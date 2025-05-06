@@ -1,4 +1,4 @@
-flask==3.10
+flask==3.1.0
 flask-cors==5.0.1
 pydantic==2.11.3
 python-dotenv==1.1.0
