@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Огородник — Профиль{% endblock %}
+
+{% block content %}
+  <link rel="stylesheet" href="../static/css/profile_style.css">
+     <div class="profile-container">
+        <div class="profile-menu">
+            <button class="personal-diary">Личный дневник</button>
+            <button class="my-sites">Мои участки</button>
+            <button class="garden-care">Уход за грядками</button>
+            <button class="recommendations">Рекомендации</button>
+            <button class="news">Новости</button>
+            <button class="statistics">Статистика</button>
+        </div>
+
+        <div class="profile">
+            <div class="profile-info">
+                <div class="profile-card">
+                    <div class="avatar">
+                        <img class="avatar-img" src="https://img.freepik.com/free-photo/selective-focus-black-white-adorable-cat-with-its-tongue-out_181624-35744.jpg" alt="Аватарка">
+                    </div>
+                    <div class="name-container">
+                        <span class="name-text">Имя</span>
+                        <label for="name"></label>
+                        <input type="text" class="name-input" id="name" style="display: none;">
+                        <button class="edit-name-button"></button>
+                    </div>
+                </div>
+                <div class="profile-edit">
+                    <div class="profile-creation-date">Создан 01/03/2024 14:00</div>
+                    <div class="profile-edit-date">Ред. 02/03/2024 9:25</div>
+                </div>
+            </div>
+
+            <div class="profile-actions">
+                <button class="export-data">Экспортировать данные</button>
+                <button class="import-data">Импортировать данные</button>
+                <button class="exit">Выход из профиля</button>
+            </div>
+        </div>
+     </div>
+
+     <script src="../static/scripts/profile_script.js"></script>
+{% endblock %}
