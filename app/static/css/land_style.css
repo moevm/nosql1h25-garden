@@ -51,27 +51,27 @@ header {
 }
 
 .personal-diary-img {
-    background-image: url("../../icons/personal-diary-icon.png");
+    background-image: url("static/icons/personal-diary-icon.png");
 }
 
 .garden-care-img {
-    background-image: url("../../icons/garden-care-icon.png");
+    background-image: url("static/icons/garden-care-icon.png");
 }
 
 .recommendations-img {
-    background-image: url("../../icons/recommendations-icon.png");
+    background-image: url("static/icons/recommendations-icon.png");
 }
 
 .news-img {
-    background-image: url("../../icons/news-icon.png");
+    background-image: url("static/icons/news-icon.png");
 }
 
 .statistics-img {
-    background-image: url("../../icons/statistics-icon.png");
+    background-image: url("static/icons/statistics-icon.png");
 }
 
 .profile-img {
-    background-image: url("../../icons/profile-icon.png");
+    background-image: url("static/icons/profile-icon.png");
 }
 
 .main {
@@ -105,7 +105,7 @@ header {
     background-size: cover;
     background-position: center;
     background-color: #F7FADE;
-    background-image: url("../../icons/search-icon.png");
+    background-image: url("static/icons/search-icon.png");
     border: none;
 }
 
@@ -176,7 +176,7 @@ header {
     background-size: cover;
     background-position: center;
     background-color: #F7FADE;
-    background-image: url("../../icons/pencil-icon.png");
+    background-image: url("../icons/pencil-icon.png");
     border: none;
 }
 
@@ -184,7 +184,7 @@ header {
     background-size: cover;
     background-position: center;
     background-color: #F7FADE;
-    background-image: url("../../icons/trashcan-icon.png");
+    background-image: url("../icons/trashcan-icon.png");
     border: none;
 }
 
