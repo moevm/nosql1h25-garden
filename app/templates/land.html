@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Огородник — Мои участки{% endblock %}
+
+{% block content %}
+  <link rel="stylesheet" href="../static/css/land_style.css">
+     <header class="header">
+        <div class="header-content">
+            <h1>Мои участки</h1>
+            <div class="header-buttons">
+                <button class="header-button personal-diary-img"></button>
+                <button class="header-button garden-care-img"></button>
+                <button class="header-button recommendations-img"></button>
+                <button class="header-button news-img"></button>
+                <button class="header-button statistics-img"></button>
+                <button class="header-button profile-img"></button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="search-filter">
+            <div class="search-bar">
+                <button class="search-button"></button>
+                <label for="search"></label>
+                <input type="text" id="search" placeholder="Введите название">
+            </div>
+            <div class="date-filter">
+                <label for="date-created">Дата создания</label>
+                <input type="date" id="date-created">
+                <label for="date-created-end">-</label>
+                <input type="date" id="date-created-end">
+            </div>
+            <div class="date-filter">
+                <label for="date-edited">Дата ред.</label>
+                <input type="date" id="date-edited">
+            </div>
+        </div>
+
+        <div class="sections-list">
+            <!-- Сюда будут добавляться участки -->
+        </div>
+
+        <button class="add-section-btn">Добавить участок</button>
+    </main>
+
+    <script src="../static/scripts/land_script.js"></script>
+{% endblock %}
