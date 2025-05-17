@@ -6,8 +6,12 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-  <header>{% block header %}Огородник{% endblock %}</header>
+
+  {% block header %}
+  <header class="header_ogorod">{% block header_name %}Огородник{% endblock %}</header>
+  {% endblock %}
 
   {% block content %}{% endblock %}
+
 </body>
 </html>
