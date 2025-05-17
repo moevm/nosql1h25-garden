@@ -11,6 +11,10 @@ land_bp = Blueprint(
     "land_bp", __name__, template_folder="../../templates", static_folder="../../static"
 )
 
+SOIL_TYPES = ["", "Песчаная", "Суглинистая", "Глинистая", "Торфяная", "Чернозем", "Известняковая"]
+TERRAIN_TYPES = ["", "Равнина", "Склон (южный)", "Склон (северный)", "Склон (восточный)", "Склон (западный)", "Холмистая", "Низина", "Террасированный"]
+LIGHTING_OPTIONS = ["", "Солнечное (весь день)", "Утреннее солнце, дневная тень", "Дневное солнце, вечерняя тень", "Полутень (рассеянный свет)", "Тень"]
+
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 def allowed_file(filename):
@@ -53,12 +57,12 @@ def gardens():
     if location_query:
         filters['location'] = {'$regex': location_query, '$options': 'i'}
     
-    if soil_type_query:
-        filters['soil_type'] = {'$regex': soil_type_query, '$options': 'i'}
-    if terrain_type_query:
-        filters['terrain_type'] = {'$regex': terrain_type_query, '$options': 'i'}
-    if lighting_query:
-        filters['lighting'] = {'$regex': lighting_query, '$options': 'i'}
+    if soil_type_query and soil_type_query in SOIL_TYPES:
+        filters['soil_type'] = soil_type_query
+    if terrain_type_query and terrain_type_query in TERRAIN_TYPES:
+        filters['terrain_type'] = terrain_type_query
+    if lighting_query and lighting_query in LIGHTING_OPTIONS:
+        filters['lighting'] = lighting_query
 
     sort_by = request.args.get('sort_by', 'registration_time')
     sort_order_str = request.args.get('sort_order', 'desc')
@@ -90,7 +94,10 @@ def gardens():
                            terrain_type_query=terrain_type_query,
                            lighting_query=lighting_query,
                            sort_by=sort_by,
-                           sort_order_str=sort_order_str)
+                           sort_order_str=sort_order_str,
+                           soil_types=SOIL_TYPES,
+                           terrain_types=TERRAIN_TYPES,
+                           lighting_options=LIGHTING_OPTIONS)
 
 @land_bp.route('/gardens/new', methods=['GET', 'POST'])
 @login_required
@@ -106,11 +113,23 @@ def new_garden():
                 if saved_photo_path:
                     photo_paths.append(saved_photo_path)
                 else:
-                    return render_template('land_form.html', form_data=data)
+                    return render_template('land_form.html', form_data=data, 
+                                           soil_types=SOIL_TYPES, terrain_types=TERRAIN_TYPES, lighting_options=LIGHTING_OPTIONS)
         
         if not data.get('name'):
             flash('Garden name is required.', 'error')
-            return render_template('land_form.html', form_data=data)
+            return render_template('land_form.html', form_data=data,
+                                   soil_types=SOIL_TYPES, terrain_types=TERRAIN_TYPES, lighting_options=LIGHTING_OPTIONS)
+        
+        if data.get('soil_type') not in SOIL_TYPES:
+            flash('Invalid soil type selected.', 'error')
+            return render_template('land_form.html', form_data=data, soil_types=SOIL_TYPES, terrain_types=TERRAIN_TYPES, lighting_options=LIGHTING_OPTIONS)
+        if data.get('terrain_type') not in TERRAIN_TYPES:
+            flash('Invalid terrain type selected.', 'error')
+            return render_template('land_form.html', form_data=data, soil_types=SOIL_TYPES, terrain_types=TERRAIN_TYPES, lighting_options=LIGHTING_OPTIONS)
+        if data.get('lighting') not in LIGHTING_OPTIONS:
+            flash('Invalid lighting option selected.', 'error')
+            return render_template('land_form.html', form_data=data, soil_types=SOIL_TYPES, terrain_types=TERRAIN_TYPES, lighting_options=LIGHTING_OPTIONS)
 
         new_garden_doc = {
             'user_id': current_user.get_id(),
@@ -136,9 +155,11 @@ def new_garden():
             return redirect(url_for('land_bp.gardens'))
         except Exception as e:
             flash(f'Error creating garden: {e}', 'error')
-            return render_template('land_form.html', form_data=data)
+            return render_template('land_form.html', form_data=data,
+                                   soil_types=SOIL_TYPES, terrain_types=TERRAIN_TYPES, lighting_options=LIGHTING_OPTIONS)
     
-    return render_template('land_form.html', form_data={})
+    return render_template('land_form.html', form_data={},
+                           soil_types=SOIL_TYPES, terrain_types=TERRAIN_TYPES, lighting_options=LIGHTING_OPTIONS)
 
 @land_bp.route('/uploads/<path:filename>')
 def uploaded_file(filename):

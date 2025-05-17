@@ -50,17 +50,29 @@
             </div>
             <div class="form-group col">
                 <label for="soil_type_query">Тип почвы</label>
-                <input type="text" id="soil_type_query" name="soil_type_query" value="{{ soil_type_query or '' }}" class="form-control">
+                <select id="soil_type_query" name="soil_type_query" class="form-control">
+                    {% for type in soil_types %}
+                        <option value="{{ type }}" {% if soil_type_query == type %}selected{% endif %}>{{ type if type else "-- Все типы --" }}</option>
+                    {% endfor %}
+                </select>
             </div>
         </div>
         <div class="form-row">
             <div class="form-group col">
                 <label for="terrain_type_query">Тип местности</label>
-                <input type="text" id="terrain_type_query" name="terrain_type_query" value="{{ terrain_type_query or '' }}" class="form-control">
+                <select id="terrain_type_query" name="terrain_type_query" class="form-control">
+                    {% for type in terrain_types %}
+                        <option value="{{ type }}" {% if terrain_type_query == type %}selected{% endif %}>{{ type if type else "-- Все типы --" }}</option>
+                    {% endfor %}
+                </select>
             </div>
             <div class="form-group col">
                 <label for="lighting_query">Освещенность</label>
-                <input type="text" id="lighting_query" name="lighting_query" value="{{ lighting_query or '' }}" class="form-control">
+                <select id="lighting_query" name="lighting_query" class="form-control">
+                    {% for option in lighting_options %}
+                        <option value="{{ option }}" {% if lighting_query == option %}selected{% endif %}>{{ option if option else "-- Все варианты --" }}</option>
+                    {% endfor %}
+                </select>
             </div>
         </div>
         <div class="form-row">
