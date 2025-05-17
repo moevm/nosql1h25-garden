@@ -3,19 +3,7 @@
 {% block title %}Огородник — Мои участки{% endblock %}
 
 {% block header %}
-<header class="header">
-  <div class="header-content">
-    <h1>Мои участки</h1>
-    <div class="header-buttons">
-      <button class="header-button personal-diary-img" title="Личный дневник"></button>
-      <button class="header-button garden-care-img" title="Уход за огородом"></button>
-      <button class="header-button recommendations-img" title="Рекомендации"></button>
-      <button class="header-button news-img" title="Новости"></button>
-      <button class="header-button statistics-img" title="Статистика"></button>
-      <a href="{{ url_for('auth_bp.logout') }}" class="header-button profile-img" title="Выход"></a> 
-    </div>
-  </div>
-</header>
+{% include "icons_header.html" %}
 {% endblock %}
 {% block content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/land_style.css') }}">
