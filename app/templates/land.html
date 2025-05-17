@@ -3,46 +3,145 @@
 {% block title %}Огородник — Мои участки{% endblock %}
 
 {% block content %}
-  <link rel="stylesheet" href="../static/css/land_style.css">
-     <header class="header">
-        <div class="header-content">
-            <h1>Мои участки</h1>
-            <div class="header-buttons">
-                <button class="header-button personal-diary-img"></button>
-                <button class="header-button garden-care-img"></button>
-                <button class="header-button recommendations-img"></button>
-                <button class="header-button news-img"></button>
-                <button class="header-button statistics-img"></button>
-                <button class="header-button profile-img"></button>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/land_style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"> <!-- Common styles -->
+
+<header class="header">
+    <div class="header-content">
+        <h1>Мои участки</h1>
+        <div class="header-buttons">
+            <!-- These buttons can be linked later -->
+            <button class="header-button personal-diary-img" title="Личный дневник"></button>
+            <button class="header-button garden-care-img" title="Уход за огородом"></button>
+            <button class="header-button recommendations-img" title="Рекомендации"></button>
+            <button class="header-button news-img" title="Новости"></button>
+            <button class="header-button statistics-img" title="Статистика"></button>
+            <a href="{{ url_for('auth_bp.logout') }}" class="header-button profile-img" title="Выход"></a> 
+        </div>
+    </div>
+</header>
+
+<main class="main container">
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-messages" style="margin-bottom: 20px;">
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <div class="controls-bar">
+        <a href="{{ url_for('land_bp.new_garden') }}" class="btn btn-primary add-section-btn">Добавить участок</a>
+    </div>
+
+    <form method="GET" action="{{ url_for('land_bp.gardens') }}" class="filter-sort-form">
+        <h4>Фильтр и Сортировка</h4>
+        <div class="form-row">
+            <div class="form-group col">
+                <label for="name_query">Название</label>
+                <input type="text" id="name_query" name="name_query" value="{{ name_query or '' }}" class="form-control">
+            </div>
+            <div class="form-group col">
+                <label for="location_query">Местоположение</label>
+                <input type="text" id="location_query" name="location_query" value="{{ location_query or '' }}" class="form-control">
+            </div>
+            <div class="form-group col">
+                <label for="soil_type_query">Тип почвы</label>
+                <input type="text" id="soil_type_query" name="soil_type_query" value="{{ soil_type_query or '' }}" class="form-control">
             </div>
         </div>
-    </header>
-
-    <main class="main">
-        <div class="search-filter">
-            <div class="search-bar">
-                <button class="search-button"></button>
-                <label for="search"></label>
-                <input type="text" id="search" placeholder="Введите название">
+        <div class="form-row">
+            <div class="form-group col">
+                <label for="terrain_type_query">Тип местности</label>
+                <input type="text" id="terrain_type_query" name="terrain_type_query" value="{{ terrain_type_query or '' }}" class="form-control">
             </div>
-            <div class="date-filter">
-                <label for="date-created">Дата создания</label>
-                <input type="date" id="date-created">
-                <label for="date-created-end">-</label>
-                <input type="date" id="date-created-end">
-            </div>
-            <div class="date-filter">
-                <label for="date-edited">Дата ред.</label>
-                <input type="date" id="date-edited">
+            <div class="form-group col">
+                <label for="lighting_query">Освещенность</label>
+                <input type="text" id="lighting_query" name="lighting_query" value="{{ lighting_query or '' }}" class="form-control">
             </div>
         </div>
-
-        <div class="sections-list">
-            <!-- Сюда будут добавляться участки -->
+        <div class="form-row">
+            <div class="form-group col">
+                <label for="sort_by">Сортировать по</label>
+                <select id="sort_by" name="sort_by" class="form-control">
+                    <option value="registration_time" {% if sort_by == 'registration_time' %}selected{% endif %}>Дате регистрации</option>
+                    <option value="name" {% if sort_by == 'name' %}selected{% endif %}>Названию</option>
+                    <option value="area" {% if sort_by == 'area' %}selected{% endif %}>Площади</option>
+                    <option value="last_modified_time" {% if sort_by == 'last_modified_time' %}selected{% endif %}>Дате изменения</option>
+                </select>
+            </div>
+            <div class="form-group col">
+                <label for="sort_order">Порядок</label>
+                <select id="sort_order" name="sort_order" class="form-control">
+                    <option value="asc" {% if sort_order_str == 'asc' %}selected{% endif %}>По возрастанию</option>
+                    <option value="desc" {% if sort_order_str == 'desc' %}selected{% endif %}>По убыванию</option>
+                </select>
+            </div>
         </div>
+        <button type="submit" class="btn btn-secondary">Применить</button>
+        <a href="{{ url_for('land_bp.gardens') }}" class="btn btn-link">Сбросить</a>
+    </form>
 
-        <button class="add-section-btn">Добавить участок</button>
-    </main>
+    <div class="sections-list">
+        {% if gardens %}
+            {% for garden in gardens %}
+                <div class="garden-card">
+                    {% if garden.photo_file_paths and garden.photo_file_paths[0] %}
+                        <img src="{{ url_for('static', filename=garden.photo_file_paths[0]) }}" alt="{{ garden.name }}" class="garden-photo">
+                    {% else %}
+                        <div class="garden-photo-placeholder">Нет фото</div>
+                    {% endif %}
+                    <div class="garden-info">
+                        <h3>{{ garden.name }}</h3>
+                        <p><strong>Место:</strong> {{ garden.location or 'Не указано' }}</p>
+                        <p><strong>Площадь:</strong> {{ garden.area or 0 }} кв. м</p>
+                        <p><strong>Почва:</strong> {{ garden.soil_type or 'Не указано' }}</p>
+                        <p><strong>Местность:</strong> {{ garden.terrain_type or 'Не указано' }}</p>
+                        <p><strong>Освещение:</strong> {{ garden.lighting or 'Не указано' }}</p>
+                        <p><small>Добавлен: {{ garden.registration_time.strftime('%Y-%m-%d %H:%M') if garden.registration_time else 'N/A' }}</small></p>
+                        <p><small>Изменен: {{ garden.last_modified_time.strftime('%Y-%m-%d %H:%M') if garden.last_modified_time else 'N/A' }}</small></p>
+                        <!-- Add edit/delete buttons later -->
+                        <!-- <a href="#" class="btn btn-sm btn-info">Edit</a> -->
+                        <!-- <a href="#" class="btn btn-sm btn-danger">Delete</a> -->
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>У вас пока нет участков. <a href="{{ url_for('land_bp.new_garden') }}">Добавить первый участок?</a></p>
+        {% endif %}
+    </div>
 
-    <script src="../static/scripts/land_script.js"></script>
+    {% if total_pages > 1 %}
+    <nav aria-label="Page navigation" class="pagination-nav">
+        <ul class="pagination">
+            {% if current_page > 1 %}
+                <li class="page-item"><a class="page-link" href="{{ url_for('land_bp.gardens', page=current_page-1, name_query=name_query, location_query=location_query, soil_type_query=soil_type_query, terrain_type_query=terrain_type_query, lighting_query=lighting_query, sort_by=sort_by, sort_order=sort_order_str) }}">Назад</a></li>
+            {% else %}
+                <li class="page-item disabled"><span class="page-link">Назад</span></li>
+            {% endif %}
+
+            {% for page_num in range(1, total_pages + 1) %}
+                {% if page_num == current_page %}
+                    <li class="page-item active"><span class="page-link">{{ page_num }}</span></li>
+                {% else %}
+                    <li class="page-item"><a class="page-link" href="{{ url_for('land_bp.gardens', page=page_num, name_query=name_query, location_query=location_query, soil_type_query=soil_type_query, terrain_type_query=terrain_type_query, lighting_query=lighting_query, sort_by=sort_by, sort_order=sort_order_str) }}">{{ page_num }}</a></li>
+                {% endif %}
+            {% endfor %}
+
+            {% if current_page < total_pages %}
+                <li class="page-item"><a class="page-link" href="{{ url_for('land_bp.gardens', page=current_page+1, name_query=name_query, location_query=location_query, soil_type_query=soil_type_query, terrain_type_query=terrain_type_query, lighting_query=lighting_query, sort_by=sort_by, sort_order=sort_order_str) }}">Вперед</a></li>
+            {% else %}
+                <li class="page-item disabled"><span class="page-link">Вперед</span></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+</main>
+
+<!-- Removed the script tag for land_script.js as it's not provided and might conflict -->
+<!-- <script src="{{ url_for('static', filename='scripts/land_script.js') }}"></script> -->
 {% endblock %}

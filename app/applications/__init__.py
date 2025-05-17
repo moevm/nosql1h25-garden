@@ -11,6 +11,12 @@ login_manager = LoginManager()
 app = Flask(__name__, static_folder='../static', template_folder='../templates')
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['MONGO_URI'] = os.getenv('MONGO_URI')
+
+UPLOAD_FOLDER = os.path.join(app.root_path, '..', 'static', 'uploads')
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
 mongo.init_app(app)
 
 
@@ -21,7 +27,8 @@ login_manager.login_message_category = "info"
     
 from .auth import auth_bp
 from .index import main_bp
+from .land import land_bp
 
 app.register_blueprint(auth_bp, url_prefix="/auth")
 app.register_blueprint(main_bp, url_prefix="") 
-
+app.register_blueprint(land_bp, url_prefix="")
