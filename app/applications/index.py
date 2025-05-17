@@ -12,6 +12,6 @@ def index():
 @main_bp.route("/home")
 @login_required
 def home():
-    return render_template("home.html")
+    return render_template("profile.html")
 
 # Add other routes here as needed
