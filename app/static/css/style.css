@@ -4,32 +4,33 @@ body {
     background-color: #D1E8C2;
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    height: 70vh;
 }
 
 header {
     background-color: #A1D884;
     color: #345A1F;
-    font-size: 48px;
+    font-size: 90px;
     font-weight: bold;
-    height: 100px;
+    height: 250px;  
     display: flex;
-    align-items: center;
     justify-content: center;
+    align-items: center;
 }
 .form-group {
-    display: flex;
+    display: flex-start;
     flex-direction: column;
     align-items: center;
     width: 100%;
 }
-
 .login-container {
     flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-direction: column;
+    transform: scale(1.75);
+    transform-origin: top center;
 }
 
 .login-box {
@@ -41,16 +42,17 @@ header {
 }
 
 .login-box label {
+    display: block;
     margin-bottom: 5px;
     font-weight: bold;
     color: #2F5720;
-    text-align: center;
-    width: 100%;
+    text-align: left;
 }
 
 .login-box input[type="email"],
-.login-box input[type="password"] {
-    width: 90%; /* чуть меньше 100%, чтобы оставить "воздух" */
+.login-box input[type="password"],
+.login-box input[type="text"]{
+    width: 90%;
     padding: 10px;
     margin-bottom: 20px;
     border: 1px solid #A5D6A7;
@@ -60,7 +62,7 @@ header {
 }
 
 .login-box button {
-    width: 100%;
+    width: 98%;
     padding: 12px;
     border: none;
     border-radius: 8px;
