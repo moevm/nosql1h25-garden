@@ -1,11 +1,8 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, send_from_directory, current_app
 from flask_login import current_user, login_required
 from datetime import datetime
-from werkzeug.utils import secure_filename
-import os
-import uuid
 from applications import mongo
-
+from .utils import allowed_file, save_photo
 
 land_bp = Blueprint(
     "land_bp", __name__, template_folder="../../templates", static_folder="../../static"
@@ -14,29 +11,6 @@ land_bp = Blueprint(
 SOIL_TYPES = ["", "Песчаная", "Суглинистая", "Глинистая", "Торфяная", "Чернозем", "Известняковая"]
 TERRAIN_TYPES = ["", "Равнина", "Склон (южный)", "Склон (северный)", "Склон (восточный)", "Склон (западный)", "Холмистая", "Низина", "Террасированный"]
 LIGHTING_OPTIONS = ["", "Солнечное (весь день)", "Утреннее солнце, дневная тень", "Дневное солнце, вечерняя тень", "Полутень (рассеянный свет)", "Тень"]
-
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-def save_photo(file):
-    if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        unique_filename = f"{uuid.uuid4().hex}_{filename}"
-        upload_folder = current_app.config['UPLOAD_FOLDER']
-        if not upload_folder:
-            flash('Upload folder is not configured.', 'error')
-            return None
-        file_path = os.path.join(upload_folder, unique_filename)
-        try:
-            file.save(file_path)
-            return os.path.join('uploads', unique_filename).replace("\\", "/")
-        except Exception as e:
-            flash(f'Error saving photo: {e}', 'error')
-            return None
-    return None
 
 @land_bp.route('/gardens')
 @login_required
