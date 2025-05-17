@@ -4,27 +4,25 @@
 
 {% block content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
 <div class="login-container">
     <form class="login-box" action="{{ url_for('auth_bp.login') }}" method="post">
-        <h2>Вход</h2>
-        <label for="email">Адрес эл. почты</label>
-        <input type="email" id="email" name="email" placeholder="Ваша почта" value="{{ email if email else '' }}" required>
+        <div class="form-group">
+            <label for="email">Адрес эл. почты</label>
+            <input type="email" id="email" name="email" placeholder="Ваша почта" value="{{ email if email else '' }}" required>
+        </div>
 
-        <label for="password">Пароль</label>
-        <input type="password" id="password" name="password" placeholder="Ваш пароль" required>
-        
-        <div class="form-group remember-me">
-            <input type="checkbox" id="remember" name="remember">
-            <label for="remember">Запомнить меня</label>
+        <div class="form-group">
+            <label for="password">Пароль</label>
+            <input type="password" id="password" name="password" placeholder="Ваш пароль" required>
         </div>
 
         <button type="submit">Вход</button>
     </form>
 
-    <!-- Error messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-        <div class="flash-messages" style="text-align: center; margin-top: 15px;">
+        <div class="flash-messages">
             {% for category, message in messages %}
             <div class="alert alert-{{ category }}">{{ message }}</div>
             {% endfor %}
@@ -32,8 +30,9 @@
         {% endif %}
     {% endwith %}
 
-    <p class="register-link" style="text-align: center; margin-top: 20px;">
-        Нет аккаунта? <a href="{{ url_for('auth_bp.register') }}">Зарегистрироваться</a>
+    <p class="register-link">
+        Не зарегистрированы?<br>
+        <a class="register-button" href="{{ url_for('auth_bp.register') }}">Регистрация</a>
     </p>
 </div>
 {% endblock %}

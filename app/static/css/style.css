@@ -1,21 +1,27 @@
 body {
     margin: 0;
-    font-family: Arial, sans-serif;
-    background-color: #CBE8BA;
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #D1E8C2;
     display: flex;
     flex-direction: column;
     height: 100vh;
 }
-  
+
 header {
-    background-color: #92D36E;
-    color: #4C7A34;
-    font-size: 36px;
+    background-color: #A1D884;
+    color: #345A1F;
+    font-size: 48px;
     font-weight: bold;
     height: 100px;
     display: flex;
     align-items: center;
     justify-content: center;
+}
+.form-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
 }
 
 .login-container {
@@ -23,44 +29,73 @@ header {
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-direction: column;
 }
 
 .login-box {
     background-color: #E8F5E9;
     padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    width: 320px;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    width: 300px;
 }
 
 .login-box label {
-    display: block;
     margin-bottom: 5px;
     font-weight: bold;
-    color: #33691E;
+    color: #2F5720;
+    text-align: center;
+    width: 100%;
 }
 
 .login-box input[type="email"],
 .login-box input[type="password"] {
-    width: 100%;
+    width: 90%; /* чуть меньше 100%, чтобы оставить "воздух" */
     padding: 10px;
     margin-bottom: 20px;
-    border: 1px solid #B2DFDB;
-    border-radius: 4px;
-    background-color: #FFF9C4;
+    border: 1px solid #A5D6A7;
+    border-radius: 6px;
+    background-color: #FDFDCB;
+    text-align: left;
 }
 
 .login-box button {
     width: 100%;
     padding: 12px;
     border: none;
-    border-radius: 4px;
-    background-color: #4CAF50;
+    border-radius: 8px;
+    background-color: #66BB6A;
     color: white;
     font-size: 16px;
+    font-weight: bold;
     cursor: pointer;
+    box-shadow: inset 0 -2px 0 #558B2F;
+    text-align: center;
 }
 
 .login-box button:hover {
-    background-color: #43A047;
+    background-color: #5AAA5A;
+}
+
+.register-link {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 14px;
+    color: #2F5720;
+}
+
+.register-link .register-button {
+    display: inline-block;
+    margin-top: 10px;
+    background-color: #AED581;
+    padding: 10px 20px;
+    border-radius: 10px;
+    text-decoration: none;
+    color: #1B5E20;
+    font-weight: bold;
+    border: 1px solid #8BC34A;
+}
+
+.register-link .register-button:hover {
+    background-color: #9CCC65;
 }
