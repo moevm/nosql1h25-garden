@@ -15,6 +15,7 @@ bed_bp = Blueprint(
 )
 
 BED_TYPES = ["", "Поднятая грядка", "Контейнер", "Высокая грядка (глубокая)", "Традиционная (в грунте)", "Вертикальная", "Гидропоника", "Другое"]
+CROP_NAMES = ["", "Огурцы", "Помидоры", "Баклажаны", "Капуста", "Свекла", "Картофель", "Морковь", "Лук", "Чеснок", "Петрушка", "Укроп", "Сельдерей", "Тыква" ,"Другое"]
 
 @bed_bp.route('/new', methods=['GET', 'POST'])
 @login_required
@@ -29,7 +30,7 @@ def new_bed(garden_id):
         
         if not data.get('name'):
             flash('Bed name is required.', 'error')
-            return render_template('bed_form.html', garden=parent_garden, garden_id=garden_id, form_data=data, bed_types=BED_TYPES, is_edit=False)
+            return render_template('bed_form.html', garden=parent_garden, garden_id=garden_id, form_data=data, bed_types=BED_TYPES, crop_names=CROP_NAMES, is_edit=False)
 
         photo_paths = []
         if 'photo' in request.files:
@@ -39,13 +40,13 @@ def new_bed(garden_id):
                 if saved_photo_path:
                     photo_paths.append(saved_photo_path)
                 else:
-                    return render_template('bed_form.html', garden=parent_garden, garden_id=garden_id, form_data=data, bed_types=BED_TYPES, is_edit=False)
+                    return render_template('bed_form.html', garden=parent_garden, garden_id=garden_id, form_data=data, bed_types=BED_TYPES, crop_names=CROP_NAMES, is_edit=False)
         
         try:
             planting_date_val = datetime.strptime(data['planting_date'], '%Y-%m-%d') if data.get('planting_date') else None
         except ValueError:
             flash('Invalid planting date format. Please use YYYY-MM-DD.', 'error')
-            return render_template('bed_form.html', garden=parent_garden, garden_id=garden_id, form_data=data, bed_types=BED_TYPES, is_edit=False)
+            return render_template('bed_form.html', garden=parent_garden, garden_id=garden_id, form_data=data, bed_types=BED_TYPES, crop_names=CROP_NAMES, is_edit=False)
 
 
         bed_doc = {
@@ -72,10 +73,13 @@ def new_bed(garden_id):
                 'completed_recommendations': 0
             }
         }
-        
+        if bed_doc['crop_name'] not in CROP_NAMES:
+            flash('Invalid crop name selected.', 'error')
+            return render_template('bed_form.html', garden=parent_garden, garden_id=garden_id, form_data=data, bed_types=BED_TYPES, crop_names=CROP_NAMES, is_edit=False)
+
         if bed_doc['bed_type'] not in BED_TYPES:
             flash('Invalid bed type selected.', 'error')
-            return render_template('bed_form.html', garden=parent_garden, garden_id=garden_id, form_data=data, bed_types=BED_TYPES, is_edit=False)
+            return render_template('bed_form.html', garden=parent_garden, garden_id=garden_id, form_data=data, bed_types=BED_TYPES, crop_names=CROP_NAMES, is_edit=False)
 
         mongo.db.beds.insert_one(bed_doc)
 
@@ -89,7 +93,7 @@ def new_bed(garden_id):
         flash('Bed created successfully!', 'success')
         return redirect(url_for('land_bp.garden_detail', garden_id=garden_id))
 
-    return render_template('bed_form.html', garden=parent_garden, garden_id=garden_id, form_data={}, bed_types=BED_TYPES, is_edit=False)
+    return render_template('bed_form.html', garden=parent_garden, garden_id=garden_id, form_data={}, bed_types=BED_TYPES, crop_names=CROP_NAMES, is_edit=False)
 
 @bed_bp.route('/<bed_id>/edit', methods=['GET', 'POST'])
 @login_required
@@ -122,11 +126,15 @@ def edit_bed(garden_id, bed_id):
             update_fields['planting_date'] = datetime.strptime(data['planting_date'], '%Y-%m-%d') if data.get('planting_date') else bed_doc.get('planting_date')
         except ValueError:
             flash('Invalid planting date format. Please use YYYY-MM-DD.', 'error')
-            return render_template('bed_form.html', form_data=data, garden_id=garden_id, bed_id=bed_id, bed_types=BED_TYPES, is_edit=True, garden=parent_garden)
-
+            return render_template('bed_form.html', form_data=data, garden_id=garden_id, bed_id=bed_id, bed_types=BED_TYPES, crop_names=CROP_NAMES, is_edit=True, garden=parent_garden)
+        
+        if update_fields['crop_name'] not in CROP_NAMES:
+            flash('Invalid crop name selected.', 'error')
+            return render_template('bed_form.html', form_data=data, garden_id=garden_id, bed_id=bed_id, bed_types=BED_TYPES, crop_names=CROP_NAMES, is_edit=True, garden=parent_garden)
+        
         if update_fields['bed_type'] not in BED_TYPES:
             flash('Invalid bed type selected.', 'error')
-            return render_template('bed_form.html', form_data=data, garden_id=garden_id, bed_id=bed_id, bed_types=BED_TYPES, is_edit=True, garden=parent_garden)
+            return render_template('bed_form.html', form_data=data, garden_id=garden_id, bed_id=bed_id, bed_types=BED_TYPES, crop_names=CROP_NAMES, is_edit=True, garden=parent_garden)
 
         if 'photo' in request.files:
             photo_file = request.files['photo']
@@ -143,14 +151,14 @@ def edit_bed(garden_id, bed_id):
                                 flash(f'Could not delete old photo: {e}', 'warning')
                     update_fields['photo_file_paths'] = [saved_photo_path] # Replace/set the first photo
                 else:
-                    return render_template('bed_form.html', form_data=bed_doc, garden_id=garden_id, bed_id=bed_id, bed_types=BED_TYPES, is_edit=True, garden=parent_garden)
+                    return render_template('bed_form.html', form_data=bed_doc, garden_id=garden_id, bed_id=bed_id, bed_types=BED_TYPES, crop_names=CROP_NAMES, is_edit=True, garden=parent_garden)
         
         mongo.db.beds.update_one({'_id': ObjectId(bed_id)}, {'$set': update_fields})
         flash('Bed updated successfully!', 'success')
         return redirect(url_for('land_bp.garden_detail', garden_id=garden_id))
 
     # For GET request, prefill form_data
-    return render_template('bed_form.html', form_data=bed_doc, garden_id=garden_id, bed_id=bed_id, bed_types=BED_TYPES, is_edit=True, garden=parent_garden)
+    return render_template('bed_form.html', form_data=bed_doc, garden_id=garden_id, bed_id=bed_id, bed_types=BED_TYPES, crop_names=CROP_NAMES, is_edit=True, garden=parent_garden)
 
 @bed_bp.route('/<bed_id>/delete', methods=['POST'])
 @login_required

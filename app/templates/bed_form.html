@@ -35,7 +35,11 @@
 
         <div class="form-group">
             <label for="crop_name">Культура</label>
-            <input type="text" id="crop_name" name="crop_name" class="form-control" value="{{ form_data.crop_name if form_data and form_data.crop_name is defined else '' }}">
+            <select id="crop_name" name="crop_name" class="form-control">
+                {% for type_choice in crop_names %}
+                    <option value="{{ type_choice }}" {% if form_data and form_data.crop_name == type_choice %}selected{% endif %}>{{ type_choice if type_choice else "-- Выберите культуру --" }}</option>
+                {% endfor %}
+            </select>
         </div>
 
         <div class="form-group">
