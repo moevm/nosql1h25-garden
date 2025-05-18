@@ -28,7 +28,9 @@ login_manager.login_message_category = "info"
 from .auth import auth_bp
 from .index import main_bp
 from .land import land_bp
+from .land_beds import bed_bp
 
 app.register_blueprint(auth_bp, url_prefix="/auth")
 app.register_blueprint(main_bp, url_prefix="") 
 app.register_blueprint(land_bp, url_prefix="")
+app.register_blueprint(bed_bp)
