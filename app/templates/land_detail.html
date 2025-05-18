@@ -39,7 +39,7 @@
                 {% if garden.photo_file_paths and garden.photo_file_paths[0] %}
                     <img src="{{ url_for('static', filename=garden.photo_file_paths[0]) }}" alt="Фото участка {{ garden.name }}" class="img-fluid garden-detail-photo">
                 {% else %}
-                    <div class="garden-photo-placeholder-detail">Нет фото</div>
+                    <div class="garden-photo-placeholder-detail"><span>{{ garden.name[0] if garden.name else 'G' }}</span></div>
                 {% endif %}
             </div>
             <div class="garden-attributes-section">
@@ -57,11 +57,11 @@
         <hr>
 
         <div class="garden-beds-section">
-            <h3>Грядки на участке</h3>
-            {# Add Bed button - link to a new_bed route (to be created) #}
-            {# <a href="{{ url_for('bed_bp.new_bed', garden_id=garden._id) }}" class="btn btn-success btn-sm mb-3">Добавить грядку</a> #}
+            <div class="section-header-actions">
+                <h3>Грядки на участке ({{ garden.stats.total_beds or 0 }})</h3>
+                <a href="{{ url_for('bed_bp.new_bed', garden_id=garden._id) }}" class="btn btn-success btn-sm">Добавить грядку</a>
+            </div>
             
-            {# Bed Filtering/Sorting Form (optional, can be simpler for detail page) #}
             <form method="GET" action="{{ url_for('land_bp.garden_detail', garden_id=garden._id) }}" class="filter-sort-form beds-filter-form">
                 <div class="form-row">
                     <div class="form-group col-md-4">
@@ -79,8 +79,8 @@
                     </div>
                     <div class="form-group col-md-1">
                         <select name="bed_sort_order" class="form-control form-control-sm">
-                            <option value="desc" {% if bed_sort_order_str == 'desc' %}selected{% endif %}>Desc</option>
-                            <option value="asc" {% if bed_sort_order_str == 'asc' %}selected{% endif %}>Asc</option>
+                            <option value="desc" {% if bed_sort_order_str == 'desc' %}selected{% endif %}>Убыв.</option>
+                            <option value="asc" {% if bed_sort_order_str == 'asc' %}selected{% endif %}>Возр.</option>
                         </select>
                     </div>
                     <div class="form-group col-md-1">
@@ -93,14 +93,29 @@
                 <div class="beds-list">
                     {% for bed in beds %}
                         <div class="bed-card">
-                            {# Basic Bed Info - expand later with bed_detail page #}
-                            <h5>{{ bed.name }}</h5>
-                            <p>Культура: {{ bed.crop_name or 'Не указана' }}</p>
-                            <p>Дата посадки: {{ bed.planting_date.strftime('%d-%m-%Y') if bed.planting_date else 'N/A' }}</p>
+                            <div class="bed-card-photo">
+                                {% if bed.photo_file_paths and bed.photo_file_paths[0] %}
+                                    <img src="{{ url_for('static', filename=bed.photo_file_paths[0]) }}" alt="Фото грядки {{ bed.name }}" class="img-thumbnail bed-photo-thumb">
+                                {% else %}
+                                    <div class="bed-photo-placeholder"><span>{{ bed.name[0] if bed.name else 'B' }}</span></div>
+                                {% endif %}
+                            </div>
+                            <div class="bed-card-info">
+                                <h5>{{ bed.name }}</h5>
+                                <p><strong>Культура:</strong> {{ bed.crop_name or 'Не указана' }}</p>
+                                <p><strong>Дата посадки:</strong> {{ bed.planting_date.strftime('%d-%m-%Y') if bed.planting_date else 'N/A' }}</p>
+                                <p><strong>Тип:</strong> {{ bed.bed_type or 'Не указан' }} {% if bed.is_hothouse %}(Теплица){% endif %}</p>
+                                <p><small>Заметки: {{ bed.notes|truncate(80) if bed.notes else 'Нет' }}</small></p>
+                            </div>
+                            <div class="bed-card-actions">
+                                <a href="{{ url_for('bed_bp.edit_bed', garden_id=garden._id, bed_id=bed._id) }}" class="btn btn-sm btn-outline-primary">Ред.</a>
+                                <form method="POST" action="{{ url_for('bed_bp.delete_bed', garden_id=garden._id, bed_id=bed._id) }}" class="d-inline" onsubmit="return confirm('Вы уверены, что хотите удалить эту грядку?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Удал.</button>
+                                </form>
+                            </div>
                         </div>
                     {% endfor %}
                 </div>
-                {# Bed Pagination #}
                 {% if total_bed_pages > 1 %}
                 <nav class="pagination-nav">
                     <ul class="pagination pagination-sm">
@@ -117,16 +132,17 @@
                 </nav>
                 {% endif %}
             {% else %}
-                <p>На этом участке пока нет грядок.</p>
+                <p>На этом участке пока нет грядок. <a href="{{ url_for('bed_bp.new_bed', garden_id=garden._id) }}">Добавить первую грядку?</a></p>
             {% endif %}
         </div>
 
         <hr>
 
         <div class="garden-tasks-section">
-            <h3>Задачи по участку</h3>
-            {# Add Task button - link to a new_task route (to be created) #}
-            {# <a href="{{ url_for('task_bp.new_task', garden_id=garden._id) }}" class="btn btn-info btn-sm mb-3">Добавить задачу</a> #}
+            <div class="section-header-actions">
+                <h3>Задачи по участку</h3>
+                {# <a href="{{ url_for('task_bp.new_task', garden_id=garden._id) }}" class="btn btn-info btn-sm">Добавить задачу</a> #}
+            </div>
             {% if garden_tasks %}
                 <ul class="list-group">
                     {% for task in garden_tasks %}
@@ -136,7 +152,6 @@
                                 {% if task.description %}<p><small>{{ task.description }}</small></p>{% endif %}
                                 <small>Срок: {{ task.due_date.strftime('%d-%m-%Y') if task.due_date else 'Нет' }}</small>
                             </div>
-                            {# Task actions - complete, edit, delete (to be implemented) #}
                         </li>
                     {% endfor %}
                 </ul>
