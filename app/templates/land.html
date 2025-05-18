@@ -20,33 +20,38 @@
         </div>
       {% endif %}
     {% endwith %}
+        {% if total_all == 0 %}
+      <div class="no-gardens-panel">
+        <p class="no-gardens-text">У вас нет участков</p>
+        <a href="{{ url_for('land_bp.new_garden') }}" class="btn add-section-btn">Добавить участок</a>
+      </div>
 
-    <div class="controls-bar">
-        <a href="{{ url_for('land_bp.new_garden') }}" class="btn btn-primary add-section-btn">Добавить участок</a>
-    </div>
-
+    {% else %}
     <form method="GET" action="{{ url_for('land_bp.gardens') }}" class="filter-sort-form">
-        <h4>Фильтр и Сортировка</h4>
+        <h4>Поиск и добавление участков</h4>
+        <!-- Первый ряд: 5 полей -->
         <div class="form-row">
-            <div class="form-group col">
+            <div class="form-group">
                 <label for="name_query">Название</label>
                 <input type="text" id="name_query" name="name_query" value="{{ name_query or '' }}" class="form-control">
             </div>
-            <div class="form-group col">
+            <div class="form-group">
                 <label for="registration_date">Дата создания</label>
-                <input type="date" id="registration_date" name="registration_date"
-                        value="{{ registration_date or '' }}" class="form-control">
+                <input type="date" id="registration_date" name="registration_date" value="{{ registration_date or '' }}" class="form-control">
             </div>
-            <div class="form-group col">
+            <div class="form-group">
                 <label for="last_modified_date">Дата редактирования</label>
-                <input type="date" id="last_modified_date" name="last_modified_date"
-                        value="{{ last_modified_date or '' }}" class="form-control">
+                <input type="date" id="last_modified_date" name="last_modified_date" value="{{ last_modified_date or '' }}" class="form-control">
             </div>
-            <div class="form-group col">
-                <label for="location_query">Местоположение</label>
-                <input type="text" id="location_query" name="location_query" value="{{ location_query or '' }}" class="form-control">
+            <div class="form-group">
+                <label for="lighting_query">Освещённость</label>
+                <select id="lighting_query" name="lighting_query" class="form-control">
+                    {% for option in lighting_options %}
+                        <option value="{{ option }}" {% if lighting_query == option %}selected{% endif %}>{{ option if option else "-- Все варианты --" }}</option>
+                    {% endfor %}
+                </select>
             </div>
-            <div class="form-group col">
+            <div class="form-group">
                 <label for="soil_type_query">Тип почвы</label>
                 <select id="soil_type_query" name="soil_type_query" class="form-control">
                     {% for type in soil_types %}
@@ -55,8 +60,10 @@
                 </select>
             </div>
         </div>
+
+        <!-- Второй ряд: 4 поля, но "Местоположение" растянем на 2 слота -->
         <div class="form-row">
-            <div class="form-group col">
+            <div class="form-group">
                 <label for="terrain_type_query">Тип местности</label>
                 <select id="terrain_type_query" name="terrain_type_query" class="form-control">
                     {% for type in terrain_types %}
@@ -64,22 +71,18 @@
                     {% endfor %}
                 </select>
             </div>
-            <div class="form-group col">
-                <label for="lighting_query">Освещенность</label>
-                <select id="lighting_query" name="lighting_query" class="form-control">
-                    {% for option in lighting_options %}
-                        <option value="{{ option }}" {% if lighting_query == option %}selected{% endif %}>{{ option if option else "-- Все варианты --" }}</option>
-                    {% endfor %}
-                </select>
+            <div class="form-group span-2">
+                <label for="location_query">Местоположение</label>
+                <input type="text" id="location_query" name="location_query" value="{{ location_query or '' }}" class="form-control">
             </div>
-            <div class="form-group col">
+            <div class="form-group">
                 <label for="sort_by">Сортировать по</label>
                 <select id="sort_by" name="sort_by" class="form-control">
                     <option value="name" {% if sort_by == 'name' %}selected{% endif %}>Названию</option>
                     <option value="area" {% if sort_by == 'area' %}selected{% endif %}>Площади</option>
                 </select>
             </div>
-            <div class="form-group col">
+            <div class="form-group">
                 <label for="sort_order">Порядок</label>
                 <select id="sort_order" name="sort_order" class="form-control">
                     <option value="asc" {% if sort_order_str == 'asc' %}selected{% endif %}>По возрастанию</option>
@@ -87,10 +90,12 @@
                 </select>
             </div>
         </div>
-        <button type="submit" class="btn btn-secondary">Применить</button>
-        <a href="{{ url_for('land_bp.gardens') }}" class="btn btn-link">Сбросить</a>
-    </form>
 
+        <button type="submit" class="btn btn-primary add-section-btn">Применить</button>
+        <a href="{{ url_for('land_bp.gardens') }}" class="btn btn-primary add-section-btn">Сбросить</a>
+        <a href="{{ url_for('land_bp.new_garden') }}" class="btn btn-primary add-section-btn">Добавить участок</a>
+    </form>
+    
     <div class="sections-list">
         {% if gardens %}
             {% for garden in gardens %}
@@ -118,7 +123,7 @@
                 </div>
             {% endfor %}
         {% else %}
-            <p>У вас пока нет участков. <a href="{{ url_for('land_bp.new_garden') }}">Добавить первый участок?</a></p>
+            <p>Участок не найден</p>
         {% endif %}
     </div>
 
@@ -146,7 +151,7 @@
             {% endif %}
         </ul>
     </nav>
+      {% endif %}
     {% endif %}
-
-</main>
+  </main>
 {% endblock %}

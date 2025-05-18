@@ -137,7 +137,7 @@ header {
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
-/* Форма фильтрации - верхний ряд (поиск и даты) */
+/* Форма фильтрации */
 .filter-sort-form {
     background: #F7FADE;
     border: 1px solid #99A534;
@@ -153,96 +153,43 @@ header {
     text-align: center;
 }
 
-/* Основная строка поиска */
-.search-filter {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    width: 100%;
-}
-
-.search-bar {
-    display: flex;
-    align-items: center;
-    flex: 1;
-    max-width: 300px;
-}
-
-.search-button {
-    width: 30px;
-    height: 30px;
-    background-size: 20px;
-    background-repeat: no-repeat;
-    background-position: center;
-    background-color: #F7FADE;
-    background-image: url("../icons/search-icon.png");
-    border: none;
-    cursor: pointer;
-    margin-right: 10px;
-}
-
-.search-bar input[type="text"] {
-    padding: 10px 15px;
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    width: 100%;
-    font-size: 14px;
-    background-color: white;
-}
-
-/* Фильтры дат */
-.date-filter {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.date-filter label {
-    font-weight: 500;
-    color: #4C7A34;
-    white-space: nowrap;
-}
-
-.date-filter input[type="date"] {
-    padding: 8px 12px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    background-color: white;
-    font-size: 14px;
-}
-
-/* Строки форм фильтрации */
-.form-row {
-    display: flex;
+/* Сетки строк формы */
+.filter-sort-form .form-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
     gap: 15px;
     margin-bottom: 15px;
-    align-items: end;
 }
 
-.form-group {
-    flex: 1;
+.filter-sort-form .form-group {
     display: flex;
     flex-direction: column;
 }
 
-.form-group label {
+.filter-sort-form .form-group.span-2 {
+    grid-column: 2 / 4;
+}
+
+.filter-sort-form .form-group label {
     margin-bottom: 5px;
     font-weight: 500;
     color: #4C7A34;
     font-size: 14px;
 }
 
-.form-group input,
-.form-group select {
+.filter-sort-form .form-group input,
+.filter-sort-form .form-group select {
+    width: 100%;
+    box-sizing: border-box;
     padding: 8px 12px;
     border: 1px solid #ccc;
     border-radius: 8px;
     background-color: white;
     font-size: 14px;
+    min-height: 40px;
 }
 
-.form-group select {
+.filter-sort-form .form-group select {
     cursor: pointer;
 }
 
@@ -305,7 +252,6 @@ header {
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
-/* Фото или заглушка */
 .garden-photo,
 .garden-photo-placeholder {
     width: 80px;
@@ -326,7 +272,6 @@ header {
     color: #4C7A34;
 }
 
-/* Информация об участке */
 .garden-info {
     flex: 1;
     margin-right: 20px;
@@ -363,20 +308,6 @@ header {
     font-size: 12px;
 }
 
-/* Дата редактирования для участка 2 */
-.section-item .section-date.edit-date {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.section-item .section-date.edit-date::after {
-    content: "Ред. 10/02/24 12:57";
-    color: #666;
-    font-size: 12px;
-}
-
-/* Стили для действий */
 .garden-card-actions {
     display: flex;
     gap: 10px;
@@ -434,7 +365,6 @@ header {
     transition: all 0.3s ease;
 }
 
-/* Альтернативные стили для действий (как в макете с иконками) */
 .actions {
     display: flex;
     align-items: center;
@@ -552,6 +482,7 @@ header {
     }
     
     .form-row {
+        display: flex;           /* возвращаемся к flex на мобильных */
         flex-direction: column;
         gap: 10px;
     }
@@ -570,4 +501,98 @@ header {
         margin-right: 0;
         margin-bottom: 15px;
     }
+}
+.no-gardens-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #F7FADE;        /* тот же фон, что у карточек */
+    border: 1px solid #99A534;
+    border-radius: 20px;
+    padding: 80px 20px;               /* простор внутри */
+    margin-bottom: 30px;
+    min-height: 400px;                /* любая нужная вам высота */
+}
+
+.no-gardens-text {
+    font-size: 24px;
+    color: #4C7A34;
+    margin-bottom: 40px;
+}
+
+/* Переиспользуем стили для кнопки */
+/* .add-section-btn уже определен — при необходимости можно подкрутить отступ */
+.no-gardens-panel .add-section-btn {
+    padding: 12px 30px;
+    background: #AEDD94;
+    color: #243E16;
+    border: 1px solid #629C44;
+    border-radius: 15px;
+    font-size: 16px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.no-gardens-panel .add-section-btn:hover {
+    background-color: #92D36E;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.form-wrapper {
+    background-color: #FFF59D; /* мягкий жёлтый */
+    padding: 2rem;
+    border-radius: 20px;
+    max-width: 600px;
+    margin: 2rem auto;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #555;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="file"],
+select,
+input[type="datetime-local"] {
+    width: 100%;
+    padding: 0.5rem;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+    background-color: #fcfce9;
+}
+
+.btn {
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background-color: #aed581;
+    color: #333;
+}
+
+.btn-secondary {
+    background-color: #e0e0e0;
+    color: #555;
+    margin-left: 1rem;
+}
+
+.required {
+    color: red;
 }

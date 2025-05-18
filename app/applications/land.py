@@ -21,6 +21,7 @@ def gardens():
     per_page = 6
 
     filters = {'user_id': current_user.get_id()}
+    total_all = mongo.db.gardens.count_documents({'user_id': current_user.get_id()})
     name_query = request.args.get('name_query', '')
     location_query = request.args.get('location_query', '')
 
@@ -89,6 +90,7 @@ def gardens():
 
     return render_template('land.html',
                            gardens=user_gardens,
+                           total_all=total_all,
                            current_page=page,
                            total_pages=total_pages,
                            name_query=name_query,

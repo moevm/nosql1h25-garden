@@ -2,14 +2,17 @@
 
 {% block title %}Огородник — {% if is_edit %}Редактировать участок{% else %}Новый участок{% endif %}{% endblock %}
 {% block header %}
-{% set header_title = "Создание участка" %}
+{% if is_edit %}
+    {% set header_title = "Редактирование участка" %}
+    {% else %}
+    {% set header_title = "Cоздание нового участка" %}{% endif %}
 {% include "icons_header.html" %}
 {% endblock %}
 {% block content %}
+<script src="{{ url_for('static', filename='scripts/land_script.js') }}"></script>
+
 <link rel="stylesheet" href="{{ url_for('static', filename='css/land_style.css') }}"> 
 <div class="container land-form-container">
-    <h2>{% if is_edit %}Редактировать участок{% else %}Создать новый участок{% endif %}</h2>
-
     <!-- Flash messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
@@ -20,8 +23,8 @@
         </div>
       {% endif %}
     {% endwith %}
-
-    <form method="POST" action="{{ url_for('land_bp.edit_garden', garden_id=garden_id) if is_edit else url_for('land_bp.new_garden') }}" enctype="multipart/form-data">
+        <div class="form-wrapper">
+    <form method="POST" class="filter-sort-form" action="{{ url_for('land_bp.edit_garden', garden_id=garden_id) if is_edit else url_for('land_bp.new_garden') }}" enctype="multipart/form-data">
         <div class="form-group">
             <label for="name">Название участка <span class="required">*</span></label>
             <input type="text" id="name" name="name" value="{{ form_data.name if form_data and form_data.name is defined else '' }}" required>
@@ -66,17 +69,29 @@
 
         <div class="form-group">
             <label for="photo">Фотография участка</label>
-            <input type="file" id="photo" name="photo" accept="image/png, image/jpeg, image/gif">
-            {% if is_edit and form_data.photo_file_paths and form_data.photo_file_paths[0] %}
-                <p><small>Текущее фото: <img src="{{ url_for('static', filename=form_data.photo_file_paths[0]) }}" alt="Current photo" style="max-width: 100px; max-height: 100px; margin-top: 5px;"></small><br>
-                <small>Загрузка нового файла заменит текущее фото.</small></p>
-            {% endif %}
+            <input type="file" id="photo" name="photo" accept="image/png, image/jpeg, image/gif" onchange="previewPhoto(event)">
+
+            <div id="photo-preview-container" style="margin-top: 10px;">
+                {% if is_edit and form_data.photo_file_paths and form_data.photo_file_paths[0] %}
+                    <p><small>Текущее фото:</small></p>
+                    <img id="photo-preview"
+                        src="{{ url_for('static', filename=form_data.photo_file_paths[0]) }}"
+                        alt="Preview"
+                        style="max-width: 300px; max-height: 300px;">
+                    <p><small>Загрузка нового файла заменит текущее фото.</small></p>
+                {% else %}
+                    <img id="photo-preview"
+                        src="#"
+                        alt="Preview"
+                        style="display: none; max-width: 300px; max-height: 300px;">
+                {% endif %}
+            </div>
         </div>
-        
         <div class="form-actions">
             <button type="submit" class="btn btn-primary">{% if is_edit %}Сохранить изменения{% else %}Создать участок{% endif %}</button>
             <a href="{{ url_for('land_bp.gardens') }}" class="btn btn-secondary">Отмена</a>
         </div>
     </form>
+    </div>
 </div>
 {% endblock %} 
