@@ -90,10 +90,9 @@
                 </select>
             </div>
         </div>
-
-        <button type="submit" class="btn btn-primary add-section-btn">Применить</button>
-        <a href="{{ url_for('land_bp.gardens') }}" class="btn btn-primary add-section-btn">Сбросить</a>
-        <a href="{{ url_for('land_bp.new_garden') }}" class="btn btn-primary add-section-btn">Добавить участок</a>
+            <button type="submit" class="icon-button search-button" title="Поиск"></button>
+            <a href="{{ url_for('land_bp.gardens') }}" class="btn btn-primary add-section-btn">Сбросить</a>
+            <a href="{{ url_for('land_bp.new_garden') }}" class="btn btn-primary add-section-btn">Добавить участок</a>
     </form>
     
     <div class="sections-list">
@@ -114,12 +113,13 @@
                         <p><strong>Освещение:</strong> {{ garden.lighting or 'Не указано' }}</p>
                         <p><small>Добавлен: {{ garden.registration_time.strftime('%d-%m-%Y') if garden.registration_time else 'N/A' }}</small></p>
                     </div>
-                    <div class="garden-card-actions">
-                        <a href="{{ url_for('land_bp.edit_garden', garden_id=garden._id) }}" class="btn btn-sm btn-outline-primary">Ред.</a>
-                        <form method="POST" action="{{ url_for('land_bp.delete_garden', garden_id=garden._id) }}" class="d-inline" onsubmit="return confirm('Вы уверены, что хотите удалить этот участок и все связанные данные?');">
-                            <button type="submit" class="btn btn-sm btn-outline-danger">Удал.</button>
-                        </form>
-                    </div>
+                    <a href="{{ url_for('land_bp.edit_garden', garden_id=garden._id) }}"
+                       class="icon-button edit-button" title="Редактировать"></a>
+                    <form method="POST"
+                          action="{{ url_for('land_bp.delete_garden', garden_id=garden._id) }}"
+                          onsubmit="return confirm('Вы уверены, что хотите удалить этот участок и все связанные данные?');">
+                        <button type="submit" class="icon-button delete-button" title="Удалить"></button>
+                    </form>
                 </div>
             {% endfor %}
         {% else %}

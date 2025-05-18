@@ -131,8 +131,13 @@ header {
     transition: all 0.3s ease;
 }
 
-.add-section-btn:hover {
+.add-section-btn:hover{
     background-color: #92D36E;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.toggle-btn:hover{
+    background-color: #aed581;
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
@@ -202,8 +207,9 @@ header {
     cursor: pointer;
     text-decoration: none;
     display: inline-block;
-    margin-right: 10px;
+    margin-right: 20px;
     transition: all 0.3s ease;
+    font-weight: bold;
 }
 
 .btn-secondary {
@@ -371,32 +377,51 @@ header {
     gap: 15px;
 }
 
-.edit-button,
-.delete-button {
-    width: 30px;
-    height: 30px;
-    background-size: 20px;
-    background-repeat: no-repeat;
+.filter-sort-form .form-actions  {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    margin-top: 15px;
+    
+}
+
+/* Кнопка поиска‑лупы */
+.search-button {
+    background-image: url("../icons/search-icon.png");
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 10px;
+}
+.search-button:hover { transform: scale(1.1); }
+
+/* Общий класс для иконок‑кнопок */
+.icon-button {
+    width: 40px;
+    height: 40px;
+    background-size: cover;
     background-position: center;
-    background-color: transparent;
     border: none;
     cursor: pointer;
-    border-radius: 5px;
-    transition: all 0.3s ease;
+    margin-right: 8px; 
+    background-color: transparent;
 }
 
+.icon-button:hover {
+    background-color: rgba(0,0,0,0.05);
+    transform: scale(1.1);
+}
+
+/* Иконка карандаша */
 .edit-button {
     background-image: url("../icons/pencil-icon.png");
+    margin-right: 30px; 
 }
 
+/* Иконка корзины */
 .delete-button {
     background-image: url("../icons/trashcan-icon.png");
-}
-
-.edit-button:hover,
-.delete-button:hover {
-    background-color: #f0f0f0;
-    transform: scale(1.1);
 }
 
 /* Сообщение об отсутствии участков */
@@ -573,7 +598,22 @@ input[type="datetime-local"] {
     box-sizing: border-box;
     background-color: #fcfce9;
 }
+.toggle-btn {
+    padding: 10px 20px;
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-weight: bold;
+}
 
+.toggle-btn.active {
+    background-color: #aed581;
+    border-color: #76b28f;
+    color: #333
+    font-weight: bold;
+}
 .btn {
     padding: 0.5rem 1rem;
     font-size: 1rem;

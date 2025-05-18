@@ -73,23 +73,21 @@
 
             <div id="photo-preview-container" style="margin-top: 10px;">
                 {% if is_edit and form_data.photo_file_paths and form_data.photo_file_paths[0] %}
-                    <p><small>Текущее фото:</small></p>
                     <img id="photo-preview"
                         src="{{ url_for('static', filename=form_data.photo_file_paths[0]) }}"
                         alt="Preview"
-                        style="max-width: 300px; max-height: 300px;">
-                    <p><small>Загрузка нового файла заменит текущее фото.</small></p>
+                        style="max-width: 100%; max-height: 300px;">
                 {% else %}
                     <img id="photo-preview"
                         src="#"
                         alt="Preview"
-                        style="display: none; max-width: 300px; max-height: 300px;">
+                        style="display: none; max-width: 100%; max-height: 300px;">
                 {% endif %}
             </div>
         </div>
         <div class="form-actions">
-            <button type="submit" class="btn btn-primary">{% if is_edit %}Сохранить изменения{% else %}Создать участок{% endif %}</button>
-            <a href="{{ url_for('land_bp.gardens') }}" class="btn btn-secondary">Отмена</a>
+            <button type="submit" class="btn btn-primary add-section-btn">{% if is_edit %}Сохранить изменения{% else %}Создать участок{% endif %}</button>
+            <a href="{{ url_for('land_bp.gardens') }}" class="btn btn-primary add-section-btn">Отмена</a>
         </div>
     </form>
     </div>

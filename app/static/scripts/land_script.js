@@ -52,15 +52,24 @@ addSectionBtn.addEventListener('click', () => {
 function previewPhoto(event) {
     const input = event.target;
     const preview = document.getElementById('photo-preview');
-
+    
     if (input.files && input.files[0]) {
         const reader = new FileReader();
-
-        reader.onload = function (e) {
+        
+        reader.onload = function(e) {
             preview.src = e.target.result;
             preview.style.display = 'block';
-        };
-
+        }
+        
         reader.readAsDataURL(input.files[0]);
     }
 }
+document.addEventListener('DOMContentLoaded', function () {
+    const btn = document.getElementById('hothouse-toggle');
+    const hiddenInput = document.getElementById('is_hothouse');
+
+    btn.addEventListener('click', function () {
+        const isActive = btn.classList.toggle('active');
+        hiddenInput.value = isActive ? 'on' : 'off';
+    });
+});
