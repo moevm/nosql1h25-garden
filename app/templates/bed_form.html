@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}Огородник — {% if is_edit %}Редактировать грядку{% else %}Новая грядка{% endif %} для участка: {{ garden.name }}{% endblock %}
+
+{% block header %}
+    {% include "icons_header.html" %}
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/land_style.css') }}"> 
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+<div class="container bed-form-container">
+    <h2>{% if is_edit %}Редактировать грядку{% else %}Новая грядка{% endif %} <small class="text-muted">на участке "{{ garden.name }}"</small></h2>
+
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-messages">
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" 
+          action="{{ url_for('bed_bp.edit_bed', garden_id=garden_id, bed_id=bed_id) if is_edit else url_for('bed_bp.new_bed', garden_id=garden_id) }}" 
+          enctype="multipart/form-data">
+        
+        <div class="form-group">
+            <label for="name">Название грядки <span class="required">*</span></label>
+            <input type="text" id="name" name="name" class="form-control" value="{{ form_data.name if form_data and form_data.name is defined else '' }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="crop_name">Культура</label>
+            <input type="text" id="crop_name" name="crop_name" class="form-control" value="{{ form_data.crop_name if form_data and form_data.crop_name is defined else '' }}">
+        </div>
+
+        <div class="form-group">
+            <label for="planting_date">Дата посадки</label>
+            <input type="date" id="planting_date" name="planting_date" class="form-control" value="{{ form_data.planting_date.strftime('%Y-%m-%d') if form_data and form_data.planting_date else '' }}">
+        </div>
+
+        <div class="form-row">
+            <div class="form-group col-md-4">
+                <label for="count_row">Количество рядов</label>
+                <input type="number" id="count_row" name="count_row" class="form-control" value="{{ form_data.count_row if form_data and form_data.count_row is defined else '0' }}" min="0">
+            </div>
+            <div class="form-group col-md-4">
+                <label for="length">Длина (м)</label>
+                <input type="number" step="0.01" id="length" name="length" class="form-control" value="{{ form_data.length if form_data and form_data.length is defined else '0.0' }}" min="0">
+            </div>
+            <div class="form-group col-md-4">
+                <label for="width">Ширина (м)</label>
+                <input type="number" step="0.01" id="width" name="width" class="form-control" value="{{ form_data.width if form_data and form_data.width is defined else '0.0' }}" min="0">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="bed_type">Тип грядки</label>
+            <select id="bed_type" name="bed_type" class="form-control">
+                {% for type_choice in bed_types %}
+                    <option value="{{ type_choice }}" {% if form_data and form_data.bed_type == type_choice %}selected{% endif %}>{{ type_choice if type_choice else "-- Выберите тип --" }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group form-check">
+            <input type="checkbox" id="is_hothouse" name="is_hothouse" class="form-check-input" {% if form_data and form_data.is_hothouse %}checked{% endif %}> 
+            <label for="is_hothouse" class="form-check-label">Тепличная грядка</label>
+        </div>
+
+        <div class="form-group">
+            <label for="notes">Заметки</label>
+            <textarea id="notes" name="notes" class="form-control" rows="3">{{ form_data.notes if form_data and form_data.notes is defined else '' }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="photo">Фотография грядки</label>
+            <input type="file" id="photo" name="photo" class="form-control-file" accept="image/png, image/jpeg, image/gif">
+            {% if is_edit and form_data.photo_file_paths and form_data.photo_file_paths[0] %}
+                <p><small>Текущее фото: <img src="{{ url_for('static', filename=form_data.photo_file_paths[0]) }}" alt="Current photo" style="max-width: 100px; max-height: 100px; margin-top: 5px;"></small><br>
+                <small>Загрузка нового файла заменит текущее фото.</small></p>
+            {% endif %}
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">{% if is_edit %}Сохранить изменения{% else %}Создать грядку{% endif %}</button>
+            <a href="{{ url_for('land_bp.garden_detail', garden_id=garden_id) }}" class="btn btn-secondary">Отмена</a>
+        </div>
+    </form>
+</div>
+{% endblock %} 
