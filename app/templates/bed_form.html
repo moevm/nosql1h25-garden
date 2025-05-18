@@ -3,7 +3,8 @@
 {% block title %}Огородник — {% if is_edit %}Редактировать грядку{% else %}Новая грядка{% endif %} для участка: {{ garden.name }}{% endblock %}
 
 {% block header %}
-    {% include "icons_header.html" %}
+{% set header_title = "Грядки"%}
+{% include "garden_header.html" %}
 {% endblock %}
 
 {% block content %}

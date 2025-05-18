@@ -27,6 +27,10 @@ def gardens():
     soil_type_query = request.args.get('soil_type_query', '')
     terrain_type_query = request.args.get('terrain_type_query', '')
     lighting_query = request.args.get('lighting_query', '')
+    
+    # Обработка фильтров по датам
+    registration_date = request.args.get('registration_date', '')
+    last_modified_date = request.args.get('last_modified_date', '')
 
     if name_query:
         filters['name'] = {'$regex': name_query, '$options': 'i'}
@@ -40,16 +44,39 @@ def gardens():
     if lighting_query and lighting_query in LIGHTING_OPTIONS:
         filters['lighting'] = lighting_query
 
+    # Фильтрация по дате регистрации
+    if registration_date:
+        try:
+            date_obj = datetime.strptime(registration_date, '%Y-%m-%d')
+            next_day = date_obj.replace(hour=23, minute=59, second=59)
+            filters['registration_time'] = {
+                '$gte': date_obj,
+                '$lte': next_day
+            }
+        except ValueError:
+            pass
+
+    # Фильтрация по дате последнего изменения
+    if last_modified_date:
+        try:
+            date_obj = datetime.strptime(last_modified_date, '%Y-%m-%d')
+            next_day = date_obj.replace(hour=23, minute=59, second=59)
+            filters['last_modified_time'] = {
+                '$gte': date_obj,
+                '$lte': next_day
+            }
+        except ValueError:
+            pass
+
     sort_by = request.args.get('sort_by', 'registration_time')
     sort_order_str = request.args.get('sort_order', 'desc')
     sort_order = -1 if sort_order_str == 'desc' else 1
     
     valid_sort_fields = [
-        'name', 'registration_time', 'last_modified_time', 
-        'area', 'soil_type', 'terrain_type', 'lighting'
+        'name', 'area', 'soil_type', 'terrain_type', 'lighting'
     ]
     if sort_by not in valid_sort_fields:
-        sort_by = 'registration_time'
+        sort_by = 'registration_time'  # По умолчанию сортируем по дате регистрации
 
     user_gardens_cursor = mongo.db.gardens.find(filters)\
                                 .sort(sort_by, sort_order)\
@@ -69,6 +96,8 @@ def gardens():
                            soil_type_query=soil_type_query,
                            terrain_type_query=terrain_type_query,
                            lighting_query=lighting_query,
+                           registration_date=registration_date,
+                           last_modified_date=last_modified_date,
                            sort_by=sort_by,
                            sort_order_str=sort_order_str,
                            soil_types=SOIL_TYPES,

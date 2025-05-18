@@ -3,7 +3,9 @@
 {% block title %}{{ garden.name if garden else 'Участок' }} | Огородник{% endblock %}
 
 {% block header %}
-    {% include "icons_header.html" %}
+
+{% set header_title = "Мои участки"%}
+{% include "icons_header.html" %}
 {% endblock %}
 
 {% block content %}
