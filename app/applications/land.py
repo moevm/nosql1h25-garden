@@ -3,6 +3,8 @@ from flask_login import current_user, login_required
 from datetime import datetime
 from applications import mongo
 from .utils import allowed_file, save_photo
+from bson import ObjectId
+import os
 
 land_bp = Blueprint(
     "land_bp", __name__, template_folder="../../templates", static_folder="../../static"
@@ -139,3 +141,148 @@ def new_garden():
 def uploaded_file(filename):
     return send_from_directory(os.path.join(current_app.static_folder, 'uploads'), filename.split('/')[-1])
 
+@land_bp.route('/gardens/<garden_id>')
+@login_required
+def garden_detail(garden_id):
+    garden = mongo.db.gardens.find_one({'_id': ObjectId(garden_id), 'user_id': current_user.get_id()})
+    if not garden:
+        flash('Garden not found', 'error')
+        return redirect(url_for('gardens'))
+    
+    bed_page = request.args.get('bed_page', 1, type=int)
+    bed_per_page = 4
+
+    bed_filters = {'garden_id': ObjectId(garden_id)}
+    bed_name_query = request.args.get('bed_name_query', '')
+    bed_crop_query = request.args.get('bed_crop_query', '')
+
+    if bed_name_query:
+        bed_filters['name'] = {'$regex': bed_name_query, '$options': 'i'}
+    if bed_crop_query:
+        bed_filters['crop_name'] = {'$regex': bed_crop_query, '$options': 'i'}
+
+    bed_sort_by = request.args.get('bed_sort_by', 'creation_time')
+    bed_sort_order_str = request.args.get('bed_sort_order', 'desc')
+    bed_sort_order = -1 if bed_sort_order_str == 'desc' else 1
+    
+    valid_bed_sort_fields = ['name', 'crop_name', 'planting_date', 'creation_time', 'last_modified_time', 'count_row', 'length', 'width', 'bed_type']
+    if bed_sort_by not in valid_bed_sort_fields:
+        bed_sort_by = 'creation_time'
+
+    beds_cursor = mongo.db.beds.find(bed_filters)\
+                        .sort(bed_sort_by, bed_sort_order)\
+                        .skip((bed_page - 1) * bed_per_page)\
+                        .limit(bed_per_page)
+    beds = list(beds_cursor)
+    
+    total_beds_in_garden = mongo.db.beds.count_documents(bed_filters)
+    total_bed_pages = (total_beds_in_garden + bed_per_page - 1) // bed_per_page
+
+    garden_tasks = list(mongo.db.tasks.find({'garden_id': garden_id, 'completed': False}).sort('due_date', 1))
+
+    return render_template('land_detail.html',
+                           garden=garden,
+                           beds=beds,
+                           garden_tasks=garden_tasks,
+                           current_bed_page=bed_page,
+                           total_bed_pages=total_bed_pages,
+                           bed_name_query=bed_name_query,
+                           bed_crop_query=bed_crop_query,
+                           bed_sort_by=bed_sort_by,
+                           bed_sort_order_str=bed_sort_order_str)
+
+@land_bp.route('/gardens/<garden_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_garden(garden_id):
+    garden_doc = mongo.db.gardens.find_one({'_id': ObjectId(garden_id), 'user_id': current_user.get_id()})
+    if not garden_doc:
+        flash('Garden not found or access denied.', 'error')
+        return redirect(url_for('land_bp.gardens'))
+    
+    if request.method == 'POST':
+        data = request.form
+        update_data = {
+            'name': data.get('name', garden_doc.get('name')),
+            'location': data.get('location', garden_doc.get('location', '')),
+            'area': float(data.get('area', garden_doc.get('area', 0.0))),
+            'soil_type': data.get('soil_type', garden_doc.get('soil_type', '')),
+            'terrain_type': data.get('terrain_type', garden_doc.get('terrain_type', '')),
+            'lighting': data.get('lighting', garden_doc.get('lighting', '')),
+            'last_modified_time': datetime.utcnow()
+        }
+
+        if update_data['soil_type'] not in SOIL_TYPES:
+            flash('Invalid soil type selected.', 'error')
+            return render_template('land_form.html', form_data=data, garden_id=garden_id, is_edit=True, soil_types=SOIL_TYPES, terrain_types=TERRAIN_TYPES, lighting_options=LIGHTING_OPTIONS)
+        if update_data['terrain_type'] not in TERRAIN_TYPES:
+            flash('Invalid terrain type selected.', 'error')
+            return render_template('land_form.html', form_data=data, garden_id=garden_id, is_edit=True, soil_types=SOIL_TYPES, terrain_types=TERRAIN_TYPES, lighting_options=LIGHTING_OPTIONS)
+        if update_data['lighting'] not in LIGHTING_OPTIONS:
+            flash('Invalid lighting option selected.', 'error')
+            return render_template('land_form.html', form_data=data, garden_id=garden_id, is_edit=True, soil_types=SOIL_TYPES, terrain_types=TERRAIN_TYPES, lighting_options=LIGHTING_OPTIONS)
+        
+        if 'photo' in request.files:
+            photo_file = request.files['photo']
+            if photo_file.filename != '':
+                saved_photo_path = save_photo(photo_file)
+                if saved_photo_path:
+                    current_photo_paths = garden_doc.get('photo_file_paths', [])
+                    if current_photo_paths and current_photo_paths[0]:
+                        old_photo_disk_path = os.path.join(current_app.static_folder, current_photo_paths[0])
+                        if os.path.exists(old_photo_disk_path):
+                            try:
+                                os.remove(old_photo_disk_path)
+                            except Exception as e:
+                                flash(f'Could not delete old photo: {e}', 'warning')
+                    update_data['photo_file_paths'] = [saved_photo_path]
+                else:
+                    return render_template('land_form.html', form_data=garden_doc, garden_id=garden_id, is_edit=True, soil_types=SOIL_TYPES, terrain_types=TERRAIN_TYPES, lighting_options=LIGHTING_OPTIONS)
+
+        mongo.db.gardens.update_one(
+            {'_id': ObjectId(garden_id)},
+            {'$set': update_data}
+        )
+        flash('Garden updated successfully!', 'success')
+        return redirect(url_for('land_bp.garden_detail', garden_id=garden_id))
+    
+    return render_template('land_form.html', form_data=garden_doc, garden_id=garden_id, is_edit=True, 
+                           soil_types=SOIL_TYPES, terrain_types=TERRAIN_TYPES, lighting_options=LIGHTING_OPTIONS)
+
+@land_bp.route('/gardens/<garden_id>/delete', methods=['POST'])
+@login_required
+def delete_garden(garden_id):
+    garden = mongo.db.gardens.find_one({'_id': ObjectId(garden_id), 'user_id': current_user.get_id()})
+    if garden:
+        if garden.get('photo_file_paths'): # Plural
+            for photo_path_from_db in garden['photo_file_paths']:
+                if photo_path_from_db:
+                    actual_photo_disk_path = os.path.join(current_app.static_folder, photo_path_from_db)
+                    if os.path.exists(actual_photo_disk_path):
+                        try:
+                            os.remove(actual_photo_disk_path)
+                        except Exception as e:
+                            flash(f'Could not delete garden photo {photo_path_from_db}: {e}', 'warning')
+        
+        beds_to_delete = list(mongo.db.beds.find({'garden_id': ObjectId(garden_id)}))
+        for bed in beds_to_delete:
+            if bed.get('photo_file_paths'):
+                 for bed_photo_path_from_db in bed['photo_file_paths']:
+                    if bed_photo_path_from_db:
+                        actual_bed_photo_disk_path = os.path.join(current_app.static_folder, bed_photo_path_from_db)
+                        if os.path.exists(actual_bed_photo_disk_path):
+                            try:
+                                os.remove(actual_bed_photo_disk_path)
+                            except Exception as e:
+                                flash(f'Could not delete bed photo {bed_photo_path_from_db}: {e}', 'warning')
+        
+
+        mongo.db.beds.delete_many({'garden_id': ObjectId(garden_id)})
+        
+        mongo.db.tasks.delete_many({'garden_id': ObjectId(garden_id)})
+
+        mongo.db.gardens.delete_one({'_id': ObjectId(garden_id)})
+        flash('Garden and all associated data (beds, tasks, photos) deleted successfully', 'success')
+    else:
+        flash('Garden not found or access denied.', 'error')
+    
+    return redirect(url_for('land_bp.gardens'))

@@ -91,20 +91,22 @@
                     {% if garden.photo_file_paths and garden.photo_file_paths[0] %}
                         <img src="{{ url_for('static', filename=garden.photo_file_paths[0]) }}" alt="{{ garden.name }}" class="garden-photo">
                     {% else %}
-                        <div class="garden-photo-placeholder">Нет фото</div>
+                        <div class="garden-photo-placeholder"><span>{{ garden.name[0] if garden.name else 'G' }}</span></div>
                     {% endif %}
                     <div class="garden-info">
-                        <h3>{{ garden.name }}</h3>
+                        <h3><a href="{{ url_for('land_bp.garden_detail', garden_id=garden._id) }}" class="garden-name-link">{{ garden.name }}</a></h3>
                         <p><strong>Место:</strong> {{ garden.location or 'Не указано' }}</p>
                         <p><strong>Площадь:</strong> {{ garden.area or 0 }} кв. м</p>
                         <p><strong>Почва:</strong> {{ garden.soil_type or 'Не указано' }}</p>
                         <p><strong>Местность:</strong> {{ garden.terrain_type or 'Не указано' }}</p>
                         <p><strong>Освещение:</strong> {{ garden.lighting or 'Не указано' }}</p>
-                        <p><small>Добавлен: {{ garden.registration_time.strftime('%Y-%m-%d %H:%M') if garden.registration_time else 'N/A' }}</small></p>
-                        <p><small>Изменен: {{ garden.last_modified_time.strftime('%Y-%m-%d %H:%M') if garden.last_modified_time else 'N/A' }}</small></p>
-                        <!-- Add edit/delete buttons later -->
-                        <!-- <a href="#" class="btn btn-sm btn-info">Edit</a> -->
-                        <!-- <a href="#" class="btn btn-sm btn-danger">Delete</a> -->
+                        <p><small>Добавлен: {{ garden.registration_time.strftime('%d-%m-%Y') if garden.registration_time else 'N/A' }}</small></p>
+                    </div>
+                    <div class="garden-card-actions">
+                        <a href="{{ url_for('land_bp.edit_garden', garden_id=garden._id) }}" class="btn btn-sm btn-outline-primary">Ред.</a>
+                        <form method="POST" action="{{ url_for('land_bp.delete_garden', garden_id=garden._id) }}" class="d-inline" onsubmit="return confirm('Вы уверены, что хотите удалить этот участок и все связанные данные?');">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Удал.</button>
+                        </form>
                     </div>
                 </div>
             {% endfor %}
