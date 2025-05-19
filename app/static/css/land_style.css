@@ -165,7 +165,9 @@ header {
     gap: 15px;
     margin-bottom: 15px;
 }
-
+.filter-sort-form .form-row-bed{
+    margin-bottom: 0px;
+}
 .filter-sort-form .form-group {
     display: flex;
     flex-direction: column;
@@ -428,7 +430,10 @@ header {
     background-image: url("../icons/pencil-icon.png");
     margin-right: 30px; 
 }
-
+.return-button{
+    background-image: url("../icons/return-icon.png");
+    margin-right: 30px; 
+}
 /* Иконка корзины */
 .delete-button {
     background-image: url("../icons/trashcan-icon.png");

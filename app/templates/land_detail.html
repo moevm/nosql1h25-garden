@@ -42,7 +42,7 @@
                 <p><small>Добавлен: {{ garden.registration_time.strftime('%d-%m-%Y') if garden.registration_time else 'N/A' }}</small></p>
                 <p><small>Изменен: {{ garden.last_modified_time.strftime('%d-%m-%Y') if garden.last_modified_time else 'N/A' }}</small></p>
             </div>
-
+                <a href="{{ url_for('land_bp.gardens') }}" class="icon-button return-button" title="Вернуться к участкам"></a>
                 <a href="{{ url_for('land_bp.edit_garden', garden_id=garden._id) }}" class="icon-button edit-button" title="Редактировать"></a>
                 <form method="POST" action="{{ url_for('land_bp.delete_garden', garden_id=garden._id) }}" onsubmit="return confirm('Вы уверены, что хотите удалить этот участок и все связанные данные?');">
                     <button type="submit" class="icon-button delete-button" title="Удалить"></button>
@@ -55,7 +55,7 @@
                 <h3>Ваши грядки на участке {{garden.name}}. Количество грядкок: {{ garden.stats.total_beds or 0 }}</h3>
             </div>
             <form method="GET" action="{{ url_for('land_bp.garden_detail', garden_id=garden._id) }}" class="filter-sort-form beds-filter-form">
-                <div class="form-row">
+                <div class="form-row form-row-bed">
                     <div class="form-group col-md-4">
                         <input type="text" name="bed_name_query" value="{{ bed_name_query or '' }}" placeholder="Название грядки" class="form-control form-control-sm">
                     </div>
@@ -75,10 +75,10 @@
                             <option value="asc" {% if bed_sort_order_str == 'asc' %}selected{% endif %}>Возр.</option>
                         </select>
                     </div>
-                    <div class="form-group col-md-1">
-                        <button type="submit" class="btn btn-secondary btn-sm">Фильтр</button>
-                    </div>
                 </div>
+                    <button type="submit" class="icon-button search-button" title="Поиск"></button>
+                    <a href="{{ url_for('land_bp.garden_detail', garden_id=garden._id) }}" class="btn btn-primary add-section-btn">Сбросить</a>
+                    <a href="{{ url_for('bed_bp.new_bed', garden_id=garden._id) }}" class="btn btn-primary add-section-btn">Добавить грядку</a>
             </form>
                 <div class="section-list">
                     {% if beds %}
@@ -96,9 +96,9 @@
                                         <p><strong>Тип:</strong> {{ bed.bed_type or 'Не указан' }} {% if bed.is_hothouse %}(Теплица){% endif %}</p>
                                         <p><strong>Заметки:</strong> {{ bed.notes if bed.notes else 'Нет' }}</p>
                                     </div>
-                                    <a href="{{ url_for('bed_bp.edit_bed', garden_id=garden._id, bed_id=bed._id) }}" class="icon-button edit-button"></a>
+                                    <a href="{{ url_for('bed_bp.edit_bed', garden_id=garden._id, bed_id=bed._id) }}" class="icon-button edit-button" title="Редактировать грядку"></a>
                                     <form method="POST" action="{{ url_for('bed_bp.delete_bed', garden_id=garden._id, bed_id=bed._id) }}" onsubmit="return confirm('Вы уверены, что хотите удалить эту грядку?');">
-                                        <button type="submit" class="icon-button delete-button"></button>
+                                        <button type="submit" class="icon-button delete-button" title="Удалить грядку"></button>
                                     </form>
                                 </div>
                             {% endfor %}
