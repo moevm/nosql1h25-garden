@@ -2,28 +2,18 @@
 
 {% block title %}{{ garden.name if garden else 'Участок' }} | Огородник{% endblock %}
 
+
 {% block header %}
 
-{% set header_title = "Мои участки"%}
+{% set header_title = 'Участок: ' ~ garden.name %}
 {% include "icons_header.html" %}
 {% endblock %}
 
 {% block content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/land_style.css') }}">
 
-<div class="container land-detail-container">
+<div class="main class="main container">
     {% if garden %}
-        <div class="garden-header">
-            <h2>{{ garden.name }}</h2>
-            <div class="garden-actions">
-                <a href="{{ url_for('land_bp.edit_garden', garden_id=garden._id) }}" class="btn btn-primary btn-sm">Редактировать участок</a>
-                <form method="POST" action="{{ url_for('land_bp.delete_garden', garden_id=garden._id) }}" style="display: inline;" onsubmit="return confirm('Вы уверены, что хотите удалить этот участок и все связанные с ним грядки и задачи?');">
-                    <button type="submit" class="btn btn-danger btn-sm">Удалить участок</button>
-                </form>
-                <a href="{{ url_for('land_bp.gardens') }}" class="btn btn-secondary btn-sm">Назад к участкам</a>
-            </div>
-        </div>
-
         <!-- Flash messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
@@ -35,34 +25,36 @@
           {% endif %}
         {% endwith %}
 
-        <div class="garden-main-content">
-            <div class="garden-photo-section">
-                {% if garden.photo_file_paths and garden.photo_file_paths[0] %}
-                    <img src="{{ url_for('static', filename=garden.photo_file_paths[0]) }}" alt="Фото участка {{ garden.name }}" class="img-fluid garden-detail-photo">
-                {% else %}
-                    <div class="garden-photo-placeholder-detail"><span>{{ garden.name[0] if garden.name else 'G' }}</span></div>
-                {% endif %}
-            </div>
-            <div class="garden-attributes-section">
-                <h4>Детали участка:</h4>
-                <p><strong>Местоположение:</strong> {{ garden.location or 'Не указано' }}</p>
+        <!-- Информация об участке в стиле карточки -->
+        <div class="garden-card"">
+            {% if garden.photo_file_paths and garden.photo_file_paths[0] %}
+                <img src="{{ url_for('static', filename=garden.photo_file_paths[0]) }}" alt="{{ garden.name }}" class="garden-photo">
+            {% else %}
+                <div class="garden-photo-placeholder big-photo"><span>{{ garden.name[0] if garden.name else 'G' }}</span></div>
+            {% endif %}
+            <div class="garden-info">
+                <h3>{{ garden.name }}</h3>
+                <p><strong>Место:</strong> {{ garden.location or 'Не указано' }}</p>
                 <p><strong>Площадь:</strong> {{ garden.area or 0 }} кв. м</p>
-                <p><strong>Тип почвы:</strong> {{ garden.soil_type or 'Не указано' }}</p>
-                <p><strong>Тип местности:</strong> {{ garden.terrain_type or 'Не указано' }}</p>
-                <p><strong>Освещенность:</strong> {{ garden.lighting or 'Не указано' }}</p>
-                <p><strong>Дата регистрации:</strong> {{ garden.registration_time.strftime('%d-%m-%Y %H:%M') if garden.registration_time else 'N/A' }}</p>
-                <p><strong>Последнее изменение:</strong> {{ garden.last_modified_time.strftime('%d-%m-%Y %H:%M') if garden.last_modified_time else 'N/A' }}</p>
+                <p><strong>Почва:</strong> {{ garden.soil_type or 'Не указано' }}</p>
+                <p><strong>Местность:</strong> {{ garden.terrain_type or 'Не указано' }}</p>
+                <p><strong>Освещение:</strong> {{ garden.lighting or 'Не указано' }}</p>
+                <p><small>Добавлен: {{ garden.registration_time.strftime('%d-%m-%Y') if garden.registration_time else 'N/A' }}</small></p>
+                <p><small>Изменен: {{ garden.last_modified_time.strftime('%d-%m-%Y') if garden.last_modified_time else 'N/A' }}</small></p>
             </div>
+
+                <a href="{{ url_for('land_bp.edit_garden', garden_id=garden._id) }}" class="icon-button edit-button" title="Редактировать"></a>
+                <form method="POST" action="{{ url_for('land_bp.delete_garden', garden_id=garden._id) }}" onsubmit="return confirm('Вы уверены, что хотите удалить этот участок и все связанные данные?');">
+                    <button type="submit" class="icon-button delete-button" title="Удалить"></button>
+                </form>
         </div>
 
-        <hr>
 
         <div class="garden-beds-section">
             <div class="section-header-actions">
                 <h3>Грядки на участке ({{ garden.stats.total_beds or 0 }})</h3>
-                <a href="{{ url_for('bed_bp.new_bed', garden_id=garden._id) }}" class="btn btn-success btn-sm">Добавить грядку</a>
             </div>
-            
+            {% if beds %}
             <form method="GET" action="{{ url_for('land_bp.garden_detail', garden_id=garden._id) }}" class="filter-sort-form beds-filter-form">
                 <div class="form-row">
                     <div class="form-group col-md-4">
@@ -89,7 +81,7 @@
                     </div>
                 </div>
             </form>
-
+            {% endif %}
             {% if beds %}
                 <div class="beds-list">
                     {% for bed in beds %}
@@ -133,8 +125,11 @@
                 </nav>
                 {% endif %}
             {% else %}
-                <p>На этом участке пока нет грядок. <a href="{{ url_for('bed_bp.new_bed', garden_id=garden._id) }}">Добавить первую грядку?</a></p>
+            <div class="no-beds-panel">
+                <p class="no-gardens-text">На этом участке пока нет грядок.</p>
+                <a href="{{ url_for('bed_bp.new_bed', garden_id=garden._id) }}" class="btn add-section-btn">Добавить первую грядку?</a>
             {% endif %}
+            </div>
         </div>
 
         <hr>
@@ -166,4 +161,4 @@
         <a href="{{ url_for('land_bp.gardens') }}" class="btn btn-primary">Вернуться к списку участков</a>
     {% endif %}
 </div>
-{% endblock %} 
+{% endblock %}
