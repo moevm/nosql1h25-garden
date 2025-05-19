@@ -252,12 +252,18 @@ header {
     margin-bottom: 15px;
     transition: all 0.3s ease;
 }
-
+.garden-card-my-gardens {
+    background: 0;
+    border: 0;
+}
 .garden-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
-
+.garden-card-my-gardens:hover {
+    box-shadow: none;
+    transform: none;
+}
 .garden-photo,
 .garden-photo-placeholder {
     width: 150px;
@@ -303,6 +309,10 @@ header {
     margin: 5px 0;
     font-size: 14px;
     color: #666;
+    white-space: normal;         /* Позволяет переносы */
+    word-break: break-word;      /* Переносит длинные слова */
+    overflow-wrap: break-word;   /* Современное свойство */
+    line-height: 1.4;
 }
 
 .garden-info p strong {
@@ -310,8 +320,8 @@ header {
 }
 
 .garden-info p small {
-    color: #999;
-    font-size: 12px;
+    color: #666;
+    font-size: 14px;
 }
 
 .garden-card-actions {
@@ -646,5 +656,5 @@ input[type="datetime-local"] {
     border: 1px solid #99A534;
     border-radius: 10px;
     padding: 10px 10px;
-    margin-bottom: 4px;
+    margin-bottom: 30px;
 }

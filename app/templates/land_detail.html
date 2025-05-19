@@ -12,7 +12,7 @@
 {% block content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/land_style.css') }}">
 
-<div class="main class="main container">
+<div class="main container">
     {% if garden %}
         <!-- Flash messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -26,7 +26,7 @@
         {% endwith %}
 
         <!-- Информация об участке в стиле карточки -->
-        <div class="garden-card"">
+        <div class="garden-card garden-card-my-gardens">
             {% if garden.photo_file_paths and garden.photo_file_paths[0] %}
                 <img src="{{ url_for('static', filename=garden.photo_file_paths[0]) }}" alt="{{ garden.name }}" class="garden-photo">
             {% else %}
@@ -52,9 +52,8 @@
 
         <div class="garden-beds-section">
             <div class="section-header-actions">
-                <h3>Грядки на участке ({{ garden.stats.total_beds or 0 }})</h3>
+                <h3>Ваши грядки на участке {{garden.name}}. Количество грядкок: {{ garden.stats.total_beds or 0 }}</h3>
             </div>
-            {% if beds %}
             <form method="GET" action="{{ url_for('land_bp.garden_detail', garden_id=garden._id) }}" class="filter-sort-form beds-filter-form">
                 <div class="form-row">
                     <div class="form-group col-md-4">
@@ -81,34 +80,29 @@
                     </div>
                 </div>
             </form>
-            {% endif %}
-            {% if beds %}
-                <div class="beds-list">
-                    {% for bed in beds %}
-                        <div class="bed-card">
-                            <div class="bed-card-photo">
-                                {% if bed.photo_file_paths and bed.photo_file_paths[0] %}
-                                    <img src="{{ url_for('static', filename=bed.photo_file_paths[0]) }}" alt="Фото грядки {{ bed.name }}" class="img-thumbnail bed-photo-thumb">
-                                {% else %}
-                                    <div class="bed-photo-placeholder"><span>{{ bed.name[0] if bed.name else 'B' }}</span></div>
-                                {% endif %}
-                            </div>
-                            <div class="bed-card-info">
-                                <h5>{{ bed.name }}</h5>
-                                <p><strong>Культура:</strong> {{ bed.crop_name or 'Не указана' }}</p>
-                                <p><strong>Дата посадки:</strong> {{ bed.planting_date.strftime('%d-%m-%Y') if bed.planting_date else 'N/A' }}</p>
-                                <p><strong>Тип:</strong> {{ bed.bed_type or 'Не указан' }} {% if bed.is_hothouse %}(Теплица){% endif %}</p>
-                                <p><small>Заметки: {{ bed.notes|truncate(80) if bed.notes else 'Нет' }}</small></p>
-                            </div>
-                            <div class="bed-card-actions">
-                                <a href="{{ url_for('bed_bp.edit_bed', garden_id=garden._id, bed_id=bed._id) }}" class="btn btn-sm btn-outline-primary">Ред.</a>
-                                <form method="POST" action="{{ url_for('bed_bp.delete_bed', garden_id=garden._id, bed_id=bed._id) }}" class="d-inline" onsubmit="return confirm('Вы уверены, что хотите удалить эту грядку?');">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger">Удал.</button>
-                                </form>
-                            </div>
-                        </div>
-                    {% endfor %}
-                </div>
+                <div class="section-list">
+                    {% if beds %}
+                            {% for bed in beds %}
+                                <div class="garden-card bed-card">
+                                    {% if bed.photo_file_paths and bed.photo_file_paths[0] %}
+                                        <img src="{{ url_for('static', filename=bed.photo_file_paths[0]) }}" alt="Фото грядки {{ bed.name }}" class="garden-photo">
+                                    {% else %}
+                                        <div class="garden-photo-placeholder"><span>{{ bed.name[0] if bed.name else 'B' }}</span></div>
+                                    {% endif %}
+                                    <div class="garden-info">
+                                        <h3>{{ bed.name }}</h3>
+                                        <p><strong>Культура:</strong> {{ bed.crop_name or 'Не указана' }}</p>
+                                        <p><strong>Дата посадки:</strong> {{ bed.planting_date.strftime('%d-%m-%Y') if bed.planting_date else 'N/A' }}</p>
+                                        <p><strong>Тип:</strong> {{ bed.bed_type or 'Не указан' }} {% if bed.is_hothouse %}(Теплица){% endif %}</p>
+                                        <p><strong>Заметки:</strong> {{ bed.notes if bed.notes else 'Нет' }}</p>
+                                    </div>
+                                    <a href="{{ url_for('bed_bp.edit_bed', garden_id=garden._id, bed_id=bed._id) }}" class="icon-button edit-button"></a>
+                                    <form method="POST" action="{{ url_for('bed_bp.delete_bed', garden_id=garden._id, bed_id=bed._id) }}" onsubmit="return confirm('Вы уверены, что хотите удалить эту грядку?');">
+                                        <button type="submit" class="icon-button delete-button"></button>
+                                    </form>
+                                </div>
+                            {% endfor %}
+                    </div>
                 {% if total_bed_pages > 1 %}
                 <nav class="pagination-nav">
                     <ul class="pagination pagination-sm">
@@ -130,30 +124,49 @@
                 <a href="{{ url_for('bed_bp.new_bed', garden_id=garden._id) }}" class="btn add-section-btn">Добавить первую грядку?</a>
             {% endif %}
             </div>
-        </div>
 
-        <hr>
-
-        <div class="garden-tasks-section">
             <div class="section-header-actions">
                 <h3>Задачи по участку</h3>
-                {# <a href="{{ url_for('task_bp.new_task', garden_id=garden._id) }}" class="btn btn-info btn-sm">Добавить задачу</a> #}
+                {# <a href="#" class="btn btn-info btn-sm">Добавить задачу</a> #}
             </div>
-            {% if garden_tasks %}
-                <ul class="list-group">
+            <div class="section-list">
+                {% if garden_tasks %}
                     {% for task in garden_tasks %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center {% if task.completed %}list-group-item-success{% elif task.due_date and task.due_date < datetime.utcnow() %}list-group-item-danger{% endif %}">
-                            <div>
-                                <strong>{{ task.title }}</strong>
-                                {% if task.description %}<p><small>{{ task.description }}</small></p>{% endif %}
-                                <small>Срок: {{ task.due_date.strftime('%d-%m-%Y') if task.due_date else 'Нет' }}</small>
+                        <div class="garden-card bed-card">
+                            <div class="garden-photo-placeholder">
+                                <span>{{ task.title[0] if task.title else 'T' }}</span>
                             </div>
-                        </li>
+                            <div class="garden-info">
+                                <h3>{{ task.title }}</h3>
+                                {% if task.description %}
+                                    <p><strong>Описание:</strong> {{ task.description }}</p>
+                                {% endif %}
+                                <p><strong>Срок:</strong> {{ task.due_date.strftime('%d-%m-%Y') if task.due_date else 'Не указан' }}</p>
+                                <p><strong>Статус:</strong> 
+                                    {% if task.completed %}
+                                        Выполнена
+                                    {% elif task.due_date and task.due_date < datetime.utcnow() %}
+                                        Просрочена
+                                    {% else %}
+                                        В процессе
+                                    {% endif %}
+                                </p>
+                            </div>
+                            {# Кнопки редактирования и удаления задач закомментированы до создания соответствующих эндпоинтов
+                            <a href="#" class="icon-button edit-button"></a>
+                            <form method="POST" action="#" onsubmit="return confirm('Вы уверены, что хотите удалить эту задачу?');">
+                                <button type="submit" class="icon-button delete-button"></button>
+                            </form>
+                            #}
+                        </div>
                     {% endfor %}
-                </ul>
-            {% else %}
-                <p>Для этого участка нет активных задач.</p>
-            {% endif %}
+                {% else %}
+                    <div class="no-beds-panel">
+                        <p class="no-gardens-text">Для этого участка пока нет задач.</p>
+                        {# <a href="#" class="btn add-section-btn">Добавить первую задачу?</a> #}
+                    </div>
+                {% endif %}
+            </div>
         </div>
 
     {% else %}
