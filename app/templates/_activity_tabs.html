@@ -1,0 +1,11 @@
+<ul class="nav nav-tabs mb-3">
+    <li class="nav-item">
+        <a class="nav-link {% if request.endpoint == 'recommendation_bp.list_recommendations' %}active{% endif %}" 
+           href="{{ url_for('recommendation_bp.list_recommendations') }}">Рекомендации</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {% if request.endpoint == 'care_bp.list_care_logs' or request.endpoint == 'care_bp.new_care_log' %}active{% endif %}" 
+           href="{{ url_for('care_bp.list_care_logs') }}">Журнал ухода</a>
+    </li>
+</ul> 
