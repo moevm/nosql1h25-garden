@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Огородник — Мой дневник{% endblock %}
+
+{% block header %}
+{% set header_title = "Мой дневник" %}
+{% include "icons_header.html" %}
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/diary_style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<main class="main container">
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-messages" style="margin-bottom: 20px;">
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% if total_all == 0 %}
+      <div class="no-entries-panel">
+        <p class="no-entries-text">У вас нет записей в дневнике</p>
+        <a href="{{ url_for('diary_bp.new_entry') }}" class="btn add-section-btn">Добавить запись</a>
+      </div>
+    {% else %}
+    <form method="GET" action="{{ url_for('diary_bp.entries') }}" class="filter-sort-form">
+        <h4>Поиск и добавление записей</h4>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="title_query">Название</label>
+                <input type="text" id="title_query" name="title_query" value="{{ title_query or '' }}" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="creation_date">Дата создания</label>
+                <input type="date" id="creation_date" name="creation_date" value="{{ creation_date or '' }}" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="modification_date">Дата редактирования</label>
+                <input type="date" id="modification_date" name="modification_date" value="{{ modification_date or '' }}" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="privacy_query">Тип записи</label>
+                <select id="privacy_query" name="privacy_query" class="form-control">
+                    {% for option in privacy_options %}
+                        <option value="{{ option }}" {% if privacy_query == option %}selected{% endif %}>{{ option if option else "-- Все варианты --" }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="sort_by">Сортировать по</label>
+                <select id="sort_by" name="sort_by" class="form-control">
+                    <option value="title" {% if sort_by == 'title' %}selected{% endif %}>Названию</option>
+                    <option value="creation_time" {% if sort_by == 'creation_time' %}selected{% endif %}>Дате создания</option>
+                    <option value="last_modified_time" {% if sort_by == 'last_modified_time' %}selected{% endif %}>Дате изменения</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="sort_order">Порядок</label>
+                <select id="sort_order" name="sort_order" class="form-control">
+                    <option value="asc" {% if sort_order_str == 'asc' %}selected{% endif %}>По возрастанию</option>
+                    <option value="desc" {% if sort_order_str == 'desc' %}selected{% endif %}>По убыванию</option>
+                </select>
+            </div>
+        </div>
+
+        <button type="submit" class="icon-button search-button" title="Поиск"></button>
+        <a href="{{ url_for('diary_bp.entries') }}" class="btn btn-primary add-section-btn">Сбросить</a>
+        <a href="{{ url_for('diary_bp.new_entry') }}" class="btn btn-primary add-section-btn">Добавить запись</a>
+    </form>
+
+    <div class="entries-list">
+        {% if entries %}
+            {% for entry in entries %}
+                <div class="entry-card">
+                    {% if entry.photo_file_paths and entry.photo_file_paths[0] %}
+                        <img src="{{ url_for('static', filename=entry.photo_file_paths[0]) }}" alt="{{ entry.title }}" class="entry-photo">
+                    {% else %}
+                        <div class="entry-photo-placeholder"><span>{{ entry.title[0] if entry.title else 'D' }}</span></div>
+                    {% endif %}
+                    <div class="entry-info">
+                        <h3><a href="{{ url_for('diary_bp.entry_detail', entry_id=entry._id) }}" class="entry-title-link">{{ entry.title }}</a></h3>
+                        <p>{{ entry.content|truncate(200) }}</p>
+                        <div class="entry-meta">
+                            <span class="privacy-badge {% if entry.is_private %}private{% else %}public{% endif %}">
+                                {% if entry.is_private %}Приватная{% else %}Публичная{% endif %}
+                            </span>
+                            <small>Создано: {{ entry.creation_time.strftime('%d-%m-%Y %H:%M') }}</small>
+                            {% if entry.last_modified_time %}
+                                <small>Изменено: {{ entry.last_modified_time.strftime('%d-%m-%Y %H:%M') }}</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <a href="{{ url_for('diary_bp.edit_entry', entry_id=entry._id) }}"
+                       class="icon-button edit-button" title="Редактировать"></a>
+                    <form method="POST"
+                          action="{{ url_for('diary_bp.delete_entry', entry_id=entry._id) }}"
+                          onsubmit="return confirm('Вы уверены, что хотите удалить эту запись?');">
+                        <button type="submit" class="icon-button delete-button" title="Удалить"></button>
+                    </form>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>Записи не найдены</p>
+        {% endif %}
+    </div>
+
+    {% if total_pages > 1 %}
+    <nav aria-label="Page navigation" class="pagination-nav">
+        <ul class="pagination">
+            {% if current_page > 1 %}
+                <li class="page-item"><a class="page-link" href="{{ url_for('diary_bp.entries', page=current_page-1, title_query=title_query, creation_date=creation_date, modification_date=modification_date, privacy_query=privacy_query, sort_by=sort_by, sort_order=sort_order_str) }}">Назад</a></li>
+            {% else %}
+                <li class="page-item disabled"><span class="page-link">Назад</span></li>
+            {% endif %}
+
+            {% for page_num in range(1, total_pages + 1) %}
+                {% if page_num == current_page %}
+                    <li class="page-item active"><span class="page-link">{{ page_num }}</span></li>
+                {% else %}
+                    <li class="page-item"><a class="page-link" href="{{ url_for('diary_bp.entries', page=page_num, title_query=title_query, creation_date=creation_date, modification_date=modification_date, privacy_query=privacy_query, sort_by=sort_by, sort_order=sort_order_str) }}">{{ page_num }}</a></li>
+                {% endif %}
+            {% endfor %}
+
+            {% if current_page < total_pages %}
+                <li class="page-item"><a class="page-link" href="{{ url_for('diary_bp.entries', page=current_page+1, title_query=title_query, creation_date=creation_date, modification_date=modification_date, privacy_query=privacy_query, sort_by=sort_by, sort_order=sort_order_str) }}">Вперед</a></li>
+            {% else %}
+                <li class="page-item disabled"><span class="page-link">Вперед</span></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+    {% endif %}
+</main>
+{% endblock %}
