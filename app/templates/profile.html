@@ -6,7 +6,7 @@
 
 <div class="profile-container">
   <div class="profile-menu">
-    <a class="personal-diary" href="">Личный дневник</a>
+    <a class="personal-diary" href="{{ url_for('diary_bp.entries') }}">Личный дневник</a>
     <a class="my-sites" href="{{ url_for('land_bp.gardens') }}">Мои участки</a>
     <a class="garden-care" href="">Уход за грядками</a>
     <a class="recommendations" href="">Рекомендации</a>
