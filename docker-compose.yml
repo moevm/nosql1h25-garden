@@ -9,7 +9,7 @@ services:
     ports:
       - "5000:5000"
     env_file:
-      - .env
+      - hello_world/.env
     volumes:
       - ./app:/app
     restart: always

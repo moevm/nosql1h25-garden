@@ -16,27 +16,40 @@
 
   <div class="profile">
     <div class="profile-info">
-      <div class="profile-card">
-        <div class="avatar">
-          <img class="avatar-img" src="https://img.freepik.com/free-photo/selective-focus-black-white-adorable-cat-with-its-tongue-out_181624-35744.jpg" alt="Аватарка">
+      <form method="post" enctype="multipart/form-data">
+        <div class="profile-card">
+          <div class="avatar">
+            {% if user.photo_path %}
+              <img class="avatar-img" src="{{ url_for('static', filename=user.photo_path) }}" alt="Аватарка">
+            {% else %}
+              <img class="avatar-img" src="https://img.freepik.com/free-photo/selective-focus-black-white-adorable-cat-with-its-tongue-out_181624-35744.jpg " alt="Аватарка по умолчанию">
+            {% endif %}
+          </div>
+
+          <div class="name-container">
+            <input type="text" name="name" id="name" class="name-input" value="{{ user.name }}">
+          </div>
+
+          <div class="photo-upload">
+            <label for="photo">Загрузить новое фото:</label>
+            <input type="file" name="photo" id="photo" accept="image/*">
+          </div>
         </div>
-        <div class="name-container">
-          <span class="name-text">Имя</span>
-          <label for="name"></label>
-          <input type="text" class="name-input" id="name" style="display: none;">
-          <button class="edit-name-button"></button>
-        </div>
-      </div>
+
+        <button type="submit" class="save-button">Сохранить изменения</button>
+      </form>
 
       <div class="profile-edit">
-        <div class="profile-creation-date">Создан 01/03/2024 14:00</div>
-        <div class="profile-edit-date">Ред. 02/03/2024 9:25</div>
+        <div class="profile-creation-dates">
+          <div class="profile-creation-date">Создан: {{ user.created_at.strftime('%d-%m-%Y') if user.created_at else 'N/A' }}</div>
+          <div class="profile-edit-date">Изменён: {{ user.updated_at.strftime('%d-%m-%Y') if user.updated_at else 'N/A' }}</div>
+        </div>
       </div>
     </div>
 
     <div class="profile-actions">
-      <a class="export-data" href="">Экспортировать данные</a>
-      <a class="import-data" href="">Импортировать данные</a>
+      <a class="export-data" href="#">Экспортировать данные</a>
+      <a class="import-data" href="#">Импортировать данные</a>
       <a class="exit" href="{{ url_for('auth_bp.logout') }}">Выход из профиля</a>
     </div>
   </div>
