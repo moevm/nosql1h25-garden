@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Огородник — {% if is_edit %}Редактировать запись{% else %}Новая запись{% endif %}{% endblock %}
+
+{% block header %}
+{% if is_edit %}
+    {% set header_title = "Редактирование записи" %}
+{% else %}
+    {% set header_title = "Создание новой записи" %}
+{% endif %}
+{% include "icons_header.html" %}
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/diary_style.css') }}"> 
+<script src="{{ url_for('static', filename='scripts/diary_script.js') }}"></script>
+
+<div class="container entry-form-container">
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-messages">
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <div class="form-wrapper">
+        <form method="POST" class="entry-form" action="{{ url_for('diary_bp.edit_entry', entry_id=entry_id) if is_edit else url_for('diary_bp.new_entry') }}" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="title">Заголовок <span class="required">*</span></label>
+                <input type="text" id="title" name="title" value="{{ form_data.title if form_data and form_data.title is defined else '' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="content">Содержание</label>
+                <textarea id="content" name="content" rows="10">{{ form_data.content if form_data and form_data.content is defined else '' }}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="is_private">Тип записи</label>
+                <select id="is_private" name="is_private" class="form-control">
+                    <option value="false" {% if form_data and not form_data.is_private %}selected{% endif %}>Публичная</option>
+                    <option value="true" {% if form_data and form_data.is_private %}selected{% endif %}>Приватная</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="photo">Фотография</label>
+                <input type="file" id="photo" name="photo" accept="image/png, image/jpeg, image/gif" onchange="previewPhoto(event)">
+
+                <div id="photo-preview-container" style="margin-top: 10px;">
+                    {% if is_edit and form_data.photo_file_paths and form_data.photo_file_paths[0] %}
+                        <img id="photo-preview"
+                            src="{{ url_for('static', filename=form_data.photo_file_paths[0]) }}"
+                            alt="Preview"
+                            style="max-width: 100%; max-height: 400px;">
+                    {% else %}
+                        <img id="photo-preview"
+                            src="#"
+                            alt="Preview"
+                            style="display: none; max-width: 100%; max-height: 400px;">
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary add-section-btn">
+                    {% if is_edit %}Сохранить изменения{% else %}Создать запись{% endif %}
+                </button>
+                <a href="{{ url_for('diary_bp.entries') }}" class="btn btn-primary add-section-btn">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
