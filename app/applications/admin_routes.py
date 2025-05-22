@@ -277,3 +277,43 @@ def admin_view_recommendations():
                          search_user_email=search_user_email, is_completed=is_completed,
                          due_date_from=due_date_from, due_date_to=due_date_to)
 
+@admin_bp.route('/admin/diary')
+@login_required
+@admin_required
+def admin_view_diary():
+    search_title = request.args.get('search_title', '')
+    search_user_email = request.args.get('search_user_email', '')
+    date_from = request.args.get('date_from', '')
+    date_to = request.args.get('date_to', '')
+
+    filters = {}
+    if search_title:
+        filters['title'] = {'$regex': search_title, '$options': 'i'}
+
+    if search_user_email:
+        matching_users = mongo.db.users.find({'email': {'$regex': search_user_email, '$options': 'i'}}, {'_id': 1})
+        user_ids = [user['_id'] for user in matching_users]
+        if user_ids:
+            filters['user_id'] = {'$in': user_ids}
+        else:
+            filters['user_id'] = None
+
+    if date_from or date_to:
+        date_filter = {}
+        if date_from:
+            date_filter['$gte'] = datetime.strptime(date_from, '%Y-%m-%d')
+        if date_to:
+            date_filter['$lte'] = datetime.strptime(date_to, '%Y-%m-%d').replace(hour=23, minute=59, second=59)
+        filters['created_at'] = date_filter
+
+    entries_cursor = mongo.db.diary_entries.find(filters)
+    entries_list = []
+    for entry in entries_cursor:
+        user = mongo.db.users.find_one({'_id': ObjectId(entry['user_id'])})
+        entry['user_email'] = user['email'] if user else 'N/A'
+        entry['user_name'] = user['name'] if user else 'N/A'
+        entries_list.append(entry)
+
+    return render_template('admin_view_diary.html', entries=entries_list, title="Manage Diary Entries",
+                         search_title=search_title, search_user_email=search_user_email,
+                         date_from=date_from, date_to=date_to)
