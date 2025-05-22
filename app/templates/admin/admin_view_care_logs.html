@@ -1,0 +1,119 @@
+{% extends "admin/admin_layout.html" %}
+
+{% block content %}
+<div class="search-filters mb-4">
+    <form method="get" class="row g-3">
+        <div class="col-md-2">
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-activity"></i></span>
+                <input type="text" class="form-control" name="search_action_type" value="{{ search_action_type }}" placeholder="Action type">
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-tree"></i></span>
+                <input type="text" class="form-control" name="search_garden_name" value="{{ search_garden_name }}" placeholder="Garden name">
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-grid"></i></span>
+                <input type="text" class="form-control" name="search_bed_name" value="{{ search_bed_name }}" placeholder="Bed name">
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                <input type="text" class="form-control" name="search_user_email" value="{{ search_user_email }}" placeholder="User email">
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-calendar"></i></span>
+                <input type="date" class="form-control" name="date_from" value="{{ date_from }}" placeholder="From date">
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-calendar"></i></span>
+                <input type="date" class="form-control" name="date_to" value="{{ date_to }}" placeholder="To date">
+            </div>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="bi bi-funnel me-2"></i>Apply Filters
+            </button>
+        </div>
+        <div class="col-md-2">
+            <a href="{{ url_for('admin_bp.admin_view_care_logs') }}" class="btn btn-outline-secondary w-100" data-action="clear-filters">
+                <i class="bi bi-x-circle me-2"></i>Clear Filters
+            </a>
+        </div>
+    </form>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-hover" data-item-type="care_logs">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Action Type</th>
+                <th>Garden</th>
+                <th>Bed</th>
+                <th>User</th>
+                <th>Description</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in care_logs %}
+            <tr data-item-id="{{ log._id }}">
+                <td>{{ log.log_date.strftime('%Y-%m-%d %H:%M') if log.log_date else 'N/A' }}</td>
+                <td>
+                    <span class="badge bg-info">{{ log.action_type }}</span>
+                </td>
+                <td>
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-tree me-2"></i>
+                        <div>{{ log.garden_name }}</div>
+                    </div>
+                </td>
+                <td>
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-grid me-2"></i>
+                        <div>{{ log.bed_name }}</div>
+                    </div>
+                </td>
+                <td>
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-person-circle me-2"></i>
+                        <div>
+                            <div>{{ log.user_name }}</div>
+                            <small class="text-muted">{{ log.user_email }}</small>
+                        </div>
+                    </div>
+                </td>
+                <td>{{ log.description }}</td>
+                <td>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-outline-primary" title="Edit Log" data-action="edit">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-danger" title="Delete Log" data-action="delete">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-success" title="View Details" data-action="view">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" class="text-center">No care logs found matching the criteria.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %} 

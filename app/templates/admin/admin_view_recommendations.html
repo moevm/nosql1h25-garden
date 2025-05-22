@@ -1,0 +1,134 @@
+{% extends "admin/admin_layout.html" %}
+
+{% block content %}
+<div class="search-filters mb-4">
+    <form method="get" class="row g-3">
+        <div class="col-md-2">
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-activity"></i></span>
+                <input type="text" class="form-control" name="search_action_type" value="{{ search_action_type }}" placeholder="Action type">
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-tree"></i></span>
+                <input type="text" class="form-control" name="search_garden_name" value="{{ search_garden_name }}" placeholder="Garden name">
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-grid"></i></span>
+                <input type="text" class="form-control" name="search_bed_name" value="{{ search_bed_name }}" placeholder="Bed name">
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                <input type="text" class="form-control" name="search_user_email" value="{{ search_user_email }}" placeholder="User email">
+            </div>
+        </div>
+        <div class="col-md-2">
+            <select class="form-select" name="is_completed">
+                <option value="">All Status</option>
+                <option value="yes" {% if is_completed == 'yes' %}selected{% endif %}>Completed</option>
+                <option value="no" {% if is_completed == 'no' %}selected{% endif %}>Pending</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-calendar"></i></span>
+                <input type="date" class="form-control" name="due_date_from" value="{{ due_date_from }}" placeholder="Due from">
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-calendar"></i></span>
+                <input type="date" class="form-control" name="due_date_to" value="{{ due_date_to }}" placeholder="Due to">
+            </div>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="bi bi-funnel me-2"></i>Apply Filters
+            </button>
+        </div>
+        <div class="col-md-2">
+            <a href="{{ url_for('admin_bp.admin_view_recommendations') }}" class="btn btn-outline-secondary w-100" data-action="clear-filters">
+                <i class="bi bi-x-circle me-2"></i>Clear Filters
+            </a>
+        </div>
+    </form>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-hover" data-item-type="recommendations">
+        <thead>
+            <tr>
+                <th>Due Date</th>
+                <th>Action Type</th>
+                <th>Garden</th>
+                <th>Bed</th>
+                <th>User</th>
+                <th>Description</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for rec in recommendations %}
+            <tr data-item-id="{{ rec._id }}">
+                <td>{{ rec.due_date.strftime('%Y-%m-%d') if rec.due_date else 'N/A' }}</td>
+                <td>
+                    <span class="badge bg-info">{{ rec.action_type }}</span>
+                </td>
+                <td>
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-tree me-2"></i>
+                        <div>{{ rec.garden_name }}</div>
+                    </div>
+                </td>
+                <td>
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-grid me-2"></i>
+                        <div>{{ rec.bed_name }}</div>
+                    </div>
+                </td>
+                <td>
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-person-circle me-2"></i>
+                        <div>
+                            <div>{{ rec.user_name }}</div>
+                            <small class="text-muted">{{ rec.user_email }}</small>
+                        </div>
+                    </div>
+                </td>
+                <td>{{ rec.description }}</td>
+                <td>
+                    {% if rec.is_completed %}
+                    <span class="badge bg-success">Completed</span>
+                    {% else %}
+                    <span class="badge bg-warning">Pending</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-outline-primary" title="Edit Recommendation" data-action="edit">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-danger" title="Delete Recommendation" data-action="delete">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-success" title="View Details" data-action="view">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="8" class="text-center">No recommendations found matching the criteria.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %} 
