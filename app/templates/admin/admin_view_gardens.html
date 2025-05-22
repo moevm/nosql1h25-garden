@@ -1,0 +1,60 @@
+{% extends "admin/admin_layout.html" %}
+
+{% block admin_content %}
+
+<form method="GET" action="{{ url_for('admin_bp.admin_view_gardens') }}" class="mb-3">
+    <div class="form-row align-items-end">
+        <div class="form-group col-md-4">
+            <label for="search_garden_name">Search Garden Name</label>
+            <input type="text" name="search_garden_name" id="search_garden_name" class="form-control form-control-sm" value="{{ search_garden_name }}">
+        </div>
+        <div class="form-group col-md-4">
+            <label for="search_user_email">Search User Email</label>
+            <input type="text" name="search_user_email" id="search_user_email" class="form-control form-control-sm" value="{{ search_user_email }}">
+        </div>
+        <div class="form-group col-md-2">
+            <button type="submit" class="btn btn-primary btn-sm btn-block">Filter</button>
+        </div>
+        <div class="form-group col-md-2">
+            <a href="{{ url_for('admin_bp.admin_view_gardens') }}" class="btn btn-secondary btn-sm btn-block">Clear</a>
+        </div>
+    </div>
+</form>
+
+<div class="table-responsive">
+    <table class="table table-striped table-sm">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Garden Name</th>
+                <th>User Name</th>
+                <th>User Email</th>
+                <th>Location</th>
+                <th>Area</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for garden in gardens %}
+            <tr>
+                <td>{{ garden._id }}</td>
+                <td>{{ garden.name }}</td>
+                <td>{{ garden.user_name }}</td>
+                <td>{{ garden.user_email }}</td>
+                <td>{{ garden.location }}</td>
+                <td>{{ garden.area }}</td>
+                <td>
+                    <a href="#" class="btn btn-sm btn-info">View Details</a> 
+                    <a href="#" class="btn btn-sm btn-primary">Edit</a>
+                    <a href="#" class="btn btn-sm btn-danger">Delete</a>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7">No gardens found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %} 

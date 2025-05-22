@@ -1,6 +1,30 @@
 {% extends "admin/admin_layout.html" %}
 
 {% block admin_content %}
+
+<form method="GET" action="{{ url_for('admin_bp.admin_view_users') }}" class="mb-3">
+    <div class="form-row align-items-end">
+        <div class="form-group col-md-4">
+            <label for="search_query">Search Name/Email</label>
+            <input type="text" name="search_query" id="search_query" class="form-control form-control-sm" value="{{ search_query }}">
+        </div>
+        <div class="form-group col-md-3">
+            <label for="admin_filter">Admin Status</label>
+            <select name="admin_filter" id="admin_filter" class="form-control form-control-sm">
+                <option value="" {% if not admin_filter %}selected{% endif %}>All</option>
+                <option value="yes" {% if admin_filter == 'yes' %}selected{% endif %}>Admin</option>
+                <option value="no" {% if admin_filter == 'no' %}selected{% endif %}>Not Admin</option>
+            </select>
+        </div>
+        <div class="form-group col-md-2">
+            <button type="submit" class="btn btn-primary btn-sm btn-block">Filter</button>
+        </div>
+        <div class="form-group col-md-2">
+            <a href="{{ url_for('admin_bp.admin_view_users') }}" class="btn btn-secondary btn-sm btn-block">Clear</a>
+        </div>
+    </div>
+</form>
+
 <div class="table-responsive">
     <table class="table table-striped table-sm">
         <thead>
