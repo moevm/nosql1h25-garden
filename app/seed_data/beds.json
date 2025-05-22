@@ -59,6 +59,186 @@
         "pending_recommendations": 0,
         "completed_recommendations": 0
       }
+    },
+    {
+      "name": "Клубничная грядка",
+      "crop_name": "Клубника",
+      "planting_date": "2024-03-20T00:00:00Z",
+      "count_row": 4,
+      "length": 5.0,
+      "width": 1.2,
+      "bed_type": "Поднятая грядка",
+      "is_hothouse": false,
+      "notes": "Сорт 'Виктория'",
+      "photo_file_paths": [],
+      "recommendations": [],
+      "care_actions": [],
+      "stats": {
+        "total_care_actions": 0,
+        "last_care_date": null,
+        "pending_recommendations": 0,
+        "completed_recommendations": 0
+      }
+    },
+    {
+      "name": "Картофельная грядка",
+      "crop_name": "Картофель",
+      "planting_date": "2024-03-25T00:00:00Z",
+      "count_row": 3,
+      "length": 6.0,
+      "width": 1.5,
+      "bed_type": "Традиционная (в грунте)",
+      "is_hothouse": false,
+      "notes": "Сорт 'Ранний'",
+      "photo_file_paths": [],
+      "recommendations": [],
+      "care_actions": [],
+      "stats": {
+        "total_care_actions": 0,
+        "last_care_date": null,
+        "pending_recommendations": 0,
+        "completed_recommendations": 0
+      }
+    },
+    {
+      "name": "Баклажанная грядка",
+      "crop_name": "Баклажаны",
+      "planting_date": "2024-03-28T00:00:00Z",
+      "count_row": 2,
+      "length": 3.0,
+      "width": 1.0,
+      "bed_type": "Поднятая грядка",
+      "is_hothouse": true,
+      "notes": "Сорт 'Черный принц'",
+      "photo_file_paths": [],
+      "recommendations": [],
+      "care_actions": [],
+      "stats": {
+        "total_care_actions": 0,
+        "last_care_date": null,
+        "pending_recommendations": 0,
+        "completed_recommendations": 0
+      }
+    },
+    {
+      "name": "Капустная грядка",
+      "crop_name": "Капуста",
+      "planting_date": "2024-04-01T00:00:00Z",
+      "count_row": 2,
+      "length": 4.0,
+      "width": 1.2,
+      "bed_type": "Традиционная (в грунте)",
+      "is_hothouse": false,
+      "notes": "Сорт 'Белокочанная'",
+      "photo_file_paths": [],
+      "recommendations": [],
+      "care_actions": [],
+      "stats": {
+        "total_care_actions": 0,
+        "last_care_date": null,
+        "pending_recommendations": 0,
+        "completed_recommendations": 0
+      }
+    },
+    {
+      "name": "Свекольная грядка",
+      "crop_name": "Свекла",
+      "planting_date": "2024-04-05T00:00:00Z",
+      "count_row": 3,
+      "length": 3.5,
+      "width": 1.0,
+      "bed_type": "Традиционная (в грунте)",
+      "is_hothouse": false,
+      "notes": "Сорт 'Бордо'",
+      "photo_file_paths": [],
+      "recommendations": [],
+      "care_actions": [],
+      "stats": {
+        "total_care_actions": 0,
+        "last_care_date": null,
+        "pending_recommendations": 0,
+        "completed_recommendations": 0
+      }
+    },
+    {
+      "name": "Луковая грядка",
+      "crop_name": "Лук",
+      "planting_date": "2024-04-10T00:00:00Z",
+      "count_row": 4,
+      "length": 3.0,
+      "width": 0.8,
+      "bed_type": "Поднятая грядка",
+      "is_hothouse": false,
+      "notes": "Сорт 'Штутгартер Ризен'",
+      "photo_file_paths": [],
+      "recommendations": [],
+      "care_actions": [],
+      "stats": {
+        "total_care_actions": 0,
+        "last_care_date": null,
+        "pending_recommendations": 0,
+        "completed_recommendations": 0
+      }
+    },
+    {
+      "name": "Чесночная грядка",
+      "crop_name": "Чеснок",
+      "planting_date": "2024-04-15T00:00:00Z",
+      "count_row": 3,
+      "length": 2.5,
+      "width": 0.6,
+      "bed_type": "Традиционная (в грунте)",
+      "is_hothouse": false,
+      "notes": "Озимый сорт",
+      "photo_file_paths": [],
+      "recommendations": [],
+      "care_actions": [],
+      "stats": {
+        "total_care_actions": 0,
+        "last_care_date": null,
+        "pending_recommendations": 0,
+        "completed_recommendations": 0
+      }
+    },
+    {
+      "name": "Зеленая грядка",
+      "crop_name": "Петрушка",
+      "planting_date": "2024-04-20T00:00:00Z",
+      "count_row": 2,
+      "length": 2.0,
+      "width": 0.5,
+      "bed_type": "Контейнер",
+      "is_hothouse": false,
+      "notes": "Кудрявая петрушка",
+      "photo_file_paths": [],
+      "recommendations": [],
+      "care_actions": [],
+      "stats": {
+        "total_care_actions": 0,
+        "last_care_date": null,
+        "pending_recommendations": 0,
+        "completed_recommendations": 0
+      }
+    },
+    {
+      "name": "Тыквенная грядка",
+      "crop_name": "Тыква",
+      "planting_date": "2024-04-25T00:00:00Z",
+      "count_row": 1,
+      "length": 8.0,
+      "width": 2.0,
+      "bed_type": "Традиционная (в грунте)",
+      "is_hothouse": false,
+      "notes": "Сорт 'Мускатная'",
+      "photo_file_paths": [],
+      "recommendations": [],
+      "care_actions": [],
+      "stats": {
+        "total_care_actions": 0,
+        "last_care_date": null,
+        "pending_recommendations": 0,
+        "completed_recommendations": 0
+      }
     }
   ]
 } 
