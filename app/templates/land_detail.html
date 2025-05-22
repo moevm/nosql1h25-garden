@@ -54,7 +54,10 @@
             <div class="section-header-actions">
                 <h3>Ваши грядки на участке {{garden.name}}. Количество грядкок: {{ garden.stats.total_beds or 0 }}</h3>
             </div>
-            <form method="GET" action="{{ url_for('land_bp.garden_detail', garden_id=garden._id) }}" class="filter-sort-form beds-filter-form">
+            {% if beds %}
+                <a href="{{ url_for('bed_bp.new_bed', garden_id=garden._id) }}" class="btn btn-primary add-section-btn margin-btn"">Добавить грядку</a>
+            {% endif %}
+            <!-- <form method="GET" action="{{ url_for('land_bp.garden_detail', garden_id=garden._id) }}" class="filter-sort-form beds-filter-form">
                 <div class="form-row form-row-bed">
                     <div class="form-group col-md-4">
                         <input type="text" name="bed_name_query" value="{{ bed_name_query or '' }}" placeholder="Название грядки" class="form-control form-control-sm">
@@ -79,7 +82,7 @@
                     <button type="submit" class="icon-button search-button" title="Поиск"></button>
                     <a href="{{ url_for('land_bp.garden_detail', garden_id=garden._id) }}" class="btn btn-primary add-section-btn">Сбросить</a>
                     <a href="{{ url_for('bed_bp.new_bed', garden_id=garden._id) }}" class="btn btn-primary add-section-btn">Добавить грядку</a>
-            </form>
+            </form> -->
                 <div class="section-list">
                     {% if beds %}
                             {% for bed in beds %}
@@ -127,35 +130,35 @@
 
             <div class="section-header-actions">
                 <h3>Журнал ухода за участком</h3>
-                <a href="{{ url_for('care_bp.new_care_log') }}?redirect_to=garden_detail&garden_id={{ garden._id }}" class="btn btn-primary add-section-btn">Добавить запись</a>
-            </div>
-            <div class="section-list">
                 {% if garden_care_logs %}
-                    {% for log in garden_care_logs %}
-                        <div class="garden-card bed-card">
-                            <div class="garden-photo-placeholder">
-                                <span>{{ log.action_type[0] if log.action_type else 'Д' }}</span>
-                            </div>
-                            <div class="garden-info">
-                                <h3>{{ log.action_type }}</h3>
-                                <p><strong>Грядка:</strong> {{ log.bed_name or 'Не указана' }}</p>
-                                <p><strong>Дата:</strong> {{ log.log_date.strftime('%d-%m-%Y %H:%M') if log.log_date else 'Н/Д' }}</p>
-                                {% if log.notes %}
-                                    <p><strong>Заметки:</strong> {{ log.notes }}</p>
-                                {% endif %}
-                            </div>
-                            <a href="{{ url_for('care_bp.edit_care_log', care_log_id=log._id) }}?redirect_to=garden_detail" class="icon-button edit-button" title="Редактировать запись"></a>
-                            <form method="POST" action="{{ url_for('care_bp.delete_care_log', care_log_id=log._id) }}" onsubmit="return confirm('Вы уверены, что хотите удалить эту запись журнала?');">
-                                <input type="hidden" name="redirect_to" value="garden_detail">
-                                <input type="hidden" name="garden_id" value="{{ garden._id }}">
-                                <button type="submit" class="icon-button delete-button" title="Удалить запись"></button>
-                            </form>
-                        </div>
-                    {% endfor %}
-                    {% if garden_care_logs_count > garden_care_logs|length %}
-                        <div class="text-center mt-3">
-                            <a href="{{ url_for('care_bp.list_care_logs') }}?garden_id={{ garden._id }}" class="btn btn-outline-primary">Показать все записи журнала ({{ garden_care_logs_count }})</a>
-                        </div>
+                    <a href="{{ url_for('care_bp.new_care_log') }}?redirect_to=garden_detail&garden_id={{ garden._id }}" class="btn btn-primary add-section-btn margin-btn">Добавить запись</a>
+                    </div>
+                    <div class="section-list">
+                            {% for log in garden_care_logs %}
+                                <div class="garden-card bed-card">
+                                    <div class="garden-photo-placeholder">
+                                        <span>{{ log.action_type[0] if log.action_type else 'Д' }}</span>
+                                    </div>
+                                    <div class="garden-info">
+                                        <h3>{{ log.action_type }}</h3>
+                                        <p><strong>Грядка:</strong> {{ log.bed_name or 'Не указана' }}</p>
+                                        <p><strong>Дата:</strong> {{ log.log_date.strftime('%d-%m-%Y %H:%M') if log.log_date else 'Н/Д' }}</p>
+                                        {% if log.notes %}
+                                            <p><strong>Заметки:</strong> {{ log.notes }}</p>
+                                        {% endif %}
+                                    </div>
+                                    <a href="{{ url_for('care_bp.edit_care_log', care_log_id=log._id) }}?redirect_to=garden_detail" class="icon-button edit-button" title="Редактировать запись"></a>
+                                    <form method="POST" action="{{ url_for('care_bp.delete_care_log', care_log_id=log._id) }}" onsubmit="return confirm('Вы уверены, что хотите удалить эту запись журнала?');">
+                                        <input type="hidden" name="redirect_to" value="garden_detail">
+                                        <input type="hidden" name="garden_id" value="{{ garden._id }}">
+                                        <button type="submit" class="icon-button delete-button" title="Удалить запись"></button>
+                                    </form>
+                                </div>
+                            {% endfor %}
+                            {% if garden_care_logs_count > garden_care_logs|length %}
+                                <div class="text-center mt-3">
+                                    <a href="{{ url_for('care_bp.list_care_logs') }}?garden_id={{ garden._id }}" class="btn btn-outline-primary">Показать все записи журнала ({{ garden_care_logs_count }})</a>
+                                </div>
                     {% endif %}
                 {% else %}
                     <div class="no-beds-panel">
@@ -167,42 +170,42 @@
 
             <div class="section-header-actions">
                 <h3>Рекомендации по участку</h3>
-                <a href="{{ url_for('recommendation_bp.new_recommendation') }}?redirect_to=garden_detail&garden_id={{ garden._id }}" class="btn btn-primary add-section-btn">Добавить рекомендацию</a>
-            </div>
-        <div class="section-list">
-            {% if garden_recommendations %}
-                {% for rec in garden_recommendations %}
-                    <div class="garden-card bed-card {% if rec.is_overdue %}overdue-recommendation{% endif %}">
-                        <div class="garden-photo-placeholder">
-                            <span>{{ rec.action_type[0] if rec.action_type else 'Р' }}</span>
+                {% if garden_recommendations %}
+                    <a href="{{ url_for('recommendation_bp.new_recommendation') }}?redirect_to=garden_detail&garden_id={{ garden._id }}" class="btn btn-primary add-section-btn margin-btn">Добавить рекомендацию</a>
                         </div>
-                        <div class="garden-info">
-                            <h3>{{ rec.action_type }}</h3>
-                            <p><strong>Грядка:</strong> {{ rec.bed_name }}</p>
-                            {% if rec.description %}
-                                <p><strong>Описание:</strong> {{ rec.description }}</p>
+                    <div class="section-list">
+                            {% for rec in garden_recommendations %}
+                                <div class="garden-card bed-card {% if rec.is_overdue %}overdue-recommendation{% endif %}">
+                                    <div class="garden-photo-placeholder">
+                                        <span>{{ rec.action_type[0] if rec.action_type else 'Р' }}</span>
+                                    </div>
+                                    <div class="garden-info">
+                                        <h3>{{ rec.action_type }}</h3>
+                                        <p><strong>Грядка:</strong> {{ rec.bed_name }}</p>
+                                        {% if rec.description %}
+                                            <p><strong>Описание:</strong> {{ rec.description }}</p>
+                                        {% endif %}
+                                        <p><strong>Срок:</strong> {{ rec.due_date.strftime('%d-%m-%Y %H:%M') if rec.due_date else 'Не указан' }}</p>
+                                        <p><strong>Статус:</strong> 
+                                            {% if rec.is_overdue %}
+                                                <span class="badge badge-danger">Просрочена</span>
+                                            {% else %}
+                                                <span class="badge badge-warning">Ожидает выполнения</span>
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                    <form method="POST" action="{{ url_for('recommendation_bp.complete_recommendation', recommendation_id=rec._id) }}">
+                                        <input type="hidden" name="redirect_to" value="garden_detail">
+                                        <input type="hidden" name="garden_id" value="{{ garden._id }}">
+                                        <button type="submit" class="icon-button complete-button" title="Отметить как выполненное"></button>
+                                    </form>
+                                </div>
+                            {% endfor %}
+                            {% if garden_recommendations_count > garden_recommendations|length %}
+                                <div class="text-center mt-3">
+                                    <a href="{{ url_for('recommendation_bp.list_recommendations') }}?garden_id={{ garden._id }}" class="btn btn-outline-primary">Показать все рекомендации ({{ garden_recommendations_count }})</a>
+                                </div>
                             {% endif %}
-                            <p><strong>Срок:</strong> {{ rec.due_date.strftime('%d-%m-%Y %H:%M') if rec.due_date else 'Не указан' }}</p>
-                            <p><strong>Статус:</strong> 
-                                {% if rec.is_overdue %}
-                                    <span class="badge badge-danger">Просрочена</span>
-                                {% else %}
-                                    <span class="badge badge-warning">Ожидает выполнения</span>
-                                {% endif %}
-                            </p>
-                        </div>
-                        <form method="POST" action="{{ url_for('recommendation_bp.complete_recommendation', recommendation_id=rec._id) }}">
-                            <input type="hidden" name="redirect_to" value="garden_detail">
-                            <input type="hidden" name="garden_id" value="{{ garden._id }}">
-                            <button type="submit" class="icon-button complete-button" title="Отметить как выполненное"></button>
-                        </form>
-                    </div>
-                {% endfor %}
-                {% if garden_recommendations_count > garden_recommendations|length %}
-                    <div class="text-center mt-3">
-                        <a href="{{ url_for('recommendation_bp.list_recommendations') }}?garden_id={{ garden._id }}" class="btn btn-outline-primary">Показать все рекомендации ({{ garden_recommendations_count }})</a>
-                    </div>
-                {% endif %}
             {% else %}
                 <div class="no-beds-panel">
                     <p class="no-gardens-text">Для этого участка пока нет рекомендаций.</p>
