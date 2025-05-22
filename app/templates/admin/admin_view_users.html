@@ -1,60 +1,82 @@
 {% extends "admin/admin_layout.html" %}
 
-{% block admin_content %}
-
-<form method="GET" action="{{ url_for('admin_bp.admin_view_users') }}" class="mb-3">
-    <div class="form-row align-items-end">
-        <div class="form-group col-md-4">
-            <label for="search_query">Search Name/Email</label>
-            <input type="text" name="search_query" id="search_query" class="form-control form-control-sm" value="{{ search_query }}">
+{% block content %}
+<div class="search-filters mb-4">
+    <form method="get" class="row g-3">
+        <div class="col-md-4">
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input type="text" class="form-control" name="search_query" value="{{ search_query }}" placeholder="Search by name or email">
+            </div>
         </div>
-        <div class="form-group col-md-3">
-            <label for="admin_filter">Admin Status</label>
-            <select name="admin_filter" id="admin_filter" class="form-control form-control-sm">
-                <option value="" {% if not admin_filter %}selected{% endif %}>All</option>
-                <option value="yes" {% if admin_filter == 'yes' %}selected{% endif %}>Admin</option>
-                <option value="no" {% if admin_filter == 'no' %}selected{% endif %}>Not Admin</option>
+        <div class="col-md-3">
+            <select class="form-select" name="admin_filter">
+                <option value="">All Users</option>
+                <option value="yes" {% if admin_filter == 'yes' %}selected{% endif %}>Admin Users</option>
+                <option value="no" {% if admin_filter == 'no' %}selected{% endif %}>Regular Users</option>
             </select>
         </div>
-        <div class="form-group col-md-2">
-            <button type="submit" class="btn btn-primary btn-sm btn-block">Filter</button>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="bi bi-funnel me-2"></i>Apply Filters
+            </button>
         </div>
-        <div class="form-group col-md-2">
-            <a href="{{ url_for('admin_bp.admin_view_users') }}" class="btn btn-secondary btn-sm btn-block">Clear</a>
+        <div class="col-md-2">
+            <a href="{{ url_for('admin_bp.admin_view_users') }}" class="btn btn-outline-secondary w-100" data-action="clear-filters">
+                <i class="bi bi-x-circle me-2"></i>Clear Filters
+            </a>
         </div>
-    </div>
-</form>
+    </form>
+</div>
 
 <div class="table-responsive">
-    <table class="table table-striped table-sm">
+    <table class="table table-hover" data-item-type="users">
         <thead>
             <tr>
-                <th>ID</th>
                 <th>Name</th>
                 <th>Email</th>
-                <th>Is Admin?</th>
+                <th>Role</th>
+                <th>Gardens</th>
+                <th>Beds</th>
+                <th>Care Logs</th>
                 <th>Actions</th>
             </tr>
         </thead>
         <tbody>
             {% for user in users %}
-            <tr>
-                <td>{{ user._id }}</td>
+            <tr data-item-id="{{ user._id }}">
                 <td>{{ user.name }}</td>
                 <td>{{ user.email }}</td>
-                <td>{{ "Yes" if user.is_admin else "No" }}</td>
                 <td>
-                    <a href="#" class="btn btn-sm btn-primary">Edit</a>
-                    <a href="#" class="btn btn-sm btn-danger">Delete</a>
+                    {% if user.is_admin %}
+                    <span class="badge bg-primary">Admin</span>
+                    {% else %}
+                    <span class="badge bg-secondary">User</span>
+                    {% endif %}
+                </td>
+                <td>{{ user.gardens_count if user.gardens_count is defined else 'N/A' }}</td>
+                <td>{{ user.beds_count if user.beds_count is defined else 'N/A' }}</td>
+                <td>{{ user.care_logs_count if user.care_logs_count is defined else 'N/A' }}</td>
+                <td>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-outline-primary" title="Edit User" data-action="edit">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-danger" title="Delete User" data-action="delete">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-success" title="View Details" data-action="view">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
                 </td>
             </tr>
             {% else %}
             <tr>
-                <td colspan="5">No users found.</td>
+                <td colspan="7" class="text-center">No users found matching the criteria.</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
-{# Add User button/form will go here #}
 {% endblock %} 
