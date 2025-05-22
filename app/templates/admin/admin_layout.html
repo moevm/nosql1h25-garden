@@ -1,39 +1,79 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - Garden Admin</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom Admin CSS -->
+    <link href="{{ url_for('static', filename='css/admin.css') }}" rel="stylesheet">
+</head>
+<body>
+    <nav class="sidebar col-md-3 col-lg-2 d-md-block">
+        <div class="sidebar-sticky">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link {{ 'active' if request.endpoint == 'admin_bp.admin_dashboard' }}" href="{{ url_for('admin_bp.admin_dashboard') }}">
+                        <i class="bi bi-speedometer2 me-2"></i>Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ 'active' if request.endpoint == 'admin_bp.admin_view_users' }}" href="{{ url_for('admin_bp.admin_view_users') }}">
+                        <i class="bi bi-people me-2"></i>Users
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ 'active' if request.endpoint == 'admin_bp.admin_view_gardens' }}" href="{{ url_for('admin_bp.admin_view_gardens') }}">
+                        <i class="bi bi-tree me-2"></i>Gardens
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ 'active' if request.endpoint == 'admin_bp.admin_view_beds' }}" href="{{ url_for('admin_bp.admin_view_beds') }}">
+                        <i class="bi bi-grid me-2"></i>Beds
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ 'active' if request.endpoint == 'admin_bp.admin_view_care_logs' }}" href="{{ url_for('admin_bp.admin_view_care_logs') }}">
+                        <i class="bi bi-journal-check me-2"></i>Care Logs
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ 'active' if request.endpoint == 'admin_bp.admin_view_recommendations' }}" href="{{ url_for('admin_bp.admin_view_recommendations') }}">
+                        <i class="bi bi-lightbulb me-2"></i>Recommendations
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ 'active' if request.endpoint == 'admin_bp.admin_view_diary' }}" href="{{ url_for('admin_bp.admin_view_diary') }}">
+                        <i class="bi bi-book me-2"></i>Diary Entries
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
 
-{% block title %}{{ title }} - Admin Panel{% endblock %}
+    <main class="main-content">
+        <div class="container-fluid">
+            <h1 class="h2 mb-4">{{ title }}</h1>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            {% block content %}{% endblock %}
+        </div>
+    </main>
 
-{% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <nav class="col-md-2 d-none d-md-block bg-light sidebar">
-            <div class="sidebar-sticky">
-                <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="{{ url_for('admin_bp.admin_dashboard') }}">
-                            Dashboard <span class="sr-only">(current)</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('admin_bp.admin_view_users') }}">
-                            Users
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('admin_bp.admin_view_gardens') }}">
-                            Gardens
-                        </a>
-                    </li>
-                    {# Add links to other manageable entities here #}
-                </ul>
-            </div>
-        </nav>
-
-        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
-            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1 class="h2">{{ title }}</h1>
-            </div>
-            {% block admin_content %}{% endblock %}
-        </main>
-    </div>
-</div>
-{% endblock %} 
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom Admin JavaScript -->
+    <script src="{{ url_for('static', filename='scripts/admin.js') }}"></script>
+</body>
+</html> 
