@@ -32,6 +32,7 @@ from .land_beds import bed_bp
 from .care import care_bp
 from .recommendations import recommendation_bp
 from .diary import diary_bp
+from .admin_routes import admin_bp
 
 
 app.register_blueprint(auth_bp, url_prefix="/auth")
@@ -41,3 +42,4 @@ app.register_blueprint(bed_bp)
 app.register_blueprint(care_bp)
 app.register_blueprint(recommendation_bp)  
 app.register_blueprint(diary_bp, url_prefix="")
+app.register_blueprint(admin_bp, url_prefix="")

@@ -15,7 +15,8 @@ class User(UserMixin):
         email_verified: bool = False,
         created_at: datetime = None,
         updated_at: datetime = None,
-        roles: list = None
+        roles: list = None,
+        is_admin: bool = False
     ):
         self._id = _id or ObjectId()
         self.email = email
@@ -26,6 +27,7 @@ class User(UserMixin):
         self.created_at = created_at or datetime.now()
         self.updated_at = updated_at or datetime.now()
         self.roles = roles or ["user"]  # Default role
+        self.is_admin = is_admin
 
     def get_id(self):
         return str(self._id)
@@ -48,7 +50,8 @@ class User(UserMixin):
             "email_verified": self.email_verified,
             "created_at": self.created_at,
             "updated_at": self.updated_at,
-            "roles": self.roles
+            "roles": self.roles,
+            "is_admin": self.is_admin
         }
 
     @classmethod
@@ -63,7 +66,8 @@ class User(UserMixin):
             email_verified=data.get("email_verified", False),
             created_at=data.get("created_at"),
             updated_at=data.get("updated_at"),
-            roles=data.get("roles", ["user"])
+            roles=data.get("roles", ["user"]),
+            is_admin=data.get("is_admin", False)
         )
         # Restore the hashed password
         if "password_hash" in data:
