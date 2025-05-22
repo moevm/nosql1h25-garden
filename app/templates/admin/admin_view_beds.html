@@ -1,0 +1,96 @@
+{% extends "admin/admin_layout.html" %}
+
+{% block content %}
+<div class="search-filters mb-4">
+    <form method="get" class="row g-3">
+        <div class="col-md-3">
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input type="text" class="form-control" name="search_bed_name" value="{{ search_bed_name }}" placeholder="Search by bed name">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-tree"></i></span>
+                <input type="text" class="form-control" name="search_garden_name" value="{{ search_garden_name }}" placeholder="Search by garden name">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                <input type="text" class="form-control" name="search_user_email" value="{{ search_user_email }}" placeholder="Search by user email">
+            </div>
+        </div>
+        <div class="col-md-1">
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="bi bi-funnel me-2"></i>Filter
+            </button>
+        </div>
+        <div class="col-md-2">
+            <a href="{{ url_for('admin_bp.admin_view_beds') }}" class="btn btn-outline-secondary w-100" data-action="clear-filters">
+                <i class="bi bi-x-circle me-2"></i>Clear Filters
+            </a>
+        </div>
+    </form>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-hover" data-item-type="beds">
+        <thead>
+            <tr>
+                <th>Bed Name</th>
+                <th>Garden</th>
+                <th>Owner</th>
+                <th>Area (m²)</th>
+                <th>Plants</th>
+                <th>Care Logs</th>
+                <th>Created At</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for bed in beds %}
+            <tr data-item-id="{{ bed._id }}">
+                <td>{{ bed.name }}</td>
+                <td>
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-tree me-2"></i>
+                        <div>{{ bed.garden_name }}</div>
+                    </div>
+                </td>
+                <td>
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-person-circle me-2"></i>
+                        <div>
+                            <div>{{ bed.user_name }}</div>
+                            <small class="text-muted">{{ bed.user_email }}</small>
+                        </div>
+                    </div>
+                </td>
+                <td>{{ bed.area }}</td>
+                <td>{{ bed.plants_count if bed.plants_count is defined else 'N/A' }}</td>
+                <td>{{ bed.care_logs_count if bed.care_logs_count is defined else 'N/A' }}</td>
+                <td>{{ bed.created_at.strftime('%Y-%m-%d') if bed.created_at else 'N/A' }}</td>
+                <td>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-outline-primary" title="Edit Bed" data-action="edit">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-danger" title="Delete Bed" data-action="delete">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-success" title="View Details" data-action="view">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="8" class="text-center">No beds found matching the criteria.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %} 
