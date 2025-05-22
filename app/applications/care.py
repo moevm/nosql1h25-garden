@@ -1,4 +1,3 @@
-
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, current_app
 from flask_login import login_required, current_user
 from applications import mongo
@@ -167,6 +166,7 @@ def new_care_log():
         log_date_str = data.get('log_date')
         log_time_str = data.get('log_time')
         notes = data.get('notes', '')
+        redirect_to = data.get('redirect_to')  # Get redirect_to from form data
 
         errors = []
         if not garden_id_str: errors.append("Garden is required.")
@@ -189,9 +189,10 @@ def new_care_log():
             return render_template('care_log_form.html', 
                                    form_data=data, 
                                    user_gardens=user_gardens, 
-                                   initial_beds=initial_beds, # Pass beds for selected garden if re-rendering
+                                   initial_beds=initial_beds,
                                    CARE_ACTION_TYPES=CARE_ACTION_TYPES, 
-                                   is_edit=False)
+                                   is_edit=False,
+                                   redirect_to=redirect_to)
         
         garden_id = ObjectId(garden_id_str)
         bed_id = ObjectId(bed_id_str)
@@ -220,7 +221,7 @@ def new_care_log():
         }).sort('due_date', 1)
 
         recommendation_completed = False
-        for rec in potential_recommendations: # Iterate to find one on the same day or earlier
+        for rec in potential_recommendations:
             if rec['due_date'].date() <= log_datetime.date():
                  mongo.db.recommendations.update_one(
                     {'_id': rec['_id']},
@@ -259,7 +260,7 @@ def new_care_log():
 
         flash('Care log added successfully!', 'success')
         
-        # Если есть параметр redirect_to и он равен 'garden_detail', перенаправляем на страницу участка
+        # Redirect based on the redirect_to parameter
         if redirect_to == 'garden_detail' and garden_id_str:
             return redirect(url_for('land_bp.garden_detail', garden_id=garden_id_str))
         else:
@@ -275,7 +276,8 @@ def new_care_log():
                            user_gardens=user_gardens, 
                            initial_beds=initial_beds,
                            CARE_ACTION_TYPES=CARE_ACTION_TYPES, 
-                           is_edit=False)
+                           is_edit=False,
+                           redirect_to=redirect_to)
                            
 @care_bp.route('/care-logs/<care_log_id>/edit', methods=['GET', 'POST'])
 @login_required
@@ -285,6 +287,9 @@ def edit_care_log(care_log_id):
     if not care_log:
         flash('Запись не найдена или у вас нет доступа к ней.', 'error')
         return redirect(url_for('care_bp.list_care_logs'))
+    
+    # Получаем параметр redirect_to из запроса
+    redirect_to = request.args.get('redirect_to')
     
     user_gardens = list(mongo.db.gardens.find({'user_id': current_user.get_id()}, {'name': 1, '_id': 1}).sort('name', 1))
     
@@ -305,6 +310,7 @@ def edit_care_log(care_log_id):
         log_date_str = data.get('log_date')
         log_time_str = data.get('log_time')
         notes = data.get('notes', '')
+        redirect_to = data.get('redirect_to')  # Get redirect_to from form data
 
         errors = []
         if not garden_id_str: errors.append("Участок обязателен.")
@@ -332,7 +338,9 @@ def edit_care_log(care_log_id):
                                    user_gardens=user_gardens, 
                                    initial_beds=user_beds,
                                    CARE_ACTION_TYPES=CARE_ACTION_TYPES, 
-                                   is_edit=True)
+                                   is_edit=True,
+                                   care_log_id=care_log_id,
+                                   redirect_to=redirect_to)
         
         garden_id = ObjectId(garden_id_str)
         bed_id = ObjectId(bed_id_str)
@@ -368,7 +376,12 @@ def edit_care_log(care_log_id):
             )
         
         flash('Запись журнала успешно обновлена!', 'success')
-        return redirect(url_for('care_bp.list_care_logs'))
+        
+        # Redirect based on the redirect_to parameter
+        if redirect_to == 'garden_detail' and garden_id_str:
+            return redirect(url_for('land_bp.garden_detail', garden_id=garden_id_str))
+        else:
+            return redirect(url_for('care_bp.list_care_logs'))
     
     # Форматируем данные для формы
     if care_log.get('log_date'):
@@ -381,7 +394,8 @@ def edit_care_log(care_log_id):
                            initial_beds=user_beds,
                            CARE_ACTION_TYPES=CARE_ACTION_TYPES, 
                            is_edit=True,
-                           care_log_id=care_log_id)
+                           care_log_id=care_log_id,
+                           redirect_to=redirect_to)
 
 @care_bp.route('/care-logs/<care_log_id>/delete', methods=['POST'])
 @login_required

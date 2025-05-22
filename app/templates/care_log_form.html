@@ -89,11 +89,10 @@
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary add-section-btn">{% if is_edit %}Сохранить изменения{% else %}Добавить запись{% endif %}</button>
                 {% if redirect_to == 'garden_detail' and form_data.garden_id %}
-                    <a href="{{ url_for('land_bp.garden_detail', garden_id=cancel_garden_id) }}" class="btn btn-primary add-section-btn">Отмена</a>
+                    <a href="{{ url_for('land_bp.garden_detail', garden_id=form_data.garden_id) }}" class="btn btn-primary add-section-btn">Отмена</a>
                 {% else %}
                     <a href="{{ url_for('care_bp.list_care_logs') }}" class="btn btn-primary add-section-btn">Отмена</a>
                 {% endif %}
-
             </div>
         </form>
     </div>
