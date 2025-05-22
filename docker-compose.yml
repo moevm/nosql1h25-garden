@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   app:
     build:
@@ -11,6 +9,7 @@ services:
       - "127.0.0.1:5000:5000"
     environment:
       - MONGO_URI=mongodb://garden_user:garden_password@db:27017/garden_db?authSource=admin
+      - SECRET_KEY=your-super-secret-key-change-this-in-production
     depends_on:
       db:
         condition: service_healthy
