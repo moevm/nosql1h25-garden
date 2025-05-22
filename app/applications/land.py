@@ -172,55 +172,98 @@ def new_garden():
 def uploaded_file(filename):
     return send_from_directory(current_app.static_folder, filename)
 
-@land_bp.route('/gardens/<garden_id>')
-@login_required
+@land_bp.route('/gardens/<garden_id>', methods=['GET'])
 def garden_detail(garden_id):
-    garden = mongo.db.gardens.find_one({'_id': ObjectId(garden_id), 'user_id': current_user.get_id()})
-    if not garden:
-        flash('Garden not found or access denied.', 'error')
+    try:
+        garden_object_id = ObjectId(garden_id)
+    except Exception:
+        flash('Некорректный формат ID участка', 'error')
         return redirect(url_for('land_bp.gardens'))
     
+    garden = mongo.db.gardens.find_one({'_id': garden_object_id, 'user_id': current_user.get_id()})
+    
+    if not garden:
+        flash('Участок не найден или у вас нет доступа к нему', 'error')
+        return redirect(url_for('land_bp.gardens'))
+    
+    # Pagination for beds
     bed_page = request.args.get('bed_page', 1, type=int)
-    bed_per_page = 4
-
-    bed_filters = {'garden_id': ObjectId(garden_id), 'user_id': current_user.get_id()}
+    bed_per_page = 6
+    
+    # Filtering and sorting beds
     bed_name_query = request.args.get('bed_name_query', '')
     bed_crop_query = request.args.get('bed_crop_query', '')
-
-    if bed_name_query:
-        bed_filters['name'] = {'$regex': bed_name_query, '$options': 'i'}
-    if bed_crop_query:
-        bed_filters['crop_name'] = {'$regex': bed_crop_query, '$options': 'i'}
-
     bed_sort_by = request.args.get('bed_sort_by', 'creation_time')
     bed_sort_order_str = request.args.get('bed_sort_order', 'desc')
     bed_sort_order = -1 if bed_sort_order_str == 'desc' else 1
     
-    valid_bed_sort_fields = ['name', 'crop_name', 'planting_date', 'creation_time', 'last_modified_time', 'count_row', 'length', 'width', 'bed_type']
-    if bed_sort_by not in valid_bed_sort_fields:
-        bed_sort_by = 'creation_time'
-
-    beds_cursor = mongo.db.beds.find(bed_filters)\
-                        .sort(bed_sort_by, bed_sort_order)\
-                        .skip((bed_page - 1) * bed_per_page)\
-                        .limit(bed_per_page)
-    beds = list(beds_cursor)
+    bed_filters = {'garden_id': garden_object_id, 'user_id': current_user.get_id()}
     
-    total_beds_in_garden = mongo.db.beds.count_documents(bed_filters)
-    total_bed_pages = (total_beds_in_garden + bed_per_page - 1) // bed_per_page
+    if bed_name_query:
+        bed_filters['name'] = {'$regex': bed_name_query, '$options': 'i'}
+    if bed_crop_query:
+        bed_filters['crop_name'] = {'$regex': bed_crop_query, '$options': 'i'}
+    
+    
+    beds_cursor = mongo.db.beds.find(bed_filters).sort(bed_sort_by, bed_sort_order).skip((bed_page - 1) * bed_per_page).limit(bed_per_page)
+    beds = list(beds_cursor)
+    total_beds = mongo.db.beds.count_documents(bed_filters)
+    total_bed_pages = (total_beds + bed_per_page - 1) // bed_per_page if total_beds > 0 else 1
+    
+    # Get garden care logs
+    garden_care_logs_limit = 5  # Show only 5 most recent logs on the garden detail page
+    garden_care_logs_cursor = mongo.db.care_logs.find(
+        {'garden_id': garden_object_id, 'user_id': current_user.get_id()}
+    ).sort('log_date', -1).limit(garden_care_logs_limit)
+    
+    # Convert cursor to list and enrich with bed names
+    garden_care_logs = []
+    for log in garden_care_logs_cursor:
+        bed = mongo.db.beds.find_one({'_id': log['bed_id']})
+        if bed:  # Only include logs where the bed still exists
+            log['bed_name'] = bed['name']
+            garden_care_logs.append(log)
 
-    garden_tasks = list(mongo.db.tasks.find({'garden_id': ObjectId(garden_id), 'user_id': current_user.get_id(), 'completed': False}).sort('due_date', 1))
+    garden_care_logs_count = mongo.db.care_logs.count_documents({
+        'garden_id': garden_object_id, 
+        'user_id': current_user.get_id()
+    })
+    
+    # Get garden recommendations instead of tasks
+    garden_recommendations_limit = 5  # Show only 5 most recent recommendations
+    garden_recommendations_cursor = mongo.db.recommendations.find(
+        {'garden_id': garden_object_id, 'user_id': current_user.get_id(), 'is_completed': False}
+    ).sort('due_date', 1).limit(garden_recommendations_limit)
+    
+    # Convert cursor to list and enrich with bed names
+    garden_recommendations = []
+    for rec in garden_recommendations_cursor:
+        bed = mongo.db.beds.find_one({'_id': rec['bed_id']})
+        if bed:  # Only include recommendations where the bed still exists
+            rec['bed_name'] = bed['name']
+            rec['is_overdue'] = rec['due_date'] < datetime.utcnow() if not rec['is_completed'] else False
+            garden_recommendations.append(rec)
 
-    return render_template('land_detail.html',
-                           garden=garden,
-                           beds=beds,
-                           garden_tasks=garden_tasks,
-                           current_bed_page=bed_page,
-                           total_bed_pages=total_bed_pages,
-                           bed_name_query=bed_name_query,
-                           bed_crop_query=bed_crop_query,
-                           bed_sort_by=bed_sort_by,
-                           bed_sort_order_str=bed_sort_order_str)
+    garden_recommendations_count = mongo.db.recommendations.count_documents({
+        'garden_id': garden_object_id, 
+        'user_id': current_user.get_id(),
+        'is_completed': False
+    })
+    
+    return render_template('land_detail.html', 
+                          garden=garden,
+                          beds=beds,
+                          current_bed_page=bed_page,
+                          total_bed_pages=total_bed_pages,
+                          bed_name_query=bed_name_query,
+                          bed_crop_query=bed_crop_query,
+                          bed_sort_by=bed_sort_by,
+                          bed_sort_order_str=bed_sort_order_str,
+                          garden_care_logs=garden_care_logs,
+                          garden_care_logs_count=garden_care_logs_count,
+                          garden_recommendations=garden_recommendations,
+                          garden_recommendations_count=garden_recommendations_count,
+                          datetime=datetime)
 
 @land_bp.route('/gardens/<garden_id>/edit', methods=['GET', 'POST'])
 @login_required
@@ -283,36 +326,45 @@ def edit_garden(garden_id):
 @login_required
 def delete_garden(garden_id):
     garden = mongo.db.gardens.find_one({'_id': ObjectId(garden_id), 'user_id': current_user.get_id()})
-    if garden:
-        if garden.get('photo_file_paths'):
-            for photo_path_from_db in garden['photo_file_paths']:
-                if photo_path_from_db:
-                    actual_photo_disk_path = os.path.join(current_app.static_folder, photo_path_from_db)
-                    if os.path.exists(actual_photo_disk_path):
-                        try:
-                            os.remove(actual_photo_disk_path)
-                        except Exception as e:
-                            flash(f'Could not delete garden photo {photo_path_from_db}: {e}', 'warning')
-        
-        beds_to_delete = list(mongo.db.beds.find({'garden_id': ObjectId(garden_id), 'user_id': current_user.get_id()}))
-        for bed in beds_to_delete:
-            if bed.get('photo_file_paths'):
-                 for bed_photo_path_from_db in bed['photo_file_paths']:
-                    if bed_photo_path_from_db:
-                        actual_bed_photo_disk_path = os.path.join(current_app.static_folder, bed_photo_path_from_db)
-                        if os.path.exists(actual_bed_photo_disk_path):
-                            try:
-                                os.remove(actual_bed_photo_disk_path)
-                            except Exception as e:
-                                flash(f'Could not delete bed photo {bed_photo_path_from_db}: {e}', 'warning')
-        
-        mongo.db.beds.delete_many({'garden_id': ObjectId(garden_id), 'user_id': current_user.get_id()})
-        
-        mongo.db.tasks.delete_many({'garden_id': ObjectId(garden_id), 'user_id': current_user.get_id()})
+    if not garden:
+        flash('Участок не найден или у вас нет доступа.', 'error')
+        return redirect(url_for('land_bp.gardens'))
 
-        mongo.db.gardens.delete_one({'_id': ObjectId(garden_id), 'user_id': current_user.get_id()})
-        flash('Garden and all associated data (beds, tasks, photos) deleted successfully', 'success')
-    else:
-        flash('Garden not found or access denied.', 'error')
+    # Находим все грядки этого участка
+    beds = list(mongo.db.beds.find({'garden_id': ObjectId(garden_id)}))
     
+    # Удаляем все записи журнала ухода, связанные с этим участком
+    mongo.db.care_logs.delete_many({'garden_id': ObjectId(garden_id)})
+    mongo.db.recommendations.delete_many({'garden_id': ObjectId(garden_id)})
+    
+    # Удаляем все грядки этого участка
+    for bed in beds:
+        if bed.get('photo_file_paths'):
+            for photo_path in bed['photo_file_paths']:
+                if photo_path:
+                    photo_disk_path = os.path.join(current_app.static_folder, photo_path)
+                    if os.path.exists(photo_disk_path):
+                        try:
+                            os.remove(photo_disk_path)
+                        except Exception as e:
+                            flash(f'Не удалось удалить фото грядки: {e}', 'warning')
+    
+    # Удаляем все грядки участка
+    mongo.db.beds.delete_many({'garden_id': ObjectId(garden_id)})
+    
+    # Удаляем фото самого участка
+    if garden.get('photo_file_paths'):
+        for photo_path in garden['photo_file_paths']:
+            if photo_path:
+                photo_disk_path = os.path.join(current_app.static_folder, photo_path)
+                if os.path.exists(photo_disk_path):
+                    try:
+                        os.remove(photo_disk_path)
+                    except Exception as e:
+                        flash(f'Не удалось удалить фото участка: {e}', 'warning')
+    
+    # Удаляем сам участок
+    mongo.db.gardens.delete_one({'_id': ObjectId(garden_id)})
+    
+    flash('Участок успешно удален!', 'success')
     return redirect(url_for('land_bp.gardens'))

@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, flash, current_app
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, current_app
 from flask_login import login_required, current_user
 from applications import mongo
 from bson import ObjectId
@@ -81,20 +81,125 @@ def list_recommendations():
         'recommendations_list.html',
         recommendations=display_recommendations,
         current_page=page, total_pages=total_pages,
+        total_recommendations=total_recommendations,
         user_gardens=user_gardens, user_beds=user_beds, # For filter dropdowns
         RECOMMENDATION_ACTION_TYPES=RECOMMENDATION_ACTION_TYPES,
         filters=request.args # Pass current filters back to template
     )
 
+@recommendation_bp.route('/recommendations/<recommendation_id>/complete', methods=['POST'])
+@login_required
+def complete_recommendation(recommendation_id):
+    redirect_to = request.form.get('redirect_to')
+    garden_id = request.form.get('garden_id')
+    
+    recommendation = mongo.db.recommendations.find_one({
+        '_id': ObjectId(recommendation_id), 
+        'user_id': current_user.get_id(),
+        'is_completed': False
+    })
+    
+    if not recommendation:
+        flash('Рекомендация не найдена или уже выполнена.', 'error')
+        if redirect_to == 'garden_detail' and garden_id:
+            return redirect(url_for('land_bp.garden_detail', garden_id=garden_id))
+        else:
+            return redirect(url_for('recommendation_bp.list_recommendations'))
+    
+    # Mark recommendation as completed
+    completed_time = datetime.utcnow()
+    mongo.db.recommendations.update_one(
+        {'_id': ObjectId(recommendation_id)},
+        {'$set': {
+            'is_completed': True,
+            'completed_at': completed_time
+        }}
+    )
+    
+    # Create a care log entry for this completion
+    care_log_doc = {
+        'user_id': current_user.get_id(),
+        'garden_id': recommendation['garden_id'],
+        'bed_id': recommendation['bed_id'],
+        'action_type': recommendation['action_type'],
+        'log_date': completed_time,
+        'notes': f"Автоматически создано при выполнении рекомендации: {recommendation.get('description', '')}",
+        'created_at': completed_time,
+        'linked_recommendation_id': recommendation['_id']
+    }
+    
+    care_log_id = mongo.db.care_logs.insert_one(care_log_doc).inserted_id
+    
+    # Update recommendation with the care log that completed it
+    mongo.db.recommendations.update_one(
+        {'_id': ObjectId(recommendation_id)},
+        {'$set': {'completed_by_care_log_id': care_log_id}}
+    )
+    
+    # Update bed stats
+    mongo.db.beds.update_one(
+        {'_id': recommendation['bed_id']},
+        {
+            '$inc': {'stats.completed_recommendations': 1, 'stats.pending_recommendations': -1, 'stats.total_care_actions': 1},
+            '$set': {'stats.last_care_date': completed_time}
+        }
+    )
+    
+    flash('Рекомендация отмечена как выполненная!', 'success')
+    
+    if redirect_to == 'garden_detail' and garden_id:
+        return redirect(url_for('land_bp.garden_detail', garden_id=garden_id))
+    else:
+        return redirect(url_for('recommendation_bp.list_recommendations'))
+
+@recommendation_bp.route('/recommendations/<recommendation_id>/delete', methods=['POST'])
+@login_required
+def delete_recommendation(recommendation_id):
+    redirect_to = request.form.get('redirect_to')
+    garden_id = request.form.get('garden_id')
+    
+    recommendation = mongo.db.recommendations.find_one({
+        '_id': ObjectId(recommendation_id), 
+        'user_id': current_user.get_id()
+    })
+    
+    if not recommendation:
+        flash('Рекомендация не найдена.', 'error')
+        if redirect_to == 'garden_detail' and garden_id:
+            return redirect(url_for('land_bp.garden_detail', garden_id=garden_id))
+        else:
+            return redirect(url_for('recommendation_bp.list_recommendations'))
+    
+    # Update bed stats to decrease pending recommendations
+    if not recommendation.get('is_completed', False):
+        mongo.db.beds.update_one(
+            {'_id': recommendation['bed_id']},
+            {'$inc': {'stats.pending_recommendations': -1}}
+        )
+    
+    # Delete recommendation
+    mongo.db.recommendations.delete_one({'_id': ObjectId(recommendation_id)})
+    
+    flash('Рекомендация успешно удалена!', 'success')
+    
+    if redirect_to == 'garden_detail' and garden_id:
+        return redirect(url_for('land_bp.garden_detail', garden_id=garden_id))
+    else:
+        return redirect(url_for('recommendation_bp.list_recommendations'))
+
 @recommendation_bp.route('/recommendations/new', methods=['GET', 'POST'])
 @login_required
 def new_recommendation():
+    # Get the redirect_to parameter from the request
+    redirect_to = request.args.get('redirect_to')
+    garden_id_from_args = request.args.get('garden_id')
+    
     user_gardens = list(mongo.db.gardens.find({'user_id': current_user.get_id()}, {'name': 1, '_id': 1}).sort('name', 1))
     
     initial_beds = []
     selected_garden_id_for_beds = request.form.get('garden_id') # on POST error
-    if not selected_garden_id_for_beds and user_gardens: # on initial GET
-        selected_garden_id_for_beds = str(user_gardens[0]['_id'])
+    if not selected_garden_id_for_beds: # on initial GET
+        selected_garden_id_for_beds = garden_id_from_args if garden_id_from_args else (str(user_gardens[0]['_id']) if user_gardens else None)
 
     if selected_garden_id_for_beds:
         try:
@@ -114,6 +219,7 @@ def new_recommendation():
         description = data.get('description', '')
         due_date_str = data.get('due_date')
         due_time_str = data.get('due_time')
+        redirect_to = data.get('redirect_to')  # Get from form post data
 
         errors = []
         if not garden_id_str: errors.append("Garden is required.")
@@ -152,7 +258,8 @@ def new_recommendation():
                                    initial_beds=current_beds_for_form,
                                    RECOMMENDATION_ACTION_TYPES=RECOMMENDATION_ACTION_TYPES,
                                    today_date=datetime.utcnow().strftime('%Y-%m-%d'),
-                                   current_time=datetime.utcnow().strftime('%H:%M'))
+                                   current_time=datetime.utcnow().strftime('%H:%M'),
+                                   redirect_to=redirect_to)
 
         garden_id = ObjectId(garden_id_str)
         bed_id = ObjectId(bed_id_str)
@@ -179,14 +286,25 @@ def new_recommendation():
                 {'$inc': {'stats.pending_recommendations': 1}}
             )
             flash('Recommendation created successfully!', 'success')
-            return redirect(url_for('recommendation_bp.list_recommendations'))
+            
+            # Redirect based on the redirect_to parameter
+            if redirect_to == 'garden_detail' and garden_id_str:
+                return redirect(url_for('land_bp.garden_detail', garden_id=garden_id_str))
+            else:
+                return redirect(url_for('recommendation_bp.list_recommendations'))
         except Exception as e:
             flash(f'Error creating recommendation: {e}', 'error')
 
+    # Create a form_data object with the garden_id if it was provided
+    form_data = {}
+    if garden_id_from_args:
+        form_data['garden_id'] = garden_id_from_args
+    
     return render_template('recommendation_form.html', 
-                           form_data=request.form if request.method == 'POST' else {},
+                           form_data=form_data,
                            user_gardens=user_gardens, 
                            initial_beds=initial_beds,
                            RECOMMENDATION_ACTION_TYPES=RECOMMENDATION_ACTION_TYPES,
                            today_date=datetime.utcnow().strftime('%Y-%m-%d'),
-                           current_time=datetime.utcnow().strftime('%H:%M'))
+                           current_time=datetime.utcnow().strftime('%H:%M'),
+                           redirect_to=redirect_to)

@@ -1,6 +1,12 @@
 {% extends "base.html" %}
 
-{% block title %}Активности - Огородник{% endblock %}
+{% block title %}{{ garden.name if garden else 'Участок' }} | Огородник{% endblock %}
+
+
+{% block header %}
+    {% set header_title = 'Участок: ' %}
+    {% include "icons_header.html" %}
+{% endblock %}
 
 {% block content %}
 <div class="container mt-4">

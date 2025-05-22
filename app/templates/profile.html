@@ -8,8 +8,8 @@
   <div class="profile-menu">
     <a class="personal-diary" href="">Личный дневник</a>
     <a class="my-sites" href="{{ url_for('land_bp.gardens') }}">Мои участки</a>
-    <a class="garden-care" href="">Уход за грядками</a>
-    <a class="recommendations" href="">Рекомендации</a>
+    <a class="garden-care" href="{{ url_for('care_bp.list_care_logs') }}">Уход за грядками</a>
+    <a class="recommendations" href="{{ url_for('recommendation_bp.list_recommendations') }}">Рекомендации</a>
     <a class="news" href="">Новости</a>
     <a class="statistics" href="">Статистика</a>
   </div>

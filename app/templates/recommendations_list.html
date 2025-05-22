@@ -1,133 +1,171 @@
-{% extends "activity_layout.html" %}
+{% extends "base.html" %}
 
-{% block title %}Рекомендации | Активности - Огородник{% endblock %}
+{% block title %}Огородник — Рекомендации{% endblock %}
 
-{% block activity_content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h3><i class="fas fa-clipboard-list"></i> Рекомендации ({{ total_recommendations if total_recommendations is defined else 0 }})</h3>
-    <a href="{{ url_for('recommendation_bp.new_recommendation') }}" class="btn btn-success"><i class="fas fa-plus"></i> Новая рекомендация</a>
-</div>
+{% block header %}
+{% set header_title = "Рекомендации" %}
+{% include "icons_header.html" %}
+{% endblock %}
 
-<!-- Filters and Sorting -->
-<form method="GET" action="{{ url_for('recommendation_bp.list_recommendations') }}" class="filter-sort-form mb-3 p-3 border rounded bg-light">
-    <div class="form-row">
-        <div class="form-group col-md-3">
-            <label for="garden_id">Участок</label>
-            <select name="garden_id" id="garden_id" class="form-control form-control-sm" onchange="this.form.submit()"> {# Basic: submit on change #}
-                <option value="">Все участки</option>
-                {% for garden in user_gardens %}
-                    <option value="{{ garden._id }}" {% if filters and filters.garden_id == garden._id|string %}selected{% endif %}>{{ garden.name }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="form-group col-md-3">
-            <label for="bed_id">Грядка</label>
-            <select name="bed_id" id="bed_id" class="form-control form-control-sm">
-                <option value="">Все грядки</option>
-                {% for bed in user_beds %}
-                    <option value="{{ bed._id }}" {% if filters and filters.bed_id == bed._id|string %}selected{% endif %}>{{ bed.name }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="form-group col-md-3">
-            <label for="action_type">Тип действия</label>
-            <select name="action_type" id="action_type" class="form-control form-control-sm">
-                <option value="">Все типы</option>
-                {% for type in RECOMMENDATION_ACTION_TYPES %}
-                    {% if type %}<option value="{{ type }}" {% if filters and filters.action_type == type %}selected{% endif %}>{{ type }}</option>{% endif %}
-                {% endfor %}
-            </select>
-        </div>
-    </div>
-    <div class="form-row">
-        <div class="form-group col-md-3">
-            <label for="due_date_from">Срок выполнения от</label>
-            <input type="date" name="due_date_from" id="due_date_from" value="{{ filters.due_date_from if filters else '' }}" class="form-control form-control-sm">
-        </div>
-        <div class="form-group col-md-3">
-            <label for="due_date_to">Срок выполнения до</label>
-            <input type="date" name="due_date_to" id="due_date_to" value="{{ filters.due_date_to if filters else '' }}" class="form-control form-control-sm">
-        </div>
-        <div class="form-group col-md-2">
-            <label for="sort_by">Сортировать по</label>
-            <select name="sort_by" id="sort_by" class="form-control form-control-sm">
-                <option value="due_date" {% if filters and filters.sort_by == 'due_date' %}selected{% endif %}>Сроку</option>
-                <option value="garden_name" {% if filters and filters.sort_by == 'garden_name' %}selected{% endif %}>Участку</option>
-                <option value="bed_name" {% if filters and filters.sort_by == 'bed_name' %}selected{% endif %}>Грядке</option>
-            </select>
-        </div>
-        <div class="form-group col-md-2">
-            <label for="sort_order">Порядок</label>
-            <select name="sort_order" id="sort_order" class="form-control form-control-sm">
-                <option value="asc" {% if filters and filters.sort_order == 'asc' %}selected{% endif %}>Возрастание</option>
-                <option value="desc" {% if filters and filters.sort_order == 'desc' %}selected{% endif %}>Убывание</option>
-            </select>
-        </div>
-        <div class="form-group col-md-2 d-flex align-items-end">
-            <button type="submit" class="btn btn-primary btn-sm btn-block">Применить</button>
-        </div>
-    </div>
-</form>
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/land_style.css') }}">
 
-{% if recommendations %}
-    <div class="list-group">
-        {% for rec in recommendations %}
-            <div class="list-group-item list-group-item-action flex-column align-items-start {% if rec.is_overdue %}list-group-item-danger{% elif rec.is_completed %}list-group-item-success{% else %}list-group-item-warning{% endif %}">
-                <div class="d-flex w-100 justify-content-between">
-                    <h5 class="mb-1">{{ rec.action_type }} - {{ rec.bed_name }} ({{ rec.garden_name }})</h5>
-                    <small>
-                        Срок: {{ rec.due_date.strftime('%Y-%m-%d %H:%M') if rec.due_date else 'N/A' }}
-                        {% if rec.is_overdue %}
-                            <span class="badge badge-danger ml-2">Просрочено</span>
-                        {% endif %}
-                    </small>
-                </div>
-                <p class="mb-1">{{ rec.description if rec.description else 'Нет дополнительного описания.' }}</p>
-                <small class="text-muted">
-                    Статус: {% if rec.is_completed %}Выполнено {{ rec.completed_at.strftime('%Y-%m-%d %H:%M') if rec.completed_at else '' }} {% else %}Ожидает выполнения{% endif %}
-                </small>
-                {# Add actions like Edit/Delete if manual recommendation management is implemented #}
+<main class="main container">
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-messages" style="margin-bottom: 20px;">
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% if total_recommendations == 0 %}
+      <div class="no-gardens-panel">
+        <p class="no-gardens-text">У вас нет рекомендаций</p>
+        <a href="{{ url_for('recommendation_bp.new_recommendation') }}" class="btn add-section-btn">Добавить рекомендацию</a>
+      </div>
+    {% else %}
+    <form method="GET" action="{{ url_for('recommendation_bp.list_recommendations') }}" class="filter-sort-form">
+        <h4>Поиск и добавление рекомендаций</h4>
+        <!-- Первый ряд: фильтры -->
+        <div class="form-row">
+            <div class="form-group">
+                <label for="garden_id">Участок</label>
+                <select name="garden_id" id="garden_id" class="form-control">
+                    <option value="">Все участки</option>
+                    {% for garden in user_gardens %}
+                        <option value="{{ garden._id }}" {% if filters and filters.garden_id == garden._id|string %}selected{% endif %}>{{ garden.name }}</option>
+                    {% endfor %}
+                </select>
             </div>
-        {% endfor %}
+            <div class="form-group">
+                <label for="bed_id">Грядка</label>
+                <select name="bed_id" id="bed_id" class="form-control">
+                    <option value="">Все грядки</option>
+                    {% for bed in user_beds %}
+                        <option value="{{ bed._id }}" {% if filters and filters.bed_id == bed._id|string %}selected{% endif %}>{{ bed.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="action_type">Тип действия</label>
+                <select name="action_type" id="action_type" class="form-control">
+                    <option value="">Все типы</option>
+                    {% for type in RECOMMENDATION_ACTION_TYPES %}
+                        {% if type %}<option value="{{ type }}" {% if filters and filters.action_type == type %}selected{% endif %}>{{ type }}</option>{% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <!-- Второй ряд: сортировка и кнопки -->
+        <div class="form-row">
+            <div class="form-group">
+                <label for="sort_by">Сортировать по</label>
+                <select name="sort_by" id="sort_by" class="form-control">
+                    <option value="due_date" {% if filters and filters.sort_by == 'due_date' %}selected{% endif %}>Сроку</option>
+                    <option value="garden_name" {% if filters and filters.sort_by == 'garden_name' %}selected{% endif %}>Участку</option>
+                    <option value="bed_name" {% if filters and filters.sort_by == 'bed_name' %}selected{% endif %}>Грядке</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="sort_order">Порядок</label>
+                <select name="sort_order" id="sort_order" class="form-control">
+                    <option value="asc" {% if filters and filters.sort_order == 'asc' %}selected{% endif %}>По возрастанию</option>
+                    <option value="desc" {% if filters and filters.sort_order == 'desc' %}selected{% endif %}>По убыванию</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="due_date_from">Срок выполнения от</label>
+                <input type="date" name="due_date_from" id="due_date_from" value="{{ filters.due_date_from if filters else '' }}" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="due_date_to">Срок выполнения до</label>
+                <input type="date" name="due_date_to" id="due_date_to" value="{{ filters.due_date_to if filters else '' }}" class="form-control">
+            </div>
+        </div>
+        <button type="submit" class="icon-button search-button" title="Поиск"></button>
+        <a href="{{ url_for('recommendation_bp.list_recommendations') }}" class="btn btn-primary add-section-btn">Сбросить</a>
+        <a href="{{ url_for('recommendation_bp.new_recommendation') }}" class="btn btn-primary add-section-btn">Добавить рекомендацию</a>
+    </form>
+    
+    <div class="sections-list">
+        {% if recommendations %}
+            {% for rec in recommendations %}
+                <div class="garden-card {% if rec.is_overdue %}overdue-recommendation{% endif %}">
+                    <div class="garden-photo-placeholder">
+                        <span>{{ rec.action_type[0] if rec.action_type else 'Р' }}</span>
+                    </div>
+                    <div class="garden-info">
+                        <h3>{{ rec.action_type }}</h3>
+                        <p><strong>Участок:</strong> {{ rec.garden_name }}</p>
+                        <p><strong>Грядка:</strong> {{ rec.bed_name }}</p>
+                        {% if rec.description %}
+                            <p><strong>Описание:</strong> {{ rec.description }}</p>
+                        {% endif %}
+                        <p><strong>Срок выполнения:</strong> {{ rec.due_date.strftime('%d-%m-%Y %H:%M') if rec.due_date else 'Не указан' }}</p>
+                        <p><strong>Статус:</strong> 
+                            {% if rec.is_overdue %}
+                                <span class="badge badge-danger">Просрочена</span>
+                            {% else %}
+                                <span class="badge badge-warning">Ожидает выполнения</span>
+                            {% endif %}
+                        </p>
+                        <p><small>Создано: {{ rec.created_at.strftime('%d-%m-%Y') if rec.created_at else 'N/A' }}</small></p>
+                    </div>
+                    <form method="POST" action="{{ url_for('recommendation_bp.complete_recommendation', recommendation_id=rec._id) }}">
+                        <button type="submit" class="icon-button complete-button" title="Отметить как выполненное"></button>
+                    </form>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>Рекомендации не найдены</p>
+        {% endif %}
     </div>
 
     {% if total_pages > 1 %}
-        <nav aria-label="Page navigation" class="mt-3">
-            <ul class="pagination justify-content-center">
-                {% if current_page > 1 %}
-                    <li class="page-item"><a class="page-link" href="{{ url_for('recommendation_bp.list_recommendations', page=current_page-1, **request.args) }}">«</a></li>
+    <nav aria-label="Page navigation" class="pagination-nav">
+        <ul class="pagination">
+            {% if current_page > 1 %}
+                <li class="page-item"><a class="page-link" href="{{ url_for('recommendation_bp.list_recommendations', page=current_page-1, **request.args) }}">Назад</a></li>
+            {% else %}
+                <li class="page-item disabled"><span class="page-link">Назад</span></li>
+            {% endif %}
+
+            {% for page_num in range(1, total_pages + 1) %}
+                {% if page_num == current_page %}
+                    <li class="page-item active"><span class="page-link">{{ page_num }}</span></li>
+                {% else %}
+                    <li class="page-item"><a class="page-link" href="{{ url_for('recommendation_bp.list_recommendations', page=page_num, **request.args) }}">{{ page_num }}</a></li>
                 {% endif %}
-                {% for page_num in range(1, total_pages + 1) %}
-                    <li class="page-item {% if page_num == current_page %}active{% endif %}">
-                        <a class="page-link" href="{{ url_for('recommendation_bp.list_recommendations', page=page_num, **request.args) }}">{{ page_num }}</a>
-                    </li>
-                {% endfor %}
-                {% if current_page < total_pages %}
-                    <li class="page-item"><a class="page-link" href="{{ url_for('recommendation_bp.list_recommendations', page=current_page+1, **request.args) }}">»</a></li>
-                {% endif %}
-            </ul>
-        </nav>
+            {% endfor %}
+
+            {% if current_page < total_pages %}
+                <li class="page-item"><a class="page-link" href="{{ url_for('recommendation_bp.list_recommendations', page=current_page+1, **request.args) }}">Вперед</a></li>
+            {% else %}
+                <li class="page-item disabled"><span class="page-link">Вперед</span></li>
+            {% endif %}
+        </ul>
+    </nav>
     {% endif %}
-{% else %}
-    <div class="alert alert-info" role="alert">
-        Активных рекомендаций не найдено. 
-    </div>
-{% endif %}
+    {% endif %}
+  </main>
 
 <script>
-// Script to update bed dropdown when garden changes (for filters)
-// This is a simplified version; a more robust solution might use a dedicated endpoint if beds are numerous
 document.addEventListener('DOMContentLoaded', function() {
     const gardenFilterSelect = document.getElementById('garden_id');
     const bedFilterSelect = document.getElementById('bed_id');
     
     if (gardenFilterSelect && bedFilterSelect) {
-        // Store initial bed options to re-add them if "All gardens" is selected
+        // Store initial bed options
         const initialBedOptions = Array.from(bedFilterSelect.options);
+        bedFilterSelect.dataset.selectedValue = "{{ filters.bed_id if filters and filters.bed_id else '' }}";
 
         gardenFilterSelect.addEventListener('change', function() {
             const gardenId = this.value;
-            // Clear current bed options (except the "All beds" default)
             while (bedFilterSelect.options.length > 1) {
                 bedFilterSelect.remove(1);
             }
@@ -142,30 +180,36 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                         data.forEach(bed => {
                             const option = new Option(bed.name, bed.id);
-                            // Check if this option was previously selected
-                            if (bedFilterSelect.dataset.selectedValue == bed.id) { 
+                            if (bed.id === bedFilterSelect.dataset.selectedValue) {
                                 option.selected = true;
                             }
                             bedFilterSelect.add(option);
                         });
                     })
                     .catch(error => console.error('Error fetching beds:', error));
-            } else {
-                // If "All gardens" is selected, re-populate with initial full list of beds if that was the design
-                // For now, it just leaves "All beds" as the only option after clearing others
-                // Or, if user_beds is passed to template filtered by nothing, we could use that.
-                // The current Python code for list_recommendations re-fetches user_beds if garden_id is set,
-                // so this JS might need adjustment if we want to fully repopulate from a global list.
             }
         });
-        // Preserve selected bed value if it was set by query param
-        bedFilterSelect.dataset.selectedValue = "{{ filters.bed_id if filters and filters.bed_id else '' }}";
-        // Trigger change if a garden is pre-selected to load its beds
-        if (gardenFilterSelect.value) {
-           // gardenFilterSelect.dispatchEvent(new Event('change')); // This could cause double submit if form submits on change
+
+        // If a garden is pre-selected, load its beds
+        if (gardenFilterSelect.value && bedFilterSelect.dataset.selectedValue) {
+            fetch(`{{ url_for('care_bp.beds_for_dropdown', garden_id='PLACEHOLDER') }}`.replace('PLACEHOLDER', gardenFilterSelect.value))
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        console.error('Error fetching beds:', data.error);
+                        return;
+                    }
+                    while (bedFilterSelect.options.length > 1) { bedFilterSelect.remove(1); }
+                    data.forEach(bed => {
+                        const option = new Option(bed.name, bed.id);
+                        if (bed.id === bedFilterSelect.dataset.selectedValue) {
+                            option.selected = true;
+                        }
+                        bedFilterSelect.add(option);
+                    });
+                }).catch(error => console.error('Error fetching beds:', error));
         }
     }
 });
 </script>
-
-{% endblock %} 
+{% endblock %}

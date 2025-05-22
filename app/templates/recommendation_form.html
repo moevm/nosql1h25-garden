@@ -1,126 +1,162 @@
-{% extends "activity_layout.html" %}
+{% extends "base.html" %}
 
-{% block title %}Новая рекомендация | Активности - Огородник{% endblock %}
+{% block title %}Огородник — Новая рекомендация{% endblock %}
 
-{% block activity_content %}
-<h3>Создать новую рекомендацию вручную</h3>
+{% block header %}
+{% set header_title = "Создание новой рекомендации" %}
+{% include "icons_header.html" %}
+{% endblock %}
 
-<form method="POST" action="{{ url_for('recommendation_bp.new_recommendation') }}" class="mt-3 p-3 border rounded bg-light">
-    <div class="form-row">
-        <div class="form-group col-md-6">
-            <label for="garden_id">Участок <span class="text-danger">*</span></label>
-            <select name="garden_id" id="garden_id" class="form-control" required>
-                <option value="">-- Выберите участок --</option>
-                {% for garden in user_gardens %}
-                    <option value="{{ garden._id }}"
-                            {% if form_data.garden_id == garden._id|string %}selected{% endif %}
-                            {% if not form_data.garden_id and initial_beds and loop.first %}selected{% endif %}>
-                        {{ garden.name }}
-                    </option>
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/land_style.css') }}">
+
+<div class="container land-form-container">
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
                 {% endfor %}
-            </select>
-        </div>
-        <div class="form-group col-md-6">
-            <label for="bed_id">Грядка <span class="text-danger">*</span></label>
-            <select name="bed_id" id="bed_id" class="form-control" required>
-                <option value="">-- Сначала выберите участок --</option>
-                {% for bed in initial_beds %}
-                     <option value="{{ bed.id }}" {% if form_data.bed_id == bed.id|string %}selected{% endif %}>{{ bed.name }}</option>
-                {% endfor %}
-            </select>
-        </div>
-    </div>
+            </div>
+        {% endif %}
+    {% endwith %}
 
-    <div class="form-group">
-        <label for="action_type">Тип действия <span class="text-danger">*</span></label>
-        <select name="action_type" id="action_type" class="form-control" required>
-            <option value="">-- Выберите тип --</option>
-            {% for type in RECOMMENDATION_ACTION_TYPES %}
-                {% if type %}<option value="{{ type }}" {% if form_data.action_type == type %}selected{% endif %}>{{ type }}</option>{% endif %}
-            {% endfor %}
-        </select>
-    </div>
+    <div class="form-wrapper">
+        <form method="POST" action="{{ url_for('recommendation_bp.new_recommendation') }}" class="filter-sort-form">
+            {% if redirect_to %}
+                <input type="hidden" name="redirect_to" value="{{ redirect_to }}">
+            {% endif %}
+            
+            <div class="form-group">
+                <label for="garden_id">Участок <span class="required">*</span></label>
+                <select name="garden_id" id="garden_id" class="form-control" required>
+                    <option value="">-- Выберите участок --</option>
+                    {% for garden in user_gardens %}
+                        <option value="{{ garden._id }}" 
+                                {% if form_data and form_data.garden_id|string == garden._id|string %}selected{% endif %}
+                                {% if not form_data and not initial_beds and loop.first %}selected{% endif %}>
+                            {{ garden.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
 
-    <div class="form-group">
-        <label for="description">Описание рекомендации</label>
-        <textarea name="description" id="description" class="form-control" rows="3">{{ form_data.description if form_data.description }}</textarea>
-    </div>
+            <div class="form-group">
+                <label for="bed_id">Грядка <span class="required">*</span></label>
+                <select name="bed_id" id="bed_id" class="form-control" required>
+                    <option value="">-- Сначала выберите участок --</option>
+                    {% for bed in initial_beds %}
+                        <option value="{{ bed.id }}" {% if form_data and form_data.bed_id == bed.id %}selected{% endif %}>
+                            {{ bed.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
 
-    <div class="form-row">
-        <div class="form-group col-md-6">
-            <label for="due_date">Дата выполнения <span class="text-danger">*</span></label>
-            <input type="date" name="due_date" id="due_date" value="{{ form_data.due_date if form_data.due_date else today_date }}" class="form-control" required>
-        </div>
-        <div class="form-group col-md-6">
-            <label for="due_time">Время выполнения <span class="text-danger">*</span></label>
-            <input type="time" name="due_time" id="due_time" value="{{ form_data.due_time if form_data.due_time else current_time }}" class="form-control" required>
-        </div>
-    </div>
+            <div class="form-group">
+                <label for="action_type">Тип действия <span class="required">*</span></label>
+                <select name="action_type" id="action_type" class="form-control" required>
+                    <option value="">-- Выберите тип --</option>
+                    {% for type in RECOMMENDATION_ACTION_TYPES %}
+                        {% if type %}<option value="{{ type }}" {% if form_data and form_data.action_type == type %}selected{% endif %}>{{ type }}</option>{% endif %}
+                    {% endfor %}
+                </select>
+            </div>
 
-    <div class="form-group mt-4">
-        <button type="submit" class="btn btn-primary">Создать рекомендацию</button>
-        <a href="{{ url_for('recommendation_bp.list_recommendations') }}" class="btn btn-secondary">Отмена</a>
+            <div class="form-group">
+                <label for="description">Описание</label>
+                <textarea name="description" id="description" class="form-control", style="width: 100%; height: 150px;">{{ form_data.description if form_data and form_data.description }}</textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="due_date">Дата выполнения <span class="required">*</span></label>
+                    <input type="date" name="due_date" id="due_date" value="{{ form_data.due_date if form_data and form_data.due_date else today_date }}" class="form-control" required>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="due_time">Время <span class="required">*</span></label>
+                    <input type="time" name="due_time" id="due_time" value="{{ form_data.due_time if form_data and form_data.due_time else current_time }}" class="form-control" required>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary add-section-btn">Создать рекомендацию</button>
+                {% if redirect_to == 'garden_detail' and form_data.garden_id %}
+                    <a href="{{ url_for('land_bp.garden_detail', garden_id=form_data.garden_id) }}" class="btn btn-primary add-section-btn">Отмена</a>
+                {% else %}
+                    <a href="{{ url_for('recommendation_bp.list_recommendations') }}" class="btn btn-primary add-section-btn">Отмена</a>
+                {% endif %}
+            </div>
+        </form>
     </div>
-</form>
+</div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const gardenSelect = document.getElementById('garden_id');
     const bedSelect = document.getElementById('bed_id');
-    // Use form_data.bed_id if available (e.g. on validation error re-render)
-    const initialBedId = "{{ form_data.bed_id if form_data.bed_id else '' }}";
-
+    
     function populateBeds(gardenId, selectedBedId) {
-        while (bedSelect.options.length > 1) {
-            bedSelect.remove(1);
+        if (!gardenId) {
+            while (bedSelect.options.length > 1) {
+                bedSelect.remove(1);
+            }
+            bedSelect.options[0].text = "-- Сначала выберите участок --";
+            bedSelect.disabled = true;
+            return;
         }
-        bedSelect.options[0].text = "-- Сначала выберите участок --";
+        
         bedSelect.disabled = true;
-
-        if (gardenId) {
-            bedSelect.disabled = false;
-            bedSelect.options[0].text = "-- Загрузка грядок... --";
-            // Note: Using care_bp.beds_for_dropdown as it's already available and suitable
-            fetch(`{{ url_for('care_bp.beds_for_dropdown', garden_id='PLACEHOLDER') }}`.replace('PLACEHOLDER', gardenId))
-                .then(response => {
-                    if (!response.ok) throw new Error('Network response was not ok');
-                    return response.json();
-                })
-                .then(data => {
-                    bedSelect.options[0].text = "-- Выберите грядку --";
-                    if (data.error) {
-                        console.error('Error fetching beds:', data.error);
-                        bedSelect.options[0].text = "-- Ошибка загрузки грядок --";
-                        return;
+        bedSelect.options[0].text = "Загрузка...";
+        
+        // Fetch beds for selected garden
+        fetch(`/api/gardens/${gardenId}/beds-for-dropdown`)
+            .then(response => response.json())
+            .then(data => {
+                while (bedSelect.options.length > 1) {
+                    bedSelect.remove(1);
+                }
+                
+                if (data.error) {
+                    bedSelect.options[0].text = "Ошибка загрузки грядок";
+                    console.error(data.error);
+                    return;
+                }
+                
+                if (data.length === 0) {
+                    bedSelect.options[0].text = "Нет грядок для этого участка";
+                    return;
+                }
+                
+                bedSelect.options[0].text = "-- Выберите грядку --";
+                data.forEach(bed => {
+                    const option = document.createElement('option');
+                    option.value = bed.id;
+                    option.textContent = bed.name;
+                    if (bed.id === selectedBedId) {
+                        option.selected = true;
                     }
-                    if (data.length === 0) {
-                        bedSelect.options[0].text = "-- Нет грядок на этом участке --";
-                        return;
-                    }
-                    data.forEach(bed => {
-                        const option = new Option(bed.name, bed.id);
-                        if (bed.id === selectedBedId) {
-                            option.selected = true;
-                        }
-                        bedSelect.add(option);
-                    });
-                })
-                .catch(error => {
-                    console.error('Error fetching beds:', error);
-                    bedSelect.options[0].text = "-- Ошибка загрузки грядок --";
+                    bedSelect.appendChild(option);
                 });
-        }
+                
+                bedSelect.disabled = false;
+            })
+            .catch(error => {
+                console.error('Error fetching beds:', error);
+                bedSelect.options[0].text = "Ошибка загрузки грядок";
+            });
     }
-
+    
     gardenSelect.addEventListener('change', function() {
-        populateBeds(this.value, null); 
+        populateBeds(this.value);
     });
-
+    
+    // Initial population if garden is selected
     if (gardenSelect.value) {
+        const initialBedId = "{{ form_data.bed_id|string if form_data and form_data.bed_id else '' }}";
         populateBeds(gardenSelect.value, initialBedId);
-    } else {
-        bedSelect.disabled = true;
     }
 });
 </script>
-{% endblock %} 
+{% endblock %}
