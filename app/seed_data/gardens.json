@@ -41,6 +41,34 @@
         "active_beds": 2,
         "total_crops": 2
       }
+    },
+    {
+      "name": "Загородный участок",
+      "location": "За городом",
+      "area": 800.0,
+      "soil_type": "Песчаная",
+      "terrain_type": "Холмистая",
+      "lighting": "Утреннее солнце, дневная тень",
+      "photo_file_paths": [],
+      "stats": {
+        "total_beds": 0,
+        "active_beds": 0,
+        "total_crops": 0
+      }
+    },
+    {
+      "name": "Дворовый огород",
+      "location": "Во дворе",
+      "area": 75.0,
+      "soil_type": "Глинистая",
+      "terrain_type": "Склон (южный)",
+      "lighting": "Дневное солнце, вечерняя тень",
+      "photo_file_paths": [],
+      "stats": {
+        "total_beds": 0,
+        "active_beds": 0,
+        "total_crops": 0
+      }
     }
   ]
 } 
