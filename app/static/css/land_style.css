@@ -678,3 +678,6 @@ input[type="datetime-local"] {
     background-color: #CBE8BA;
     border-color: #333;
 }
+.margin-btn{
+    margin-bottom: 30px;
+}
