@@ -169,6 +169,10 @@ def delete_bed(garden_id, bed_id):
         return redirect(url_for('land_bp.gardens'))
 
     bed = mongo.db.beds.find_one({'_id': ObjectId(bed_id), 'garden_id': ObjectId(garden_id), 'user_id': current_user.get_id()})
+    mongo.db.recommendations.delete_many({
+        'bed_id': ObjectId(bed_id),
+        'user_id': current_user.get_id()
+    })
     if bed:
         if bed.get('photo_file_paths'):
             for photo_path_from_db in bed['photo_file_paths']:
@@ -179,7 +183,6 @@ def delete_bed(garden_id, bed_id):
                             os.remove(actual_photo_disk_path)
                         except Exception as e:
                              flash(f'Could not delete bed photo {photo_path_from_db}: {e}', 'warning')
-        
         mongo.db.beds.delete_one({'_id': ObjectId(bed_id)})
         
         # Update garden stats
@@ -191,4 +194,4 @@ def delete_bed(garden_id, bed_id):
     else:
         flash('Bed not found or access denied.', 'error')
     
-    return redirect(url_for('land_bp.garden_detail', garden_id=garden_id)) 
+    return redirect(url_for('land_bp.garden_detail', garden_id=garden_id))

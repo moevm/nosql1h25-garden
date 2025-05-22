@@ -272,7 +272,7 @@ header {
     height: 150px;
     border-radius: 50%;
     margin-right: 20px;
-    object-fit: cover;
+    object-fit: fill;
     border: 2px solid #99A534;
 }
 
@@ -636,10 +636,11 @@ input[type="datetime-local"] {
     border-radius: 8px;
     border: none;
     cursor: pointer;
+    font-weight: bold;
+    background-color: #aed581;
 }
 
 .btn-primary {
-    background-color: #aed581;
     color: #333;
 }
 
@@ -662,4 +663,18 @@ input[type="datetime-local"] {
     border-radius: 10px;
     padding: 10px 10px;
     margin-bottom: 30px;
+}
+
+.overdue-recommendation {
+    border-left: 4px solid #dc3545;
+}
+.icon-button.complete-button {
+    background-color: transparent;
+    border: 2px solid #333;
+    border-radius: 50%;
+}
+
+.icon-button.complete-button:hover {
+    background-color: #CBE8BA;
+    border-color: #333;
 }
