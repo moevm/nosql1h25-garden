@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     const gardenSelect = document.getElementById('garden_id');
     const bedSelect = document.getElementById('bed_id');
-    const initialBedId = "{{ form_data.bed_id if form_data and form_data.bed_id else '' }}";
+    const initialBedId = bedSelect.dataset.initialBedId || '';
 
     function populateBeds(gardenId, selectedBedId) {
         while (bedSelect.options.length > 1) {
@@ -16,7 +16,9 @@ document.addEventListener('DOMContentLoaded', function() {
         bedSelect.disabled = false;
         bedSelect.options[0].text = "-- Загрузка грядок... --";
 
-        fetch(`{{ url_for('care_bp.beds_for_dropdown', garden_id='PLACEHOLDER') }}`.replace('PLACEHOLDER', gardenId))
+        const bedsUrl = bedSelect.dataset.bedsUrl.replace('PLACEHOLDER', gardenId);
+        
+        fetch(bedsUrl)
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
@@ -27,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 bedSelect.options[0].text = "-- Выберите грядку --";
                 if (data.error) {
                     console.error('Error fetching beds:', data.error);
-                     bedSelect.options[0].text = "-- Ошибка загрузки грядок --";
+                    bedSelect.options[0].text = "-- Ошибка загрузки грядок --";
                     return;
                 }
                 if (data.length === 0) {

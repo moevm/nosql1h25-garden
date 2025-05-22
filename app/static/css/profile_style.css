@@ -23,7 +23,6 @@ body {
     align-items: center;
 }
 
-/* Общие стили для кнопок в .profile-menu (сделаны для ссылок <a>) */
 .profile-menu a {
     width: 70%;
     height: 63px;
@@ -78,14 +77,57 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 10px;
+    gap: 32px; 
+    box-sizing: border-box;
+    padding: 10px 0 10px 0;
 }
 
+.avatar {
+    position: relative;
+    width: 92%;
+    max-width: 420px;
+    aspect-ratio: 1 / 1;
+    border-radius: 28px;
+    overflow: hidden;
+    cursor: pointer;
+    margin: 0 auto;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 .avatar img {
-    width: 300px;
-    height: 300px;
-    border-radius: 50%;
-    border: 1px solid #629C44;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 0;
+}
+
+.name-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    margin-top: 0;
+}
+
+.avatar-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+.avatar:hover .avatar-overlay {
+    opacity: 1;
+}
+.overlay-icon {
+    font-size: 24px;
+    color: #fff;
 }
 
 .name-container {
@@ -95,35 +137,28 @@ body {
     justify-content: center;
     align-items: center;
     position: relative;
+    margin-top: 10px;
 }
 
-.name-text {
-    font-size: 24px;
+#name-text {
+    font-size: 28px;
+    text-align: center;
+    flex: 0 1 auto;
 }
 
-.name-input {
+#name-input {
     font-size: 20px;
     width: 60%;
     border-radius: 10px;
 }
 
-.edit-name-button {
-    width: 25px;
-    height: 25px;
-    margin-left: 20px;
-    background-size: cover;
-    background-position: center;
-    background-color: #F1F6BE;
-    background-image: url("../icons/pencil-icon.png");
-    border: none;
-}
-
-.edit-name-btn {
+.icon-button {
     background: none;
     border: none;
+    font-size: 22px;
+    margin-left: 12px;
     cursor: pointer;
-    font-size: 16px;
-    margin-left: 5px;
+    vertical-align: middle;
 }
 
 .profile-edit {
@@ -144,7 +179,6 @@ body {
     height: 15%;
 }
 
-/* Применяем стили к ссылкам в .profile-actions */
 .profile-actions a {
     background-color: #CBE8BA;
     border: 1px solid #CBE8BA;
@@ -160,4 +194,39 @@ body {
 
 .profile-actions a:hover {
     background-color: #b6dca6;
+}
+
+.flash-messages {
+    margin-bottom: 20px;
+}
+
+.alert {
+    padding: 12px 16px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    border: 1px solid transparent;
+}
+
+.alert-success {
+    color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+}
+
+.alert-error {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+
+.alert-warning {
+    color: #856404;
+    background-color: #fff3cd;
+    border-color: #ffeaa7;
+}
+
+.alert-info {
+    color: #0c5460;
+    background-color: #d1ecf1;
+    border-color: #bee5eb;
 }
