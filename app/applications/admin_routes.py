@@ -1,14 +1,15 @@
 from flask import Blueprint, render_template, abort, redirect, url_for, request
 from flask_login import current_user, login_required
 from functools import wraps
-from applications import mongo # Import mongo
-from applications.schemas import User # Import User schema for type hinting if needed
-from bson import ObjectId # Add ObjectId import
+from applications import mongo
+from applications.schemas import User
+from bson import ObjectId
+from datetime import datetime
 
 admin_bp = Blueprint(
     "admin_bp", 
     __name__, 
-    template_folder="../templates/admin",  # Keep admin templates separate
+    template_folder="../templates/admin",
     static_folder="../../static"
 )
 
@@ -25,7 +26,16 @@ def admin_required(f):
 @login_required
 @admin_required
 def admin_dashboard():
-    return render_template('admin_dashboard.html', title="Admin Dashboard")
+    # Get counts for each entity
+    stats = {
+        'users': mongo.db.users.count_documents({}),
+        'gardens': mongo.db.gardens.count_documents({}),
+        'beds': mongo.db.beds.count_documents({}),
+        'care_logs': mongo.db.care_logs.count_documents({}),
+        'recommendations': mongo.db.recommendations.count_documents({}),
+        'diary_entries': mongo.db.diary_entries.count_documents({})
+    }
+    return render_template('admin_dashboard.html', title="Admin Dashboard", stats=stats)
 
 # Placeholder for viewing all users - we'll expand this later
 @admin_bp.route('/admin/users')
@@ -68,25 +78,21 @@ def admin_view_gardens():
     if search_garden_name:
         filters['name'] = {'$regex': search_garden_name, '$options': 'i'}
 
-    user_ids_for_filter = []
     if search_user_email:
-        # Find users matching the email search
         matching_users = mongo.db.users.find({'email': {'$regex': search_user_email, '$options': 'i'}}, {'_id': 1})
-        user_ids_for_filter = [user['_id'] for user in matching_users]
-        if not user_ids_for_filter: # If no users match email, no gardens will match this part of the filter
-            filters['user_id'] = {'$in': []} # effectively no results for user email
+        user_ids = [user['_id'] for user in matching_users]
+        if user_ids:
+            filters['user_id'] = {'$in': user_ids}
         else:
-            filters['user_id'] = {'$in': user_ids_for_filter}
-
+            filters['user_id'] = None
 
     gardens_cursor = mongo.db.gardens.find(filters)
     gardens_list = []
-    for g in gardens_cursor:
-        # Try to get user email for display
-        user = mongo.db.users.find_one({'_id': ObjectId(g['user_id'])})
-        g['user_email'] = user['email'] if user else 'N/A'
-        g['user_name'] = user['name'] if user else 'N/A'
-        gardens_list.append(g)
+    for garden in gardens_cursor:
+        user = mongo.db.users.find_one({'_id': ObjectId(garden['user_id'])})
+        garden['user_email'] = user['email'] if user else 'N/A'
+        garden['user_name'] = user['name'] if user else 'N/A'
+        gardens_list.append(garden)
     
     return render_template(
         'admin_view_gardens.html', 
@@ -96,4 +102,3 @@ def admin_view_gardens():
         search_user_email=search_user_email
     )
 
-# Add more routes here for other entities (gardens, beds, care_logs, etc.) 
