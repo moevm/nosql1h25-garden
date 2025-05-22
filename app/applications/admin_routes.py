@@ -102,3 +102,45 @@ def admin_view_gardens():
         search_user_email=search_user_email
     )
 
+@admin_bp.route('/admin/beds')
+@login_required
+@admin_required
+def admin_view_beds():
+    search_bed_name = request.args.get('search_bed_name', '')
+    search_garden_name = request.args.get('search_garden_name', '')
+    search_user_email = request.args.get('search_user_email', '')
+
+    filters = {}
+    if search_bed_name:
+        filters['name'] = {'$regex': search_bed_name, '$options': 'i'}
+
+    if search_garden_name:
+        matching_gardens = mongo.db.gardens.find({'name': {'$regex': search_garden_name, '$options': 'i'}}, {'_id': 1})
+        garden_ids = [garden['_id'] for garden in matching_gardens]
+        if garden_ids:
+            filters['garden_id'] = {'$in': garden_ids}
+        else:
+            filters['garden_id'] = None
+
+    if search_user_email:
+        matching_users = mongo.db.users.find({'email': {'$regex': search_user_email, '$options': 'i'}}, {'_id': 1})
+        user_ids = [user['_id'] for user in matching_users]
+        if user_ids:
+            filters['user_id'] = {'$in': user_ids}
+        else:
+            filters['user_id'] = None
+
+    beds_cursor = mongo.db.beds.find(filters)
+    beds_list = []
+    for bed in beds_cursor:
+        garden = mongo.db.gardens.find_one({'_id': bed['garden_id']})
+        user = mongo.db.users.find_one({'_id': ObjectId(bed['user_id'])})
+        bed['garden_name'] = garden['name'] if garden else 'N/A'
+        bed['user_email'] = user['email'] if user else 'N/A'
+        bed['user_name'] = user['name'] if user else 'N/A'
+        beds_list.append(bed)
+
+    return render_template('admin_view_beds.html', beds=beds_list, title="Manage Beds",
+                         search_bed_name=search_bed_name, search_garden_name=search_garden_name,
+                         search_user_email=search_user_email)
+
