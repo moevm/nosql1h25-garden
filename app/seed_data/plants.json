@@ -1,0 +1,31 @@
+{
+  "plants": [
+    {
+      "name": "Tomato Plant",
+      "scientific_name": "Solanum lycopersicum",
+      "care_level": "medium",
+      "water_frequency": "daily",
+      "sunlight": "full sun",
+      "description": "Common garden tomato plant",
+      "created_by": "master_gardener"
+    },
+    {
+      "name": "Basil",
+      "scientific_name": "Ocimum basilicum",
+      "care_level": "easy",
+      "water_frequency": "every 2-3 days",
+      "sunlight": "partial sun",
+      "description": "Sweet basil herb plant",
+      "created_by": "plant_enthusiast"
+    },
+    {
+      "name": "Snake Plant",
+      "scientific_name": "Dracaena trifasciata",
+      "care_level": "easy",
+      "water_frequency": "weekly",
+      "sunlight": "low light",
+      "description": "Popular indoor plant",
+      "created_by": "master_gardener"
+    }
+  ]
+} 
