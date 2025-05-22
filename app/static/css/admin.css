@@ -1,0 +1,124 @@
+.sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    padding: 48px 0 0;
+    box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+    background-color: #f8f9fa;
+}
+
+.sidebar-sticky {
+    position: relative;
+    top: 0;
+    height: calc(100vh - 48px);
+    padding-top: .5rem;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.main-content {
+    margin-left: 240px;
+    padding: 20px;
+}
+
+.nav-link {
+    color: #333;
+    padding: 10px 20px;
+}
+
+.nav-link:hover {
+    background-color: #e9ecef;
+}
+
+.nav-link.active {
+    color: #2196f3;
+    background-color: #e3f2fd;
+}
+
+.search-filters {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.table-responsive {
+    background-color: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Dashboard specific styles */
+.card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card.border-left-primary { border-left: 4px solid #4e73df; }
+.card.border-left-success { border-left: 4px solid #1cc88a; }
+.card.border-left-info { border-left: 4px solid #36b9cc; }
+.card.border-left-warning { border-left: 4px solid #f6c23e; }
+.card.border-left-danger { border-left: 4px solid #e74a3b; }
+.card.border-left-secondary { border-left: 4px solid #858796; }
+
+.text-gray-300 { color: #dddfeb; }
+.text-gray-800 { color: #5a5c69; }
+
+/* Table styles */
+.table-hover tbody tr:hover {
+    background-color: #f8f9fc;
+}
+
+/* Badge styles */
+.badge {
+    padding: 0.5em 0.75em;
+}
+
+/* Button group styles */
+.btn-group .btn {
+    padding: 0.25rem 0.5rem;
+}
+
+/* Content preview styles */
+.text-truncate {
+    max-width: 300px;
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* User info in tables */
+.user-info {
+    display: flex;
+    align-items: center;
+}
+
+.user-info .icon {
+    margin-right: 0.5rem;
+}
+
+/* Quick actions section */
+.quick-actions .btn {
+    margin-bottom: 0.5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .main-content {
+        margin-left: 0;
+    }
+    
+    .sidebar {
+        position: static;
+        height: auto;
+        padding-top: 0;
+    }
+    
+    .sidebar-sticky {
+        height: auto;
+    }
+} 
