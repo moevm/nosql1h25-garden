@@ -1,6 +1,145 @@
 {% extends "admin/admin_layout.html" %}
 
-{% block admin_content %}
-<p>Welcome to the admin dashboard. Select an entity to manage from the sidebar.</p>
-{# We will add more details and summaries here later #}
+{% block content %}
+<div class="row">
+    <div class="col-xl-2 col-md-4 mb-4">
+        <div class="card border-left-primary h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Users</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.users }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-people fs-2 text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-2 col-md-4 mb-4">
+        <div class="card border-left-success h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Gardens</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.gardens }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-tree fs-2 text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-2 col-md-4 mb-4">
+        <div class="card border-left-info h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Beds</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.beds }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-grid fs-2 text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-2 col-md-4 mb-4">
+        <div class="card border-left-warning h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Care Logs</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.care_logs }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-journal-check fs-2 text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-2 col-md-4 mb-4">
+        <div class="card border-left-danger h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Recommendations</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.recommendations }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-lightbulb fs-2 text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-2 col-md-4 mb-4">
+        <div class="card border-left-secondary h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">Diary Entries</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.diary_entries }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-book fs-2 text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-2 mb-3">
+                        <a href="{{ url_for('admin_bp.admin_view_users') }}" class="btn btn-primary w-100">
+                            <i class="bi bi-people me-2"></i>Manage Users
+                        </a>
+                    </div>
+                    <div class="col-md-2 mb-3">
+                        <a href="{{ url_for('admin_bp.admin_view_gardens') }}" class="btn btn-success w-100">
+                            <i class="bi bi-tree me-2"></i>Manage Gardens
+                        </a>
+                    </div>
+                    <div class="col-md-2 mb-3">
+                        <a href="{{ url_for('admin_bp.admin_view_beds') }}" class="btn btn-info w-100">
+                            <i class="bi bi-grid me-2"></i>Manage Beds
+                        </a>
+                    </div>
+                    <div class="col-md-2 mb-3">
+                        <a href="{{ url_for('admin_bp.admin_view_care_logs') }}" class="btn btn-warning w-100">
+                            <i class="bi bi-journal-check me-2"></i>View Care Logs
+                        </a>
+                    </div>
+                    <div class="col-md-2 mb-3">
+                        <a href="{{ url_for('admin_bp.admin_view_recommendations') }}" class="btn btn-danger w-100">
+                            <i class="bi bi-lightbulb me-2"></i>Recommendations
+                        </a>
+                    </div>
+                    <div class="col-md-2 mb-3">
+                        <a href="{{ url_for('admin_bp.admin_view_diary') }}" class="btn btn-secondary w-100">
+                            <i class="bi bi-book me-2"></i>Diary Entries
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %} 
