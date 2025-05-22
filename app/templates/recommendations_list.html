@@ -154,62 +154,15 @@
     {% endif %}
   </main>
 
+<script src="{{ url_for('static', filename='scripts/rec_list.js') }}"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const gardenFilterSelect = document.getElementById('garden_id');
-    const bedFilterSelect = document.getElementById('bed_id');
-    
-    if (gardenFilterSelect && bedFilterSelect) {
-        // Store initial bed options
-        const initialBedOptions = Array.from(bedFilterSelect.options);
-        bedFilterSelect.dataset.selectedValue = "{{ filters.bed_id if filters and filters.bed_id else '' }}";
-
-        gardenFilterSelect.addEventListener('change', function() {
-            const gardenId = this.value;
-            while (bedFilterSelect.options.length > 1) {
-                bedFilterSelect.remove(1);
-            }
-
-            if (gardenId) {
-                fetch(`{{ url_for('care_bp.beds_for_dropdown', garden_id='PLACEHOLDER') }}`.replace('PLACEHOLDER', gardenId))
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.error) {
-                            console.error('Error fetching beds:', data.error);
-                            return;
-                        }
-                        data.forEach(bed => {
-                            const option = new Option(bed.name, bed.id);
-                            if (bed.id === bedFilterSelect.dataset.selectedValue) {
-                                option.selected = true;
-                            }
-                            bedFilterSelect.add(option);
-                        });
-                    })
-                    .catch(error => console.error('Error fetching beds:', error));
-            }
-        });
-
-        // If a garden is pre-selected, load its beds
-        if (gardenFilterSelect.value && bedFilterSelect.dataset.selectedValue) {
-            fetch(`{{ url_for('care_bp.beds_for_dropdown', garden_id='PLACEHOLDER') }}`.replace('PLACEHOLDER', gardenFilterSelect.value))
-                .then(response => response.json())
-                .then(data => {
-                    if (data.error) {
-                        console.error('Error fetching beds:', data.error);
-                        return;
-                    }
-                    while (bedFilterSelect.options.length > 1) { bedFilterSelect.remove(1); }
-                    data.forEach(bed => {
-                        const option = new Option(bed.name, bed.id);
-                        if (bed.id === bedFilterSelect.dataset.selectedValue) {
-                            option.selected = true;
-                        }
-                        bedFilterSelect.add(option);
-                    });
-                }).catch(error => console.error('Error fetching beds:', error));
+    // Передача данных из шаблона в JS
+    document.addEventListener('DOMContentLoaded', function() {
+        const bedFilterSelect = document.getElementById('bed_id');
+        if (bedFilterSelect) {
+            bedFilterSelect.dataset.selectedValue = "{{ filters.bed_id if filters and filters.bed_id else '' }}";
+            bedFilterSelect.dataset.bedsUrl = "{{ url_for('care_bp.beds_for_dropdown', garden_id='PLACEHOLDER') }}";
         }
-    }
-});
+    });
 </script>
 {% endblock %}

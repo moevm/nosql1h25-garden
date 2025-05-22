@@ -1,14 +1,14 @@
 from flask import (
-    Blueprint, render_template
+    Blueprint, render_template, current_app, Flask, jsonify, request, flash, redirect, url_for, session, send_from_directory
 )
-from flask import Flask, jsonify, request, render_template, flash, redirect, url_for, session, send_from_directory
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from datetime import datetime, timedelta
 from .schemas import User
 from applications import mongo, login_manager
 from bson import ObjectId
-
-
+from .utils import allowed_file, save_photo
+import os
+from datetime import datetime
 auth_bp = Blueprint("auth_bp", __name__)
 
 @login_manager.user_loader
@@ -101,4 +101,61 @@ def logout():
     flash('You have been logged out.', 'success')
     return redirect(url_for('auth_bp.login'))
 
+@auth_bp.route('/profile', methods=['GET', 'POST'])
+@login_required
+def profile():
+    if request.method == 'POST':
+        name = request.form.get('name')
+        photo = request.files.get('photo')
+        update_fields = {}
 
+        # Обновление имени
+        if name and name != current_user.name:
+            update_fields['name'] = name
+
+        # Обновление фото
+        if photo and photo.filename:
+            saved_path = save_photo(photo)
+            if saved_path:
+                # Удаляем старое фото, если есть
+                old_path = getattr(current_user, 'photo_path', None)
+                if old_path:
+                    try:
+                        old_disk_path = os.path.join(current_app.static_folder, old_path)
+                        if os.path.exists(old_disk_path):
+                            os.remove(old_disk_path)
+                    except Exception as e:
+                        flash(f'Не удалось удалить старое фото: {e}', 'warning')
+                update_fields['photo_path'] = saved_path
+            else:
+                flash('Ошибка при загрузке фото', 'error')
+                return redirect(url_for('auth_bp.profile'))
+
+        # Сохраняем изменения, если есть что сохранять
+        if update_fields:
+            # обновляем отметку времени изменения
+            new_updated = datetime.utcnow()
+            update_fields['updated_at'] = new_updated
+
+            # обновляем в базе
+            mongo.db.users.update_one(
+                {'_id': ObjectId(current_user.get_id())},
+                {'$set': update_fields}
+            )
+
+            # обновляем текущий объект пользователя для следующего запроса
+            if 'name' in update_fields:
+                current_user.name = update_fields['name']
+            if 'photo_path' in update_fields:
+                current_user.photo_path = update_fields['photo_path']
+            current_user.updated_at = new_updated
+
+            flash('Профиль обновлён', 'success')
+        else:
+            flash('Нет изменений для сохранения', 'info')
+
+        # Всегда перенаправляем после POST (PRG), чтобы сбросить форму
+        return redirect(url_for('auth_bp.profile'))
+
+    # GET
+    return render_template('profile.html')

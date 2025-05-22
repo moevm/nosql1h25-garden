@@ -16,7 +16,9 @@ document.addEventListener('DOMContentLoaded', function() {
         bedSelect.options[0].text = "Загрузка...";
         
         // Fetch beds for selected garden
-        fetch(`/api/gardens/${gardenId}/beds-for-dropdown`)
+        const bedsUrl = bedSelect.dataset.bedsUrl.replace('GARDEN_ID', gardenId);
+        
+        fetch(bedsUrl)
             .then(response => response.json())
             .then(data => {
                 while (bedSelect.options.length > 1) {
@@ -59,7 +61,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initial population if garden is selected
     if (gardenSelect.value) {
-        const initialBedId = "{{ form_data.bed_id|string if form_data and form_data.bed_id else '' }}";
+        const initialBedId = bedSelect.dataset.initialBedId || '';
         populateBeds(gardenSelect.value, initialBedId);
     }
 });

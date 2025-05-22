@@ -4,6 +4,17 @@
 {% block content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/profile_style.css') }}">
 
+<!-- Flash messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="flash-messages" style="margin-bottom: 20px;">
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} flash-message">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
 <div class="profile-container">
   <div class="profile-menu">
     <a class="personal-diary" href="{{ url_for('diary_bp.entries') }}">Личный дневник</a>
@@ -14,36 +25,42 @@
     <a class="statistics" href="">Статистика</a>
   </div>
 
-  <div class="profile">
+<form id="profile-form" class="profile" method="POST" action="{{ url_for('auth_bp.profile') }}" enctype="multipart/form-data">
     <div class="profile-info">
       <div class="profile-card">
-        <div class="avatar">
+        <!-- Аватар -->
+        <div class="avatar" id="avatar-container" title="Нажмите для изменения фото">
           {% if current_user.photo_path %}
-            <img class="avatar-img" src="{{ url_for('static', filename=current_user.photo_path) }}" alt="Аватарка">
+            <img id="avatar-img" src="{{ url_for('static', filename=current_user.photo_path) }}" alt="Аватарка">
           {% else %}
-            <img class="avatar-img" src="{{ url_for('static', filename='icons/default-avatar.jpg') }}" alt="Аватарка">
+            <img id="avatar-img" src="{{ url_for('static', filename='icons/default-avatar.jpg') }}" alt="Аватарка">
           {% endif %}
+          <div class="avatar-overlay">
+            <span class="overlay-icon">✎</span>
+          </div>
+          <input id="photo-input" name="photo" type="file" accept="image/*" style="display: none;">
         </div>
+
         <div class="name-container">
-          <span class="name-text">{{ current_user.name }}</span>
-          <label for="name"></label>
-          <input type="text" class="name-input" id="name" value="{{ current_user.name }}" style="display: none;">
-          <button class="edit-name-button"></button>
+          <span id="name-text">{{ current_user.name }}</span>
+          <input id="name-input" name="name" type="text" value="{{ current_user.name }}" maxlength="35" hidden>
+          <button type="button" id="edit-name-button" class="icon-button" title="Редактировать имя">✎</button>
+          <button type="submit" id="save-name-button" class="save-button" hidden>Сохранить</button>
         </div>
       </div>
 
       <div class="profile-edit">
-        <div class="profile-creation-date">Создан {{ current_user.created_at.strftime('%d/%m/%Y %H:%M') }}</div>
-        <div class="profile-edit-date">Ред. {{ current_user.updated_at.strftime('%d/%m/%Y %H:%M') }}</div>
+        <div class="profile-creation-date">Создан {{ current_user.created_at.strftime('%d/%m/%Y %H:%M:%S') }}</div>
+        <div class="profile-edit-date">Ред. {{ current_user.updated_at.strftime('%d/%m/%Y %H:%M:%S') }}</div>
       </div>
     </div>
 
     <div class="profile-actions">
       <a class="export-data" href="">Экспортировать данные</a>
       <a class="import-data" href="">Импортировать данные</a>
-      <a class="exit" href="{{ url_for('auth_bp.logout') }}">Выход из профиля</a>
+      <a href="{{ url_for('auth_bp.logout') }}" class="profile-action-btn logout-btn" onclick="return confirm('Вы уверены, что хотите выйти из профиля?')">Выйти из профиля</a>
     </div>
-  </div>
+  </form>
 </div>
 
 <script src="{{ url_for('static', filename='scripts/profile_script.js') }}"></script>
