@@ -1,15 +1,36 @@
-version: "3.9"
+version: '3.8'
 
 services:
-  web:
+  app:
     build:
       context: .
       dockerfile: app/Dockerfile
-    container_name: nosql1h25-app
+    container_name: garden_app
+    restart: unless-stopped
     ports:
-      - "5000:5000"
-    env_file:
-      - .env
+      - "127.0.0.1:5000:5000"
+    environment:
+      - MONGO_URI=mongodb://garden_user:garden_password@db:27017/garden_db?authSource=admin
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mongo:7.0.5
+    container_name: garden_mongodb
+    restart: unless-stopped
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=garden_user
+      - MONGO_INITDB_ROOT_PASSWORD=garden_password
+      - MONGO_INITDB_DATABASE=garden_db
     volumes:
-      - ./app:/app
-    restart: always
+      - mongodb_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+volumes:
+  mongodb_data:
