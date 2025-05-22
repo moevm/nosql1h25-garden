@@ -58,7 +58,23 @@ def admin_view_users():
         filters['is_admin'] = False
 
     users_cursor = mongo.db.users.find(filters)
-    users_list = [User.from_dict(u) for u in users_cursor]
+    users_list = []
+    for user_dict in users_cursor:
+        user = User.from_dict(user_dict)
+        user_id = user.get_id()
+
+        gardens_count = mongo.db.gardens.count_documents({'user_id': user_id})
+        
+        beds_count = mongo.db.beds.count_documents({'user_id': user_id})
+        
+        care_logs_count = mongo.db.care_logs.count_documents({'user_id': user_id})
+
+        user.gardens_count = gardens_count
+        user.beds_count = beds_count
+        user.care_logs_count = care_logs_count
+        
+        users_list.append(user)
+
     return render_template(
         'admin_view_users.html', 
         users=users_list, 
@@ -89,9 +105,22 @@ def admin_view_gardens():
     gardens_cursor = mongo.db.gardens.find(filters)
     gardens_list = []
     for garden in gardens_cursor:
+        # Get user info
         user = mongo.db.users.find_one({'_id': ObjectId(garden['user_id'])})
         garden['user_email'] = user['email'] if user else 'N/A'
         garden['user_name'] = user['name'] if user else 'N/A'
+        
+        # Count related entities
+        garden['beds_count'] = mongo.db.beds.count_documents({'garden_id': garden['_id']})
+        garden['care_logs_count'] = mongo.db.care_logs.count_documents({'garden_id': garden['_id']})
+        
+        # Ensure area and location are present
+        garden['area'] = garden.get('area', 'N/A')
+        garden['location'] = garden.get('location', 'N/A')
+        
+        # Format creation time
+        garden['created_at'] = garden.get('creation_time', garden.get('created_at', datetime.utcnow()))
+        
         gardens_list.append(garden)
     
     return render_template(
@@ -133,11 +162,23 @@ def admin_view_beds():
     beds_cursor = mongo.db.beds.find(filters)
     beds_list = []
     for bed in beds_cursor:
+        # Get garden and user info
         garden = mongo.db.gardens.find_one({'_id': bed['garden_id']})
         user = mongo.db.users.find_one({'_id': ObjectId(bed['user_id'])})
         bed['garden_name'] = garden['name'] if garden else 'N/A'
         bed['user_email'] = user['email'] if user else 'N/A'
         bed['user_name'] = user['name'] if user else 'N/A'
+        
+        # Count care logs
+        bed['care_logs_count'] = mongo.db.care_logs.count_documents({'bed_id': bed['_id']})
+        
+        # Ensure area and count_row are present
+        bed['crop_name'] = bed.get('crop_name', 'N/A')
+        bed['count_row'] = bed.get('count_row', 0)
+        
+        # Format creation time
+        bed['created_at'] = bed.get('creation_time', bed.get('created_at', datetime.utcnow()))
+        
         beds_list.append(bed)
 
     return render_template('admin_view_beds.html', beds=beds_list, title="Manage Beds",

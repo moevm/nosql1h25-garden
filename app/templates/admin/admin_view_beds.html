@@ -41,8 +41,8 @@
                 <th>Bed Name</th>
                 <th>Garden</th>
                 <th>Owner</th>
-                <th>Area (m²)</th>
-                <th>Plants</th>
+                <th>Crop name</th>
+                <th>Rows</th>
                 <th>Care Logs</th>
                 <th>Created At</th>
                 <th>Actions</th>
@@ -67,8 +67,8 @@
                         </div>
                     </div>
                 </td>
-                <td>{{ bed.area }}</td>
-                <td>{{ bed.plants_count if bed.plants_count is defined else 'N/A' }}</td>
+                <td>{{ bed.crop_name }}</td>
+                <td>{{ bed.count_row if bed.count_row is defined else 'N/A' }}</td>
                 <td>{{ bed.care_logs_count if bed.care_logs_count is defined else 'N/A' }}</td>
                 <td>{{ bed.created_at.strftime('%Y-%m-%d') if bed.created_at else 'N/A' }}</td>
                 <td>
