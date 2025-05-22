@@ -1,0 +1,46 @@
+{
+  "gardens": [
+    {
+      "name": "Дачный участок",
+      "location": "Пригород",
+      "area": 500.0,
+      "soil_type": "Чернозем",
+      "terrain_type": "Равнина",
+      "lighting": "Солнечное (весь день)",
+      "photo_file_paths": [],
+      "stats": {
+        "total_beds": 3,
+        "active_beds": 3,
+        "total_crops": 3
+      }
+    },
+    {
+      "name": "Городской огород",
+      "location": "Городская черта",
+      "area": 100.0,
+      "soil_type": "Суглинистая",
+      "terrain_type": "Террасированный",
+      "lighting": "Полутень (рассеянный свет)",
+      "photo_file_paths": [],
+      "stats": {
+        "total_beds": 2,
+        "active_beds": 2,
+        "total_crops": 2
+      }
+    },
+    {
+      "name": "Теплица",
+      "location": "Задний двор",
+      "area": 50.0,
+      "soil_type": "Торфяная",
+      "terrain_type": "Равнина",
+      "lighting": "Солнечное (весь день)",
+      "photo_file_paths": [],
+      "stats": {
+        "total_beds": 2,
+        "active_beds": 2,
+        "total_crops": 2
+      }
+    }
+  ]
+} 
