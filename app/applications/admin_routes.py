@@ -144,3 +144,67 @@ def admin_view_beds():
                          search_bed_name=search_bed_name, search_garden_name=search_garden_name,
                          search_user_email=search_user_email)
 
+@admin_bp.route('/admin/care-logs')
+@login_required
+@admin_required
+def admin_view_care_logs():
+    search_action_type = request.args.get('search_action_type', '')
+    search_garden_name = request.args.get('search_garden_name', '')
+    search_bed_name = request.args.get('search_bed_name', '')
+    search_user_email = request.args.get('search_user_email', '')
+    date_from = request.args.get('date_from', '')
+    date_to = request.args.get('date_to', '')
+
+    filters = {}
+    if search_action_type:
+        filters['action_type'] = {'$regex': search_action_type, '$options': 'i'}
+
+    if search_garden_name:
+        matching_gardens = mongo.db.gardens.find({'name': {'$regex': search_garden_name, '$options': 'i'}}, {'_id': 1})
+        garden_ids = [garden['_id'] for garden in matching_gardens]
+        if garden_ids:
+            filters['garden_id'] = {'$in': garden_ids}
+        else:
+            filters['garden_id'] = None
+
+    if search_bed_name:
+        matching_beds = mongo.db.beds.find({'name': {'$regex': search_bed_name, '$options': 'i'}}, {'_id': 1})
+        bed_ids = [bed['_id'] for bed in matching_beds]
+        if bed_ids:
+            filters['bed_id'] = {'$in': bed_ids}
+        else:
+            filters['bed_id'] = None
+
+    if search_user_email:
+        matching_users = mongo.db.users.find({'email': {'$regex': search_user_email, '$options': 'i'}}, {'_id': 1})
+        user_ids = [user['_id'] for user in matching_users]
+        if user_ids:
+            filters['user_id'] = {'$in': user_ids}
+        else:
+            filters['user_id'] = None
+
+    if date_from or date_to:
+        date_filter = {}
+        if date_from:
+            date_filter['$gte'] = datetime.strptime(date_from, '%Y-%m-%d')
+        if date_to:
+            date_filter['$lte'] = datetime.strptime(date_to, '%Y-%m-%d').replace(hour=23, minute=59, second=59)
+        filters['log_date'] = date_filter
+
+    care_logs_cursor = mongo.db.care_logs.find(filters)
+    care_logs_list = []
+    for log in care_logs_cursor:
+        garden = mongo.db.gardens.find_one({'_id': log['garden_id']})
+        bed = mongo.db.beds.find_one({'_id': log['bed_id']})
+        user = mongo.db.users.find_one({'_id': ObjectId(log['user_id'])})
+        log['garden_name'] = garden['name'] if garden else 'N/A'
+        log['bed_name'] = bed['name'] if bed else 'N/A'
+        log['user_email'] = user['email'] if user else 'N/A'
+        log['user_name'] = user['name'] if user else 'N/A'
+        care_logs_list.append(log)
+
+    return render_template('admin_view_care_logs.html', care_logs=care_logs_list, title="Manage Care Logs",
+                         search_action_type=search_action_type, search_garden_name=search_garden_name,
+                         search_bed_name=search_bed_name, search_user_email=search_user_email,
+                         date_from=date_from, date_to=date_to)
+
