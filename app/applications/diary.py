@@ -114,8 +114,8 @@ def new_entry():
             'content': data.get('content', ''),
             'is_private': data.get('is_private') == 'true',
             'photo_file_paths': photo_paths,
-            'creation_time': datetime.utcnow(),
-            'last_modified_time': datetime.utcnow()
+            'creation_time': datetime.now(),
+            'last_modified_time': datetime.now()
         }
 
         try:
@@ -154,7 +154,7 @@ def edit_entry(entry_id):
             'title': data.get('title', entry_doc.get('title')),
             'content': data.get('content', entry_doc.get('content', '')),
             'is_private': data.get('is_private') == 'true',
-            'last_modified_time': datetime.utcnow()
+            'last_modified_time': datetime.now()
         }
 
         if 'photo' in request.files:

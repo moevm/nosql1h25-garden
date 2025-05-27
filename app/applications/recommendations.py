@@ -4,7 +4,6 @@ from applications import mongo
 from bson import ObjectId
 from datetime import datetime
 from .choices import RECOMMENDATION_ACTION_TYPES
-
 recommendation_bp = Blueprint(
     "recommendation_bp", 
     __name__, 
@@ -28,7 +27,7 @@ def list_recommendations():
     filter_due_date_to_str = request.args.get('due_date_to')
 
     user_gardens = list(mongo.db.gardens.find({'user_id': current_user.get_id()}, {'name': 1, '_id': 1}).sort('name', 1))
-    user_beds = [] # For populating bed filter based on selected garden
+    user_beds = [] 
 
     if filter_garden_id:
         filters['garden_id'] = ObjectId(filter_garden_id)
@@ -71,7 +70,7 @@ def list_recommendations():
         bed = mongo.db.beds.find_one({'_id': rec['bed_id']})
         rec['garden_name'] = garden['name'] if garden else 'N/A'
         rec['bed_name'] = bed['name'] if bed else 'N/A'
-        rec['is_overdue'] = rec['due_date'] < datetime.utcnow() if not rec['is_completed'] else False
+        rec['is_overdue'] = rec['due_date'] < datetime.now() if not rec['is_completed'] else False
         display_recommendations.append(rec)
 
     total_recommendations = mongo.db.recommendations.count_documents(filters)
@@ -107,7 +106,7 @@ def complete_recommendation(recommendation_id):
             return redirect(url_for('recommendation_bp.list_recommendations'))
     
     # Mark recommendation as completed
-    completed_time = datetime.utcnow()
+    completed_time = datetime.now()
     mongo.db.recommendations.update_one(
         {'_id': ObjectId(recommendation_id)},
         {'$set': {
@@ -219,7 +218,7 @@ def new_recommendation():
         description = data.get('description', '')
         due_date_str = data.get('due_date')
         due_time_str = data.get('due_time')
-        redirect_to = data.get('redirect_to')  # Get from form post data
+        redirect_to = data.get('redirect_to')
 
         errors = []
         if not garden_id_str: errors.append("Garden is required.")
@@ -233,8 +232,12 @@ def new_recommendation():
         if due_date_str and due_time_str:
             try:
                 due_datetime = datetime.strptime(f"{due_date_str} {due_time_str}", '%Y-%m-%d %H:%M')
+                current_datetime = datetime.now()
+                if due_datetime < current_datetime:
+                    errors.append("Дата и время выполнения не могут быть в прошлом.")
+                    
             except ValueError:
-                errors.append("Invalid due date or time format. Use YYYY-MM-DD and HH:MM.")
+                errors.append("Неверный формат даты. Используйте ГГГГ-MM-ДД and ЧЧ:MM.")
         
         if errors:
             for error in errors:
@@ -257,8 +260,8 @@ def new_recommendation():
                                    user_gardens=user_gardens,
                                    initial_beds=current_beds_for_form,
                                    RECOMMENDATION_ACTION_TYPES=RECOMMENDATION_ACTION_TYPES,
-                                   today_date=datetime.utcnow().strftime('%Y-%m-%d'),
-                                   current_time=datetime.utcnow().strftime('%H:%M'),
+                                   today_date=datetime.now().strftime('%Y-%m-%d'),
+                                   current_time=datetime.now().strftime('%H:%M'),
                                    redirect_to=redirect_to)
 
         garden_id = ObjectId(garden_id_str)
@@ -275,7 +278,7 @@ def new_recommendation():
             'completed_at': None,
             'completed_by_care_log_id': None,
             'source': 'manual', # Indicates it was manually created by user
-            'created_at': datetime.utcnow()
+            'created_at': datetime.now()
         }
         
         try:
@@ -305,6 +308,6 @@ def new_recommendation():
                            user_gardens=user_gardens, 
                            initial_beds=initial_beds,
                            RECOMMENDATION_ACTION_TYPES=RECOMMENDATION_ACTION_TYPES,
-                           today_date=datetime.utcnow().strftime('%Y-%m-%d'),
-                           current_time=datetime.utcnow().strftime('%H:%M'),
+                           today_date=datetime.now().strftime('%Y-%m-%d'),
+                           current_time=datetime.now().strftime('%H:%M'),
                            redirect_to=redirect_to)

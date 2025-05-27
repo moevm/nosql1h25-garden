@@ -119,7 +119,7 @@ def admin_view_gardens():
         garden['location'] = garden.get('location', 'N/A')
         
         # Format creation time
-        garden['created_at'] = garden.get('creation_time', garden.get('created_at', datetime.utcnow()))
+        garden['created_at'] = garden.get('creation_time', garden.get('created_at', datetime.now()))
         
         gardens_list.append(garden)
     
@@ -177,7 +177,7 @@ def admin_view_beds():
         bed['count_row'] = bed.get('count_row', 0)
         
         # Format creation time
-        bed['created_at'] = bed.get('creation_time', bed.get('created_at', datetime.utcnow()))
+        bed['created_at'] = bed.get('creation_time', bed.get('created_at', datetime.now()))
         
         beds_list.append(bed)
 

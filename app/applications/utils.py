@@ -2,6 +2,8 @@ from flask import flash, current_app
 from werkzeug.utils import secure_filename
 import os
 import uuid
+from datetime import datetime, timezone, timedelta
+MOSCOW_TZ = timezone(timedelta(hours=3))
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 def allowed_file(filename):
     return '.' in filename and \
@@ -23,3 +25,6 @@ def save_photo(file):
             flash(f'Error saving photo: {e}', 'error')
             return None
     return None
+
+def now_msk() -> datetime:
+    return datetime.now(MOSCOW_TZ)

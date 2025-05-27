@@ -30,7 +30,6 @@
     {% else %}
     <form method="GET" action="{{ url_for('recommendation_bp.list_recommendations') }}" class="filter-sort-form">
         <h4>Поиск и добавление рекомендаций</h4>
-        <!-- Первый ряд: фильтры -->
         <div class="form-row">
             <div class="form-group">
                 <label for="garden_id">Участок</label>
@@ -114,7 +113,7 @@
                                 <span class="badge badge-warning">Ожидает выполнения</span>
                             {% endif %}
                         </p>
-                        <p><small>Создано: {{ rec.created_at.strftime('%d-%m-%Y') if rec.created_at else 'N/A' }}</small></p>
+                        <p><small>Создано: {{ rec.created_at.strftime('%d-%m-%Y %H:%M') if rec.created_at else 'N/A' }}</small></p>
                     </div>
                     <form method="POST" action="{{ url_for('recommendation_bp.complete_recommendation', recommendation_id=rec._id) }}">
                         <button type="submit" class="icon-button complete-button" title="Отметить как выполненное"></button>

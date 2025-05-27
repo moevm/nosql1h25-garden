@@ -19,8 +19,8 @@
 }
 
 .main-content {
-    margin-left: 240px;
-    padding: 20px;
+    margin-left: 350px;
+    padding: 0px;
 }
 
 .nav-link {
@@ -111,14 +111,14 @@
     .main-content {
         margin-left: 0;
     }
-    
+
     .sidebar {
         position: static;
         height: auto;
         padding-top: 0;
     }
-    
+
     .sidebar-sticky {
         height: auto;
     }
-} 
+}

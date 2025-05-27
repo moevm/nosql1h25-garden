@@ -39,8 +39,8 @@
                 <p><strong>Почва:</strong> {{ garden.soil_type or 'Не указано' }}</p>
                 <p><strong>Местность:</strong> {{ garden.terrain_type or 'Не указано' }}</p>
                 <p><strong>Освещение:</strong> {{ garden.lighting or 'Не указано' }}</p>
-                <p><small>Добавлен: {{ garden.registration_time.strftime('%d-%m-%Y') if garden.registration_time else 'N/A' }}</small></p>
-                <p><small>Изменен: {{ garden.last_modified_time.strftime('%d-%m-%Y') if garden.last_modified_time else 'N/A' }}</small></p>
+                <p><small>Добавлен: {{ garden.registration_time.strftime('%d-%m-%Y %H:%M') if garden.registration_time else 'N/A' }}</small></p>
+                <p><small>Изменен: {{ garden.last_modified_time.strftime('%d-%m-%Y %H:%M') if garden.last_modified_time else 'N/A' }}</small></p>
             </div>
                 <a href="{{ url_for('land_bp.gardens') }}" class="icon-button return-button" title="Вернуться к участкам"></a>
                 <a href="{{ url_for('land_bp.edit_garden', garden_id=garden._id) }}" class="icon-button edit-button" title="Редактировать"></a>

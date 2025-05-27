@@ -17,12 +17,15 @@
 
 <div class="profile-container">
   <div class="profile-menu">
-    <a class="personal-diary" href="{{ url_for('diary_bp.entries') }}">Личный дневник</a>
-    <a class="my-sites" href="{{ url_for('land_bp.gardens') }}">Мои участки</a>
-    <a class="garden-care" href="{{ url_for('care_bp.list_care_logs') }}">Уход за грядками</a>
-    <a class="recommendations" href="{{ url_for('recommendation_bp.list_recommendations') }}">Рекомендации</a>
-    <a class="news" href="">Новости</a>
-    <a class="statistics" href="">Статистика</a>
+      <a class="personal-diary" href="{{ url_for('diary_bp.entries') }}">Личный дневник</a>
+      <a class="my-sites" href="{{ url_for('land_bp.gardens') }}">Мои участки</a>
+      <a class="garden-care" href="{{ url_for('care_bp.list_care_logs') }}">Уход за грядками</a>
+      <a class="recommendations" href="{{ url_for('recommendation_bp.list_recommendations') }}">Рекомендации</a>
+      <a class="news" href="">Новости</a>
+      <a class="statistics" href="">Статистика</a>
+      {% if current_user.is_authenticated and current_user.is_admin %}
+          <a class="admin-panel" href="{{ url_for('admin_bp.admin_dashboard') }}">Зайти в панель админа</a>
+      {% endif %}
   </div>
 
 <form id="profile-form" class="profile" method="POST" action="{{ url_for('auth_bp.profile') }}" enctype="multipart/form-data">

@@ -134,7 +134,7 @@ def profile():
         # Сохраняем изменения, если есть что сохранять
         if update_fields:
             # обновляем отметку времени изменения
-            new_updated = datetime.utcnow()
+            new_updated = datetime.now()
             update_fields['updated_at'] = new_updated
 
             # обновляем в базе

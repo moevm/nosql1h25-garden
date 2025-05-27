@@ -4,7 +4,6 @@ from applications import mongo
 from bson import ObjectId
 from datetime import datetime
 from .choices import CARE_ACTION_TYPES
-
 care_bp = Blueprint(
     "care_bp", 
     __name__, 
@@ -204,7 +203,7 @@ def new_care_log():
             'action_type': action_type,
             'log_date': log_datetime,
             'notes': notes,
-            'created_at': datetime.utcnow(),
+            'created_at': datetime.now(),
             'linked_recommendation_id': None 
         }
         
