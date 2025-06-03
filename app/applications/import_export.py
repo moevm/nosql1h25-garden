@@ -275,8 +275,7 @@ def import_data():
                             imported_counts[collection_name] = 0
                 else:
                     imported_counts[collection_name] = 0
-                    
-        # Create summary message
+                      # Create summary message
         summary_parts = []
         for collection_name, count in imported_counts.items():
             if count > 0:
@@ -292,6 +291,143 @@ def import_data():
         flash(f'Ошибка при импорте данных: {str(e)}', 'error')
         
     return redirect(url_for('admin_bp.admin_dashboard'))
+
+@import_export_bp.route('/import-user-data', methods=['POST'])
+@login_required
+def import_user_data():
+    """Import current user's own data only"""
+    try:
+        if 'import_file' not in request.files:
+            flash('Файл для импорта не выбран', 'error')
+            return redirect(url_for('auth_bp.profile'))
+            
+        file = request.files['import_file']
+        if file.filename == '':
+            flash('Файл для импорта не выбран', 'error')
+            return redirect(url_for('auth_bp.profile'))
+            
+        if not file.filename.lower().endswith('.json'):
+            flash('Поддерживаются только JSON файлы', 'error')
+            return redirect(url_for('auth_bp.profile'))
+            
+        # Parse JSON data
+        try:
+            import_data = json.load(file)
+        except json.JSONDecodeError as e:
+            flash(f'Ошибка при чтении JSON файла: {str(e)}', 'error')
+            return redirect(url_for('auth_bp.profile'))
+            
+        # Validate structure
+        if 'data' not in import_data:
+            flash('Неверный формат файла импорта. Отсутствует секция "data"', 'error')
+            return redirect(url_for('auth_bp.profile'))
+            
+        # Check if this is a user export (not admin export)
+        export_type = import_data.get('export_metadata', {}).get('export_type')
+        if export_type != 'user_data':
+            flash('Можно импортировать только файлы экспорта пользователей. Обратитесь к администратору для массового импорта.', 'error')
+            return redirect(url_for('auth_bp.profile'))
+            
+        data_to_import = import_data['data']
+        current_user_id = current_user.get_id()
+        
+        # Validate that the imported data belongs to the current user
+        if 'users' in data_to_import and data_to_import['users']:
+            imported_user_data = data_to_import['users'][0]  # Should be only one user
+            imported_user_id = str(imported_user_data.get('_id', ''))
+            
+            if imported_user_id != current_user_id:
+                flash('Вы можете импортировать только свои собственные данные', 'error')
+                return redirect(url_for('auth_bp.profile'))
+        
+        # Get confirmation from user
+        replace_existing = request.form.get('replace_existing') == 'true'
+        
+        imported_counts = {}
+        
+        # Define collections to import (excluding users - we don't want to overwrite user account)
+        import_collections = [
+            'gardens',
+            'beds', 
+            'care_logs',
+            'recommendations',
+            'diary'
+        ]
+        
+        # Import each collection (user's data only)
+        for collection_name in import_collections:
+            if collection_name not in data_to_import:
+                continue
+                
+            collection = mongo.db[collection_name]
+            documents = data_to_import[collection_name]
+            
+            if not documents:
+                imported_counts[collection_name] = 0
+                continue
+                
+            # Additional validation: ensure all documents belong to current user
+            for doc in documents:
+                if 'user_id' in doc and doc['user_id'] != current_user_id:
+                    flash(f'Обнаружены данные другого пользователя в коллекции {collection_name}. Импорт отменен.', 'error')
+                    return redirect(url_for('auth_bp.profile'))
+                
+            # Convert back to MongoDB format
+            documents = deserialize_mongodb_data(documents)
+            
+            if replace_existing:
+                # Clear existing data for this collection (only for current user)
+                collection.delete_many({'user_id': current_user_id})
+                
+            # Insert documents
+            if isinstance(documents, list):
+                if len(documents) > 0:
+                    try:
+                        result = collection.insert_many(documents, ordered=False)
+                        imported_counts[collection_name] = len(result.inserted_ids)
+                    except Exception as e:
+                        # Handle duplicate key errors
+                        if 'duplicate key' in str(e).lower():
+                            # Try inserting one by one to handle duplicates
+                            count = 0
+                            for doc in documents:
+                                try:
+                                    collection.insert_one(doc)
+                                    count += 1
+                                except:
+                                    # Skip duplicates or invalid documents
+                                    continue
+                            imported_counts[collection_name] = count
+                        else:
+                            flash(f'Ошибка при импорте коллекции {collection_name}: {str(e)}', 'warning')
+                            imported_counts[collection_name] = 0
+                else:
+                    imported_counts[collection_name] = 0
+                    
+        # Create summary message
+        summary_parts = []
+        for collection_name, count in imported_counts.items():
+            if count > 0:
+                collection_names_ru = {
+                    'gardens': 'участков',
+                    'beds': 'грядок',
+                    'care_logs': 'записей ухода',
+                    'recommendations': 'рекомендаций',
+                    'diary': 'записей дневника'
+                }
+                ru_name = collection_names_ru.get(collection_name, collection_name)
+                summary_parts.append(f'{ru_name}: {count}')
+                
+        if summary_parts:
+            summary = 'Импортировано ваших данных: ' + ', '.join(summary_parts)
+            flash(summary, 'success')
+        else:
+            flash('Нет данных для импорта или все записи уже существуют', 'warning')
+            
+    except Exception as e:
+        flash(f'Ошибка при импорте ваших данных: {str(e)}', 'error')
+        
+    return redirect(url_for('auth_bp.profile'))
 
 @import_export_bp.route('/export-user-data', methods=['POST'])
 @login_required
