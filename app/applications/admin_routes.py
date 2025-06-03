@@ -459,3 +459,54 @@ def admin_edit_garden(garden_id):
         return redirect(url_for('admin_bp.admin_view_gardens'))
     
     return render_template('land_form.html', form_data=garden_doc, garden_id=garden_id, is_edit=True, is_admin=True, soil_types=SOIL_TYPES, terrain_types=TERRAIN_TYPES, lighting_options=LIGHTING_OPTIONS)
+
+@admin_bp.route('/admin/gardens/<garden_id>/delete', methods=['POST'])
+@login_required
+@admin_required
+def admin_delete_garden(garden_id):
+    """Admin can delete any garden"""
+    import os
+    from flask import current_app
+    
+    garden = mongo.db.gardens.find_one({'_id': ObjectId(garden_id)})
+    if not garden:
+        flash('Garden not found.', 'error')
+        return redirect(url_for('admin_bp.admin_view_gardens'))
+
+    # Find all beds of this garden
+    beds = list(mongo.db.beds.find({'garden_id': ObjectId(garden_id)}))
+    
+    # Delete all care logs related to this garden
+    mongo.db.care_logs.delete_many({'garden_id': ObjectId(garden_id)})
+    mongo.db.recommendations.delete_many({'garden_id': ObjectId(garden_id)})
+    
+    # Delete all beds of this garden
+    for bed in beds:
+        if bed.get('photo_file_paths'):
+            for photo_path in bed['photo_file_paths']:
+                if photo_path:
+                    photo_disk_path = os.path.join(current_app.static_folder, photo_path)
+                    if os.path.exists(photo_disk_path):
+                        try:
+                            os.remove(photo_disk_path)
+                        except Exception as e:
+                            flash(f'Could not delete bed photo: {e}', 'warning')
+    
+    mongo.db.beds.delete_many({'garden_id': ObjectId(garden_id)})
+    
+    # Delete garden photos
+    if garden.get('photo_file_paths'):
+        for photo_path in garden['photo_file_paths']:
+            if photo_path:
+                photo_disk_path = os.path.join(current_app.static_folder, photo_path)
+                if os.path.exists(photo_disk_path):
+                    try:
+                        os.remove(photo_disk_path)
+                    except Exception as e:
+                        flash(f'Could not delete garden photo: {e}', 'warning')
+    
+    # Delete the garden itself
+    mongo.db.gardens.delete_one({'_id': ObjectId(garden_id)})
+    
+    flash('Garden deleted successfully!', 'success')
+    return redirect(url_for('admin_bp.admin_view_gardens'))
