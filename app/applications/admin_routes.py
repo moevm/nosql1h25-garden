@@ -950,3 +950,37 @@ def admin_edit_recommendation(recommendation_id):
                            recommendation_id=recommendation_id,
                            today_date=datetime.utcnow().strftime('%Y-%m-%d'),
                            current_time=datetime.utcnow().strftime('%H:%M'))
+
+@admin_bp.route('/admin/recommendations/<recommendation_id>/delete', methods=['POST'])
+@login_required
+@admin_required
+def admin_delete_recommendation(recommendation_id):
+    """Admin can delete any recommendation"""
+    recommendation = mongo.db.recommendations.find_one({'_id': ObjectId(recommendation_id)})
+    if not recommendation:
+        flash('Recommendation not found.', 'error')
+        return redirect(url_for('admin_bp.admin_view_recommendations'))
+
+    # Update bed stats if recommendation is linked to a bed
+    bed_id = recommendation.get('bed_id')
+    if bed_id:
+        remaining_recommendations = mongo.db.recommendations.count_documents({'bed_id': bed_id}) - 1
+        pending_recommendations = mongo.db.recommendations.count_documents({
+            'bed_id': bed_id, 'is_completed': False
+        })
+        
+        mongo.db.beds.update_one(
+            {'_id': ObjectId(bed_id)},
+            {'$set': {
+                'stats.pending_recommendations': max(0, pending_recommendations - 1) if not recommendation.get('is_completed') else pending_recommendations,
+                'stats.completed_recommendations': mongo.db.recommendations.count_documents({
+                    'bed_id': bed_id, 'is_completed': True
+                }) - (1 if recommendation.get('is_completed') else 0)
+            }}
+        )
+    
+    # Delete the recommendation
+    mongo.db.recommendations.delete_one({'_id': ObjectId(recommendation_id)})
+    
+    flash('Recommendation deleted successfully!', 'success')
+    return redirect(url_for('admin_bp.admin_view_recommendations'))
