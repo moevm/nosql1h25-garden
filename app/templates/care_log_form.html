@@ -24,11 +24,13 @@
                 {% endfor %}
             </div>
         {% endif %}
-    {% endwith %}
-
-    <div class="form-wrapper">
+    {% endwith %}    <div class="form-wrapper">
         {% if is_edit %}
-            <form method="POST" action="{{ url_for('care_bp.edit_care_log', care_log_id=care_log_id) }}" class="filter-sort-form">
+            {% if is_admin %}
+                <form method="POST" action="{{ url_for('admin_bp.admin_edit_care_log', care_log_id=care_log_id) }}" class="filter-sort-form">
+            {% else %}
+                <form method="POST" action="{{ url_for('care_bp.edit_care_log', care_log_id=care_log_id) }}" class="filter-sort-form">
+            {% endif %}
         {% else %}
             <form method="POST" action="{{ url_for('care_bp.new_care_log') }}" class="filter-sort-form">
         {% endif %}
@@ -84,11 +86,11 @@
             <div class="form-group">
                 <label for="notes">Заметки</label>
                 <textarea name="notes" id="notes" class="form-control" style="width: 100%;height: 80px;" rows="3">{{ form_data.notes if form_data and form_data.notes }}</textarea>
-            </div>
-
-            <div class="form-actions">
+            </div>            <div class="form-actions">
                 <button type="submit" class="btn btn-primary add-section-btn">{% if is_edit %}Сохранить изменения{% else %}Добавить запись{% endif %}</button>
-                {% if redirect_to == 'garden_detail' and form_data.garden_id %}
+                {% if is_admin %}
+                    <a href="{{ url_for('admin_bp.admin_view_care_logs') }}" class="btn btn-primary add-section-btn">Отмена</a>
+                {% elif redirect_to == 'garden_detail' and form_data.garden_id %}
                     <a href="{{ url_for('land_bp.garden_detail', garden_id=form_data.garden_id) }}" class="btn btn-primary add-section-btn">Отмена</a>
                 {% else %}
                     <a href="{{ url_for('care_bp.list_care_logs') }}" class="btn btn-primary add-section-btn">Отмена</a>
