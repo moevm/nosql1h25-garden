@@ -510,3 +510,79 @@ def admin_delete_garden(garden_id):
     
     flash('Garden deleted successfully!', 'success')
     return redirect(url_for('admin_bp.admin_view_gardens'))
+
+@admin_bp.route('/admin/beds/<bed_id>/edit', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def admin_edit_bed(bed_id):
+    """Admin can edit any bed"""
+    from .land_beds import BED_TYPES, CROP_NAMES
+    from .utils import save_photo
+    
+    bed_doc = mongo.db.beds.find_one({'_id': ObjectId(bed_id)})
+    if not bed_doc:
+        flash('Bed not found.', 'error')
+        return redirect(url_for('admin_bp.admin_view_beds'))
+    
+    # Get the garden for this bed
+    garden = mongo.db.gardens.find_one({'_id': bed_doc['garden_id']})
+    if not garden:
+        flash('Garden not found for this bed.', 'error')
+        return redirect(url_for('admin_bp.admin_view_beds'))
+    
+    if request.method == 'POST':
+        data = request.form
+        
+        # Parse planting date
+        planting_date = None
+        if data.get('planting_date'):
+            try:
+                planting_date = datetime.strptime(data['planting_date'], '%Y-%m-%d')
+            except ValueError:
+                flash('Invalid planting date format.', 'error')
+                return render_template('bed_form.html', 
+                                       form_data=data, 
+                                       bed_id=bed_id, 
+                                       garden_id=str(garden['_id']),
+                                       garden=garden,
+                                       is_edit=True, 
+                                       is_admin=True, 
+                                       bed_types=BED_TYPES,
+                                       crop_names=CROP_NAMES)
+        
+        update_data = {
+            'name': data.get('name', bed_doc.get('name')),
+            'crop_name': data.get('crop_name', bed_doc.get('crop_name', '')),
+            'planting_date': planting_date or bed_doc.get('planting_date'),
+            'count_row': int(data.get('count_row', bed_doc.get('count_row', 1))),
+            'length': float(data.get('length', bed_doc.get('length', 0.0))),
+            'width': float(data.get('width', bed_doc.get('width', 0.0))),
+            'bed_type': data.get('bed_type', bed_doc.get('bed_type', '')),
+            'is_hothouse': data.get('is_hothouse') == 'on',
+            'notes': data.get('notes', bed_doc.get('notes', '')),
+            'last_modified_time': datetime.utcnow()
+        }
+
+        if 'photo' in request.files:
+            photo_file = request.files['photo']
+            if photo_file.filename != '':
+                saved_photo_path = save_photo(photo_file)
+                if saved_photo_path:
+                    if 'photo_file_paths' not in update_data:
+                        update_data['photo_file_paths'] = bed_doc.get('photo_file_paths', [])
+                    update_data['photo_file_paths'].append(saved_photo_path)
+
+        mongo.db.beds.update_one({'_id': ObjectId(bed_id)}, {'$set': update_data})
+        flash('Bed updated successfully!', 'success')
+        return redirect(url_for('admin_bp.admin_view_beds'))
+    
+    return render_template('bed_form.html', 
+                           form_data=bed_doc, 
+                           bed_id=bed_id, 
+                           garden_id=str(garden['_id']),
+                           garden=garden,
+                           is_edit=True, 
+                           is_admin=True, 
+                           bed_types=BED_TYPES,
+                           crop_names=CROP_NAMES)
+    
