@@ -56,38 +56,37 @@
         <div class="profile-creation-date">Создан {{ current_user.created_at.strftime('%d/%m/%Y %H:%M:%S') }}</div>
         <div class="profile-edit-date">Ред. {{ current_user.updated_at.strftime('%d/%m/%Y %H:%M:%S') }}</div>
       </div>
-    </div>    <div class="profile-actions">
-      <form method="POST" action="{{ url_for('import_export_bp.export_user_data') }}" style="display: inline;">
-        <button type="submit" class="export-data profile-action-btn" style="border: none; background: none; color: inherit; cursor: pointer;">Экспортировать мои данные</button>
-      </form>
+    </div>
+    <div class="profile-actions">
+       <a class="export-data" href="#" id="export-data-link" data-export-url="{{ url_for('import_export_bp.export_user_data') }}">Экспортировать мои данные</a>
       <a class="import-data" href="#" onclick="document.getElementById('user-import-modal').style.display='block'">Импортировать данные</a>
       <a href="{{ url_for('auth_bp.logout') }}" class="profile-action-btn logout-btn" onclick="return confirm('Вы уверены, что хотите выйти из профиля?')">Выйти из профиля</a>
     </div>
   </form>
 </div>
 
-<!-- User Import Modal -->
-<div id="user-import-modal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
-  <div class="modal-content" style="background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 500px; border-radius: 8px;">
-    <span class="close" onclick="document.getElementById('user-import-modal').style.display='none'" style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+<div id="user-import-modal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="document.getElementById('user-import-modal').style.display='none'">&times;</span>
     <h3>Импорт данных</h3>
     <p class="text-muted">Выберите JSON файл с вашими данными для импорта.</p>
     <form method="POST" action="{{ url_for('import_export_bp.import_data') }}" enctype="multipart/form-data">
-      <div class="form-group" style="margin-bottom: 15px;">
+      <div class="form-group">
         <label for="user_import_file">Файл данных (JSON):</label>
-        <input type="file" id="user_import_file" name="import_file" accept=".json" required style="width: 100%; padding: 8px; margin-top: 5px;">
+        <input type="file" id="user_import_file" name="import_file" accept=".json" required>
       </div>
-      <div class="form-check" style="margin-bottom: 15px;">
-        <input type="checkbox" id="user_replace_existing" name="replace_existing" value="true" style="margin-right: 8px;">
-        <label for="user_replace_existing" style="font-size: 14px; color: #666;">Заменить существующие данные</label>
+      <div class="form-check">
+        <input type="checkbox" id="user_replace_existing" name="replace_existing" value="true">
+        <label for="user_replace_existing">Заменить существующие данные</label>
       </div>
-      <div style="text-align: right;">
-        <button type="button" onclick="document.getElementById('user-import-modal').style.display='none'" style="margin-right: 10px; padding: 8px 16px; background: #ccc; border: none; border-radius: 4px; cursor: pointer;">Отмена</button>
-        <button type="submit" style="padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Импортировать</button>
+      <div class="form-actions">
+        <button type="button" onclick="document.getElementById('user-import-modal').style.display='none'">Отмена</button>
+        <button type="submit">Импортировать</button>
       </div>
     </form>
   </div>
 </div>
+
 
 <script src="{{ url_for('static', filename='scripts/profile_script.js') }}"></script>
 {% endblock %}

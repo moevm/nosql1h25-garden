@@ -98,3 +98,20 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  const exportLink = document.getElementById('export-data-link');
+  if (exportLink) {
+    exportLink.addEventListener('click', function(event) {
+      event.preventDefault();
+
+      // Создаем и отправляем POST-запрос через временную форму
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = exportLink.dataset.exportUrl;
+      document.body.appendChild(form);
+      form.submit();
+    });
+  }
+});
