@@ -28,10 +28,8 @@
     {% endwith %}
 
     <div class="form-wrapper">
-        <h2>{% if is_edit %}Редактировать грядку{% else %}Новая грядка{% endif %} <small class="text-muted">на участке "{{ garden.name }}"</small></h2>
-
-        <form method="POST" 
-              action="{{ url_for('bed_bp.edit_bed', garden_id=garden_id, bed_id=bed_id) if is_edit else url_for('bed_bp.new_bed', garden_id=garden_id) }}" 
+        <h2>{% if is_edit %}Редактировать грядку{% else %}Новая грядка{% endif %} <small class="text-muted">на участке "{{ garden.name }}"</small></h2>        <form method="POST" 
+              action="{% if is_admin and is_edit %}{{ url_for('admin_bp.admin_edit_bed', bed_id=bed_id) }}{% elif is_edit %}{{ url_for('bed_bp.edit_bed', garden_id=garden_id, bed_id=bed_id) }}{% else %}{{ url_for('bed_bp.new_bed', garden_id=garden_id) }}{% endif %}" 
               enctype="multipart/form-data"
               class="filter-sort-form">
             
@@ -107,7 +105,7 @@
                     Тепличная грядка
                 </button>
                 <button type="submit" class="btn btn-primary add-section-btn">{% if is_edit %}Сохранить изменения{% else %}Создать грядку{% endif %}</button>
-                <a href="{{ url_for('land_bp.garden_detail', garden_id=garden_id) }}" class="btn btn-primary add-section-btn">Отмена</a>
+                <a href="{% if is_admin %}{{ url_for('admin_bp.admin_view_beds') }}{% else %}{{ url_for('land_bp.garden_detail', garden_id=garden_id) }}{% endif %}" class="btn btn-primary add-section-btn">Отмена</a>
             </div>
         </form>
     </div>
