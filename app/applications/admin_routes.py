@@ -984,3 +984,44 @@ def admin_delete_recommendation(recommendation_id):
     
     flash('Recommendation deleted successfully!', 'success')
     return redirect(url_for('admin_bp.admin_view_recommendations'))
+
+@admin_bp.route('/admin/diary_entries/<entry_id>/edit', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def admin_edit_diary_entry(entry_id):
+    """Admin can edit any diary entry"""
+    entry_doc = mongo.db.diary.find_one({'_id': ObjectId(entry_id)})
+    if not entry_doc:
+        flash('Diary entry not found.', 'error')
+        return redirect(url_for('admin_bp.admin_view_diary'))
+    
+    if request.method == 'POST':
+        data = request.form
+        
+        update_data = {
+            'title': data.get('title', entry_doc.get('title')),
+            'content': data.get('content', entry_doc.get('content', '')),
+            'last_modified_time': datetime.utcnow()
+        }
+
+        mongo.db.diary.update_one({'_id': ObjectId(entry_id)}, {'$set': update_data})
+        flash('Diary entry updated successfully!', 'success')
+        return redirect(url_for('admin_bp.admin_view_diary'))
+    
+    return render_template('entry_form.html', form_data=entry_doc, entry_id=entry_id, is_edit=True, is_admin=True)
+
+@admin_bp.route('/admin/diary_entries/<entry_id>/delete', methods=['POST'])
+@login_required
+@admin_required
+def admin_delete_diary_entry(entry_id):
+    """Admin can delete any diary entry"""
+    entry = mongo.db.diary.find_one({'_id': ObjectId(entry_id)})
+    if not entry:
+        flash('Diary entry not found.', 'error')
+        return redirect(url_for('admin_bp.admin_view_diary'))
+
+    # Delete the diary entry
+    mongo.db.diary.delete_one({'_id': ObjectId(entry_id)})
+    
+    flash('Diary entry deleted successfully!', 'success')
+    return redirect(url_for('admin_bp.admin_view_diary'))
