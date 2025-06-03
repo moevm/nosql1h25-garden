@@ -585,4 +585,46 @@ def admin_edit_bed(bed_id):
                            is_admin=True, 
                            bed_types=BED_TYPES,
                            crop_names=CROP_NAMES)
+
+@admin_bp.route('/admin/beds/<bed_id>/delete', methods=['POST'])
+@login_required
+@admin_required  
+def admin_delete_bed(bed_id):
+    """Admin can delete any bed"""
+    import os
+    from flask import current_app
     
+    bed = mongo.db.beds.find_one({'_id': ObjectId(bed_id)})
+    if not bed:
+        flash('Bed not found.', 'error')
+        return redirect(url_for('admin_bp.admin_view_beds'))
+
+    # Delete related care logs and recommendations
+    mongo.db.care_logs.delete_many({'bed_id': ObjectId(bed_id)})
+    mongo.db.recommendations.delete_many({'bed_id': ObjectId(bed_id)})
+    
+    # Delete bed photos
+    if bed.get('photo_file_paths'):
+        for photo_path in bed['photo_file_paths']:
+            if photo_path:
+                photo_disk_path = os.path.join(current_app.static_folder, photo_path)
+                if os.path.exists(photo_disk_path):
+                    try:
+                        os.remove(photo_disk_path)
+                    except Exception as e:
+                        flash(f'Could not delete bed photo: {e}', 'warning')
+    
+    # Update garden stats
+    garden_id = bed.get('garden_id')
+    if garden_id:
+        remaining_beds = mongo.db.beds.count_documents({'garden_id': garden_id})
+        mongo.db.gardens.update_one(
+            {'_id': ObjectId(garden_id)},
+            {'$set': {'stats.total_beds': remaining_beds, 'stats.active_beds': remaining_beds}}
+        )
+    
+    # Delete the bed
+    mongo.db.beds.delete_one({'_id': ObjectId(bed_id)})
+    
+    flash('Bed deleted successfully!', 'success')
+    return redirect(url_for('admin_bp.admin_view_beds'))
