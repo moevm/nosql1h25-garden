@@ -1,9 +1,13 @@
 {% extends "base.html" %}
 
-{% block title %}Огородник — Новая рекомендация{% endblock %}
+{% block title %}Огородник — {% if is_edit %}Редактировать рекомендацию{% else %}Новая рекомендация{% endif %}{% endblock %}
 
 {% block header %}
-{% set header_title = "Создание новой рекомендации" %}
+{% if is_edit %}
+    {% set header_title = "Редактирование рекомендации" %}
+{% else %}
+    {% set header_title = "Создание новой рекомендации" %}
+{% endif %}
 {% include "icons_header.html" %}
 {% endblock %}
 
@@ -20,10 +24,16 @@
                 {% endfor %}
             </div>
         {% endif %}
-    {% endwith %}
-
-    <div class="form-wrapper">
-        <form method="POST" action="{{ url_for('recommendation_bp.new_recommendation') }}" class="filter-sort-form">
+    {% endwith %}    <div class="form-wrapper">
+        {% if is_edit %}
+            {% if is_admin %}
+                <form method="POST" action="{{ url_for('admin_bp.admin_edit_recommendation', recommendation_id=recommendation_id) }}" class="filter-sort-form">
+            {% else %}
+                <form method="POST" action="{{ url_for('recommendation_bp.edit_recommendation', recommendation_id=recommendation_id) }}" class="filter-sort-form">
+            {% endif %}
+        {% else %}
+            <form method="POST" action="{{ url_for('recommendation_bp.new_recommendation') }}" class="filter-sort-form">
+        {% endif %}
             {% if redirect_to %}
                 <input type="hidden" name="redirect_to" value="{{ redirect_to }}">
             {% endif %}
@@ -89,11 +99,11 @@
                            class="form-control" 
                            required>
                 </div>
-            </div>
-
-            <div class="form-actions">
-                <button type="submit" class="btn btn-primary add-section-btn">Создать рекомендацию</button>
-                {% if redirect_to == 'garden_detail' and form_data.garden_id %}
+            </div>            <div class="form-actions">
+                <button type="submit" class="btn btn-primary add-section-btn">{% if is_edit %}Сохранить изменения{% else %}Создать рекомендацию{% endif %}</button>
+                {% if is_admin %}
+                    <a href="{{ url_for('admin_bp.admin_view_recommendations') }}" class="btn btn-primary add-section-btn">Отмена</a>
+                {% elif redirect_to == 'garden_detail' and form_data.garden_id %}
                     <a href="{{ url_for('land_bp.garden_detail', garden_id=form_data.garden_id) }}" class="btn btn-primary add-section-btn">Отмена</a>
                 {% else %}
                     <a href="{{ url_for('recommendation_bp.list_recommendations') }}" class="btn btn-primary add-section-btn">Отмена</a>
