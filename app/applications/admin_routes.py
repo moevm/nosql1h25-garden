@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, abort, redirect, url_for, request
+from flask import Blueprint, render_template, abort, redirect, url_for, request, flash
 from flask_login import current_user, login_required
 from functools import wraps
 from applications import mongo
@@ -37,7 +37,6 @@ def admin_dashboard():
     }
     return render_template('admin_dashboard.html', title="Admin Dashboard", stats=stats)
 
-# Placeholder for viewing all users - we'll expand this later
 @admin_bp.route('/admin/users')
 @login_required
 @admin_required
@@ -416,3 +415,47 @@ def admin_view_diary():
     return render_template('admin_view_diary.html', entries=entries_list, title="Manage Diary Entries",
                          search_title=search_title, search_user_email=search_user_email,
                          date_from=date_from, date_to=date_to)
+
+@admin_bp.route('/admin/gardens/<garden_id>/edit', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def admin_edit_garden(garden_id):
+    """Admin can edit any garden"""
+    from .land import SOIL_TYPES, TERRAIN_TYPES, LIGHTING_OPTIONS
+    from .utils import save_photo
+    
+    garden_doc = mongo.db.gardens.find_one({'_id': ObjectId(garden_id)})
+    if not garden_doc:
+        flash('Garden not found.', 'error')
+        return redirect(url_for('admin_bp.admin_view_gardens'))
+    
+    if request.method == 'POST':
+        data = request.form
+        update_data = {
+            'name': data.get('name', garden_doc.get('name')),
+            'location': data.get('location', garden_doc.get('location', '')),
+            'area': float(data.get('area', garden_doc.get('area', 0.0))),
+            'soil_type': data.get('soil_type', garden_doc.get('soil_type', '')),
+            'terrain_type': data.get('terrain_type', garden_doc.get('terrain_type', '')),
+            'lighting': data.get('lighting', garden_doc.get('lighting', '')),
+            'last_modified_time': datetime.utcnow()
+        }
+
+        if update_data['soil_type'] not in SOIL_TYPES:
+            flash('Invalid soil type selected.', 'error')
+            return render_template('land_form.html', form_data=data, garden_id=garden_id, is_edit=True, is_admin=True, soil_types=SOIL_TYPES, terrain_types=TERRAIN_TYPES, lighting_options=LIGHTING_OPTIONS)
+        
+        if 'photo' in request.files:
+            photo_file = request.files['photo']
+            if photo_file.filename != '':
+                saved_photo_path = save_photo(photo_file)
+                if saved_photo_path:
+                    if 'photo_file_paths' not in update_data:
+                        update_data['photo_file_paths'] = garden_doc.get('photo_file_paths', [])
+                    update_data['photo_file_paths'].append(saved_photo_path)
+
+        mongo.db.gardens.update_one({'_id': ObjectId(garden_id)}, {'$set': update_data})
+        flash('Garden updated successfully!', 'success')
+        return redirect(url_for('admin_bp.admin_view_gardens'))
+    
+    return render_template('land_form.html', form_data=garden_doc, garden_id=garden_id, is_edit=True, is_admin=True, soil_types=SOIL_TYPES, terrain_types=TERRAIN_TYPES, lighting_options=LIGHTING_OPTIONS)
