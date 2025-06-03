@@ -131,8 +131,7 @@
                         <a href="{{ url_for('admin_bp.admin_view_recommendations') }}" class="btn btn-danger w-100">
                             <i class="bi bi-lightbulb me-2"></i>Recommendations
                         </a>
-                    </div>
-                    <div class="col-md-2 mb-3">
+                    </div>                    <div class="col-md-2 mb-3">
                         <a href="{{ url_for('admin_bp.admin_view_diary') }}" class="btn btn-secondary w-100">
                             <i class="bi bi-book me-2"></i>Diary Entries
                         </a>
@@ -142,4 +141,45 @@
         </div>
     </div>
 </div>
-{% endblock %} 
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Data Management</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Export Data</h6>
+                        <p class="text-muted small">Export all application data to JSON format</p>
+                        <form method="POST" action="{{ url_for('import_export_bp.export_data') }}" class="d-inline">
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-download me-2"></i>Export All Data
+                            </button>
+                        </form>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Import Data</h6>
+                        <p class="text-muted small">Import application data from JSON format</p>
+                        <form method="POST" action="{{ url_for('import_export_bp.import_data') }}" enctype="multipart/form-data">
+                            <div class="input-group mb-2">
+                                <input type="file" class="form-control" id="import_file" name="import_file" accept=".json" required>
+                                <button type="submit" class="btn btn-warning">
+                                    <i class="bi bi-upload me-2"></i>Import Data
+                                </button>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="replace_existing" name="replace_existing" value="true">
+                                <label class="form-check-label small text-muted" for="replace_existing">
+                                    Replace existing data (WARNING: This will delete all current data)
+                                </label>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
