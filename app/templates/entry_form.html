@@ -25,10 +25,16 @@
           {% endfor %}
         </div>
       {% endif %}
-    {% endwith %}
-
-    <div class="form-wrapper">
-        <form method="POST" class="entry-form" action="{{ url_for('diary_bp.edit_entry', entry_id=entry_id) if is_edit else url_for('diary_bp.new_entry') }}" enctype="multipart/form-data">
+    {% endwith %}    <div class="form-wrapper">
+        {% if is_edit %}
+            {% if is_admin %}
+                <form method="POST" class="entry-form" action="{{ url_for('admin_bp.admin_edit_diary_entry', entry_id=entry_id) }}" enctype="multipart/form-data">
+            {% else %}
+                <form method="POST" class="entry-form" action="{{ url_for('diary_bp.edit_entry', entry_id=entry_id) }}" enctype="multipart/form-data">
+            {% endif %}
+        {% else %}
+            <form method="POST" class="entry-form" action="{{ url_for('diary_bp.new_entry') }}" enctype="multipart/form-data">
+        {% endif %}
             <div class="form-group">
                 <label for="title">Заголовок <span class="required">*</span></label>
                 <input type="text" id="title" name="title" value="{{ form_data.title if form_data and form_data.title is defined else '' }}" required>
@@ -64,13 +70,15 @@
                             style="display: none; max-width: 100%; max-height: 400px;">
                     {% endif %}
                 </div>
-            </div>
-
-            <div class="form-actions">
+            </div>            <div class="form-actions">
                 <button type="submit" class="btn btn-primary add-section-btn">
                     {% if is_edit %}Сохранить изменения{% else %}Создать запись{% endif %}
                 </button>
-                <a href="{{ url_for('diary_bp.entries') }}" class="btn btn-primary add-section-btn">Отмена</a>
+                {% if is_admin %}
+                    <a href="{{ url_for('admin_bp.admin_view_diary') }}" class="btn btn-primary add-section-btn">Отмена</a>
+                {% else %}
+                    <a href="{{ url_for('diary_bp.entries') }}" class="btn btn-primary add-section-btn">Отмена</a>
+                {% endif %}
             </div>
         </form>
     </div>
