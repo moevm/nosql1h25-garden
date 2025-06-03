@@ -3,8 +3,18 @@ document.addEventListener('DOMContentLoaded', function() {
     const deleteButtons = document.querySelectorAll('[data-action="delete"]');
     deleteButtons.forEach(button => {
         button.addEventListener('click', function(e) {
-            if (!confirm('Are you sure you want to delete this item?')) {
-                e.preventDefault();
+            e.preventDefault();
+            const itemId = this.closest('tr').dataset.itemId;
+            const itemType = this.closest('table').dataset.itemType;
+            const itemName = this.closest('tr').querySelector('td').textContent.trim();
+            
+            if (confirm(`Are you sure you want to delete this ${itemType.slice(0, -1)}? This action cannot be undone.\n\nItem: ${itemName}`)) {
+                // Create a form to submit the delete request
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/admin/${itemType}/${itemId}/delete`;
+                document.body.appendChild(form);
+                form.submit();
             }
         });
     });
