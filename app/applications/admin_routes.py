@@ -704,3 +704,35 @@ def admin_edit_care_log(care_log_id):
                            care_log_id=care_log_id,
                            today_date=datetime.utcnow().strftime('%Y-%m-%d'),
                            current_time=datetime.utcnow().strftime('%H:%M'))
+
+@admin_bp.route('/admin/care-logs/<care_log_id>/delete', methods=['POST'])
+@login_required
+@admin_required
+def admin_delete_care_log(care_log_id):
+    """Admin can delete any care log"""
+    care_log = mongo.db.care_logs.find_one({'_id': ObjectId(care_log_id)})
+    if not care_log:
+        flash('Care log not found.', 'error')
+        return redirect(url_for('admin_bp.admin_view_care_logs'))
+
+    # Update bed stats
+    bed_id = care_log.get('bed_id')
+    if bed_id:
+        remaining_logs = mongo.db.care_logs.count_documents({'bed_id': bed_id})
+        last_care_log = mongo.db.care_logs.find_one(
+            {'bed_id': bed_id}, sort=[('log_date', -1)]
+        )
+        
+        update_data = {'stats.total_care_actions': remaining_logs - 1}
+        if last_care_log:
+            update_data['stats.last_care_date'] = last_care_log.get('log_date')
+        else:
+            update_data['stats.last_care_date'] = None
+            
+        mongo.db.beds.update_one({'_id': ObjectId(bed_id)}, {'$set': update_data})
+    
+    # Delete the care log
+    mongo.db.care_logs.delete_one({'_id': ObjectId(care_log_id)})
+    
+    flash('Care log deleted successfully!', 'success')
+    return redirect(url_for('admin_bp.admin_view_care_logs'))
