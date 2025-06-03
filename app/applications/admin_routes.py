@@ -736,3 +736,117 @@ def admin_delete_care_log(care_log_id):
     
     flash('Care log deleted successfully!', 'success')
     return redirect(url_for('admin_bp.admin_view_care_logs'))
+
+@admin_bp.route('/admin/users/<user_id>/edit', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def admin_edit_user(user_id):
+    """Admin can edit user details (except password)"""
+    user_doc = mongo.db.users.find_one({'_id': ObjectId(user_id)})
+    if not user_doc:
+        flash('User not found.', 'error')
+        return redirect(url_for('admin_bp.admin_view_users'))
+    
+    if request.method == 'POST':
+        data = request.form
+        
+        # Check if email is already taken by another user
+        existing_user = mongo.db.users.find_one({
+            'email': data.get('email'),
+            '_id': {'$ne': ObjectId(user_id)}
+        })
+        if existing_user:
+            flash('Email already exists for another user.', 'error')
+            return render_template('admin/admin_edit_user.html', form_data=data, user_id=user_id, is_edit=True)
+        
+        update_data = {
+            'name': data.get('name', user_doc.get('name')),
+            'email': data.get('email', user_doc.get('email')),
+            'email_verified': data.get('email_verified') == 'on',
+            'is_admin': data.get('is_admin') == 'on',
+            'updated_at': datetime.utcnow()
+        }
+        
+        # Update roles based on admin status
+        if update_data['is_admin']:
+            update_data['roles'] = ['admin']
+        else:
+            update_data['roles'] = ['user']
+
+        mongo.db.users.update_one({'_id': ObjectId(user_id)}, {'$set': update_data})
+        flash('User updated successfully!', 'success')
+        return redirect(url_for('admin_bp.admin_view_users'))
+    
+    return render_template('admin/admin_edit_user.html', form_data=user_doc, user_id=user_id, is_edit=True)
+
+@admin_bp.route('/admin/users/<user_id>/delete', methods=['POST'])
+@login_required
+@admin_required
+def admin_delete_user(user_id):
+    """Admin can delete any user (except themselves)"""
+    import os
+    from flask import current_app
+    
+    # Prevent admin from deleting themselves
+    if user_id == current_user.get_id():
+        flash('You cannot delete your own account.', 'error')
+        return redirect(url_for('admin_bp.admin_view_users'))
+    
+    user = mongo.db.users.find_one({'_id': ObjectId(user_id)})
+    if not user:
+        flash('User not found.', 'error')
+        return redirect(url_for('admin_bp.admin_view_users'))
+
+    # Delete all user data in correct order
+    
+    # 1. Delete care logs
+    mongo.db.care_logs.delete_many({'user_id': user_id})
+    
+    # 2. Delete recommendations  
+    mongo.db.recommendations.delete_many({'user_id': user_id})
+    
+    # 3. Delete diary entries
+    mongo.db.diary.delete_many({'user_id': user_id})
+    
+    # 4. Delete beds and their photos
+    beds = list(mongo.db.beds.find({'user_id': user_id}))
+    for bed in beds:
+        if bed.get('photo_file_paths'):
+            for photo_path in bed['photo_file_paths']:
+                if photo_path:
+                    photo_disk_path = os.path.join(current_app.static_folder, photo_path)
+                    if os.path.exists(photo_disk_path):
+                        try:
+                            os.remove(photo_disk_path)
+                        except Exception as e:
+                            pass  # Continue deletion even if photo removal fails
+    mongo.db.beds.delete_many({'user_id': user_id})
+    
+    # 5. Delete gardens and their photos
+    gardens = list(mongo.db.gardens.find({'user_id': user_id}))
+    for garden in gardens:
+        if garden.get('photo_file_paths'):
+            for photo_path in garden['photo_file_paths']:
+                if photo_path:
+                    photo_disk_path = os.path.join(current_app.static_folder, photo_path)
+                    if os.path.exists(photo_disk_path):
+                        try:
+                            os.remove(photo_disk_path)
+                        except Exception as e:
+                            pass  # Continue deletion even if photo removal fails
+    mongo.db.gardens.delete_many({'user_id': user_id})
+    
+    # 6. Delete user profile photo
+    if user.get('photo_path'):
+        photo_disk_path = os.path.join(current_app.static_folder, user['photo_path'])
+        if os.path.exists(photo_disk_path):
+            try:
+                os.remove(photo_disk_path)
+            except Exception as e:
+                pass  # Continue deletion even if photo removal fails
+    
+    # 7. Finally delete the user
+    mongo.db.users.delete_one({'_id': ObjectId(user_id)})
+    
+    flash(f'User "{user.get("name", "Unknown")}" and all associated data deleted successfully!', 'success')
+    return redirect(url_for('admin_bp.admin_view_users'))
