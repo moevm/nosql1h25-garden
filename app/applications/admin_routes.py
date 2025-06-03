@@ -33,7 +33,7 @@ def admin_dashboard():
         'beds': mongo.db.beds.count_documents({}),
         'care_logs': mongo.db.care_logs.count_documents({}),
         'recommendations': mongo.db.recommendations.count_documents({}),
-        'diary_entries': mongo.db.diary_entries.count_documents({})
+        'diary_entries': mongo.db.diary.count_documents({})
     }
     return render_template('admin_dashboard.html', title="Admin Dashboard", stats=stats)
 
@@ -113,13 +113,21 @@ def admin_view_gardens():
         # Count related entities
         garden['beds_count'] = mongo.db.beds.count_documents({'garden_id': garden['_id']})
         garden['care_logs_count'] = mongo.db.care_logs.count_documents({'garden_id': garden['_id']})
-        
-        # Ensure area and location are present
+          # Ensure area and location are present
         garden['area'] = garden.get('area', 'N/A')
         garden['location'] = garden.get('location', 'N/A')
         
-        # Format creation time
-        garden['created_at'] = garden.get('creation_time', garden.get('created_at', datetime.now()))
+        # Format creation time - ensure it's a datetime object
+        creation_time = garden.get('creation_time', garden.get('created_at', datetime.now()))
+        if isinstance(creation_time, str):
+            try:
+                garden['created_at'] = datetime.fromisoformat(creation_time.replace('Z', '+00:00'))
+            except (ValueError, AttributeError):
+                garden['created_at'] = datetime.now()
+        elif isinstance(creation_time, datetime):
+            garden['created_at'] = creation_time
+        else:
+            garden['created_at'] = datetime.now()
         
         gardens_list.append(garden)
     
@@ -172,12 +180,20 @@ def admin_view_beds():
         # Count care logs
         bed['care_logs_count'] = mongo.db.care_logs.count_documents({'bed_id': bed['_id']})
         
-        # Ensure area and count_row are present
-        bed['crop_name'] = bed.get('crop_name', 'N/A')
+        # Ensure area and count_row are present        bed['crop_name'] = bed.get('crop_name', 'N/A')
         bed['count_row'] = bed.get('count_row', 0)
         
-        # Format creation time
-        bed['created_at'] = bed.get('creation_time', bed.get('created_at', datetime.now()))
+        # Format creation time - ensure it's a datetime object
+        creation_time = bed.get('creation_time', bed.get('created_at', datetime.now()))
+        if isinstance(creation_time, str):
+            try:
+                bed['created_at'] = datetime.fromisoformat(creation_time.replace('Z', '+00:00'))
+            except (ValueError, AttributeError):
+                bed['created_at'] = datetime.now()
+        elif isinstance(creation_time, datetime):
+            bed['created_at'] = creation_time
+        else:
+            bed['created_at'] = datetime.now()
         
         beds_list.append(bed)
 
@@ -242,6 +258,17 @@ def admin_view_care_logs():
         log['bed_name'] = bed['name'] if bed else 'N/A'
         log['user_email'] = user['email'] if user else 'N/A'
         log['user_name'] = user['name'] if user else 'N/A'
+        
+        # Ensure log_date is a datetime object
+        log_date = log.get('log_date')
+        if isinstance(log_date, str):
+            try:
+                log['log_date'] = datetime.fromisoformat(log_date.replace('Z', '+00:00'))
+            except (ValueError, AttributeError):
+                log['log_date'] = None
+        elif not isinstance(log_date, datetime):
+            log['log_date'] = None
+            
         care_logs_list.append(log)
 
     return render_template('admin_view_care_logs.html', care_logs=care_logs_list, title="Manage Care Logs",
@@ -310,6 +337,17 @@ def admin_view_recommendations():
         rec['bed_name'] = bed['name'] if bed else 'N/A'
         rec['user_email'] = user['email'] if user else 'N/A'
         rec['user_name'] = user['name'] if user else 'N/A'
+        
+        # Ensure due_date is a datetime object
+        due_date = rec.get('due_date')
+        if isinstance(due_date, str):
+            try:
+                rec['due_date'] = datetime.fromisoformat(due_date.replace('Z', '+00:00'))
+            except (ValueError, AttributeError):
+                rec['due_date'] = None
+        elif not isinstance(due_date, datetime):
+            rec['due_date'] = None
+            
         recommendations_list.append(rec)
 
     return render_template('admin_view_recommendations.html', recommendations=recommendations_list,
@@ -347,12 +385,32 @@ def admin_view_diary():
             date_filter['$lte'] = datetime.strptime(date_to, '%Y-%m-%d').replace(hour=23, minute=59, second=59)
         filters['created_at'] = date_filter
 
-    entries_cursor = mongo.db.diary_entries.find(filters)
+    entries_cursor = mongo.db.diary.find(filters)
     entries_list = []
     for entry in entries_cursor:
         user = mongo.db.users.find_one({'_id': ObjectId(entry['user_id'])})
         entry['user_email'] = user['email'] if user else 'N/A'
         entry['user_name'] = user['name'] if user else 'N/A'
+        
+        # Ensure creation dates are datetime objects
+        creation_time = entry.get('creation_time')
+        if isinstance(creation_time, str):
+            try:
+                entry['creation_time'] = datetime.fromisoformat(creation_time.replace('Z', '+00:00'))
+            except (ValueError, AttributeError):
+                entry['creation_time'] = datetime.now()
+        elif not isinstance(creation_time, datetime):
+            entry['creation_time'] = datetime.now()
+            
+        last_modified_time = entry.get('last_modified_time')
+        if isinstance(last_modified_time, str):
+            try:
+                entry['last_modified_time'] = datetime.fromisoformat(last_modified_time.replace('Z', '+00:00'))
+            except (ValueError, AttributeError):
+                entry['last_modified_time'] = entry['creation_time']
+        elif not isinstance(last_modified_time, datetime):
+            entry['last_modified_time'] = entry['creation_time']
+            
         entries_list.append(entry)
 
     return render_template('admin_view_diary.html', entries=entries_list, title="Manage Diary Entries",
