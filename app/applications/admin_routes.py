@@ -628,3 +628,79 @@ def admin_delete_bed(bed_id):
     
     flash('Bed deleted successfully!', 'success')
     return redirect(url_for('admin_bp.admin_view_beds'))
+
+@admin_bp.route('/admin/care-logs/<care_log_id>/edit', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def admin_edit_care_log(care_log_id):
+    """Admin can edit any care log"""
+    from .choices import CARE_ACTION_TYPES
+    from datetime import datetime
+    
+    care_log_doc = mongo.db.care_logs.find_one({'_id': ObjectId(care_log_id)})
+    if not care_log_doc:
+        flash('Care log not found.', 'error')
+        return redirect(url_for('admin_bp.admin_view_care_logs'))
+    
+    # Get all gardens and beds for admin view
+    user_gardens = list(mongo.db.gardens.find({}).sort('name', 1))
+    initial_beds = []
+    
+    if request.method == 'POST':
+        data = request.form
+        
+        # Parse date and time
+        log_date_str = data.get('log_date')
+        log_time_str = data.get('log_time')
+        
+        log_datetime = None
+        if log_date_str and log_time_str:
+            try:
+                log_datetime = datetime.strptime(f"{log_date_str} {log_time_str}", '%Y-%m-%d %H:%M')
+            except ValueError:
+                flash('Invalid date or time format.', 'error')
+                care_log_doc.update(data)
+                return render_template('care_log_form.html', 
+                                       form_data=care_log_doc, 
+                                       user_gardens=user_gardens, 
+                                       initial_beds=initial_beds,
+                                       CARE_ACTION_TYPES=CARE_ACTION_TYPES, 
+                                       is_edit=True, 
+                                       is_admin=True,
+                                       care_log_id=care_log_id,
+                                       today_date=datetime.utcnow().strftime('%Y-%m-%d'),
+                                       current_time=datetime.utcnow().strftime('%H:%M'))
+        
+        update_data = {
+            'garden_id': ObjectId(data.get('garden_id')) if data.get('garden_id') else care_log_doc.get('garden_id'),
+            'bed_id': ObjectId(data.get('bed_id')) if data.get('bed_id') else care_log_doc.get('bed_id'),
+            'action_type': data.get('action_type', care_log_doc.get('action_type')),
+            'log_date': log_datetime or care_log_doc.get('log_date'),
+            'notes': data.get('notes', care_log_doc.get('notes', '')),
+            'updated_at': datetime.utcnow()
+        }
+
+        mongo.db.care_logs.update_one({'_id': ObjectId(care_log_id)}, {'$set': update_data})
+        flash('Care log updated successfully!', 'success')
+        return redirect(url_for('admin_bp.admin_view_care_logs'))
+    
+    # Format dates for the form
+    if care_log_doc.get('log_date'):
+        care_log_doc['log_date_str'] = care_log_doc['log_date'].strftime('%Y-%m-%d')
+        care_log_doc['log_time_str'] = care_log_doc['log_date'].strftime('%H:%M')
+    
+    # Get beds for the current garden if available
+    if care_log_doc.get('garden_id'):
+        beds_cursor = mongo.db.beds.find({'garden_id': care_log_doc['garden_id']}).sort('name', 1)
+        initial_beds = [{'id': str(bed['_id']), 'name': bed['name']} for bed in beds_cursor]
+    
+    return render_template('care_log_form.html', 
+                           form_data=care_log_doc, 
+                           user_gardens=user_gardens, 
+                           initial_beds=initial_beds,
+                           CARE_ACTION_TYPES=CARE_ACTION_TYPES, 
+                           is_edit=True, 
+                           is_admin=True,
+                           care_log_id=care_log_id,
+                           today_date=datetime.utcnow().strftime('%Y-%m-%d'),
+                           current_time=datetime.utcnow().strftime('%H:%M'))
