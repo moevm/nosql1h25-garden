@@ -850,3 +850,103 @@ def admin_delete_user(user_id):
     
     flash(f'User "{user.get("name", "Unknown")}" and all associated data deleted successfully!', 'success')
     return redirect(url_for('admin_bp.admin_view_users'))
+
+@admin_bp.route('/admin/recommendations/<recommendation_id>/edit', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def admin_edit_recommendation(recommendation_id):
+    """Admin can edit any recommendation"""
+    from .choices import RECOMMENDATION_ACTION_TYPES
+    from datetime import datetime
+    
+    recommendation_doc = mongo.db.recommendations.find_one({'_id': ObjectId(recommendation_id)})
+    if not recommendation_doc:
+        flash('Recommendation not found.', 'error')
+        return redirect(url_for('admin_bp.admin_view_recommendations'))
+    
+    # Get all gardens and beds for admin view
+    user_gardens = list(mongo.db.gardens.find({}).sort('name', 1))
+    initial_beds = []
+    
+    if request.method == 'POST':
+        data = request.form
+        
+        # Parse due date and time
+        due_date_str = data.get('due_date')
+        due_time_str = data.get('due_time')
+        
+        due_datetime = None
+        if due_date_str and due_time_str:
+            try:
+                due_datetime = datetime.strptime(f"{due_date_str} {due_time_str}", '%Y-%m-%d %H:%M')
+            except ValueError:
+                flash('Invalid due date or time format.', 'error')
+                recommendation_doc.update(data)
+                return render_template('recommendation_form.html', 
+                                       form_data=recommendation_doc, 
+                                       user_gardens=user_gardens, 
+                                       initial_beds=initial_beds,
+                                       RECOMMENDATION_ACTION_TYPES=RECOMMENDATION_ACTION_TYPES, 
+                                       is_edit=True, 
+                                       is_admin=True,
+                                       recommendation_id=recommendation_id,
+                                       today_date=datetime.utcnow().strftime('%Y-%m-%d'),
+                                       current_time=datetime.utcnow().strftime('%H:%M'))
+        elif due_date_str:
+            try:
+                due_datetime = datetime.strptime(due_date_str, '%Y-%m-%d')
+            except ValueError:
+                flash('Invalid due date format.', 'error')
+                recommendation_doc.update(data)
+                return render_template('recommendation_form.html', 
+                                       form_data=recommendation_doc, 
+                                       user_gardens=user_gardens, 
+                                       initial_beds=initial_beds,
+                                       RECOMMENDATION_ACTION_TYPES=RECOMMENDATION_ACTION_TYPES, 
+                                       is_edit=True, 
+                                       is_admin=True,
+                                       recommendation_id=recommendation_id,
+                                       today_date=datetime.utcnow().strftime('%Y-%m-%d'),
+                                       current_time=datetime.utcnow().strftime('%H:%M'))
+        
+        update_data = {
+            'garden_id': ObjectId(data.get('garden_id')) if data.get('garden_id') else recommendation_doc.get('garden_id'),
+            'bed_id': ObjectId(data.get('bed_id')) if data.get('bed_id') else recommendation_doc.get('bed_id'),
+            'action_type': data.get('action_type', recommendation_doc.get('action_type')),
+            'description': data.get('description', recommendation_doc.get('description', '')),
+            'due_date': due_datetime or recommendation_doc.get('due_date'),
+            'updated_at': datetime.utcnow()
+        }
+        
+        # Handle completion status
+        if data.get('is_completed') == 'on':
+            update_data['is_completed'] = True
+            update_data['completed_at'] = datetime.utcnow()
+        else:
+            update_data['is_completed'] = False
+            update_data['completed_at'] = None
+
+        mongo.db.recommendations.update_one({'_id': ObjectId(recommendation_id)}, {'$set': update_data})
+        flash('Recommendation updated successfully!', 'success')
+        return redirect(url_for('admin_bp.admin_view_recommendations'))
+    
+    # Format dates for the form
+    if recommendation_doc.get('due_date'):
+        recommendation_doc['due_date'] = recommendation_doc['due_date'].strftime('%Y-%m-%d')
+        recommendation_doc['due_time'] = recommendation_doc['due_date'].strftime('%H:%M') if isinstance(recommendation_doc.get('due_date'), datetime) else '09:00'
+    
+    # Get beds for the current garden if available
+    if recommendation_doc.get('garden_id'):
+        beds_cursor = mongo.db.beds.find({'garden_id': recommendation_doc['garden_id']}).sort('name', 1)
+        initial_beds = [{'id': str(bed['_id']), 'name': bed['name']} for bed in beds_cursor]
+    
+    return render_template('recommendation_form.html', 
+                           form_data=recommendation_doc, 
+                           user_gardens=user_gardens, 
+                           initial_beds=initial_beds,
+                           RECOMMENDATION_ACTION_TYPES=RECOMMENDATION_ACTION_TYPES, 
+                           is_edit=True, 
+                           is_admin=True,
+                           recommendation_id=recommendation_id,
+                           today_date=datetime.utcnow().strftime('%Y-%m-%d'),
+                           current_time=datetime.utcnow().strftime('%H:%M'))
