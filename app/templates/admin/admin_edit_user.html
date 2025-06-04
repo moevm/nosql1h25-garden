@@ -14,7 +14,7 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="name">Name</label>
+                                <label for="name">Имя</label>
                                 <input type="text" class="form-control" id="name" name="name" 
                                        value="{{ form_data.name if form_data else '' }}" required>
                             </div>
@@ -34,7 +34,7 @@
                                 <input type="checkbox" class="form-check-input" id="email_verified" name="email_verified"
                                        {% if form_data and form_data.email_verified %}checked{% endif %}>
                                 <label class="form-check-label" for="email_verified">
-                                    Email Verified
+                                    Email подтверждён
                                 </label>
                             </div>
                         </div>
@@ -43,7 +43,7 @@
                                 <input type="checkbox" class="form-check-input" id="is_admin" name="is_admin"
                                        {% if form_data and form_data.is_admin %}checked{% endif %}>
                                 <label class="form-check-label" for="is_admin">
-                                    Admin User
+                                    Администратор
                                 </label>
                             </div>
                         </div>
@@ -53,8 +53,8 @@
                     <div class="row mt-3">
                         <div class="col-12">
                             <div class="alert alert-info">
-                                <strong>Note:</strong> Password cannot be changed through this interface. 
-                                User must change their password through the profile page.
+                                <strong>Note:</strong>Пароль не может быть изменен через этот интерфейс.
+                                Пользователь должен изменить свой пароль на странице профиля.
                             </div>
                         </div>
                     </div>
@@ -62,9 +62,9 @@
                     
                     <div class="form-group mt-4">
                         <button type="submit" class="btn btn-primary">
-                            {% if is_edit %}Update User{% else %}Create User{% endif %}
+                            {% if is_edit %}Обновить пользователя{% else %}Create User{% endif %}
                         </button>
-                        <a href="{{ url_for('admin_bp.admin_view_users') }}" class="btn btn-secondary">Cancel</a>
+                        <a href="{{ url_for('admin_bp.admin_view_users') }}" class="btn btn-secondary">Отмена</a>
                     </div>
                 </form>
             </div>
@@ -75,13 +75,13 @@
     <div class="col-lg-4">
         <div class="card shadow mb-4">
             <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">User Information</h6>
+                <h6 class="m-0 font-weight-bold text-primary">Информация о пользователе</h6>
             </div>
             <div class="card-body">
                 <p><strong>User ID:</strong> {{ form_data._id }}</p>
-                <p><strong>Created:</strong> {{ form_data.created_at.strftime('%Y-%m-%d %H:%M:%S') if form_data.created_at else 'N/A' }}</p>
-                <p><strong>Last Updated:</strong> {{ form_data.updated_at.strftime('%Y-%m-%d %H:%M:%S') if form_data.updated_at else 'N/A' }}</p>
-                <p><strong>Roles:</strong> {{ ', '.join(form_data.roles) if form_data.roles else 'None' }}</p>
+                <p><strong>Создан:</strong> {{ form_data.created_at.strftime('%Y-%m-%d %H:%M:%S') if form_data.created_at else 'N/A' }}</p>
+                <p><strong>Последнее обновление:</strong> {{ form_data.updated_at.strftime('%Y-%m-%d %H:%M:%S') if form_data.updated_at else 'N/A' }}</p>
+                <p><strong>Роль:</strong> {{ ', '.join(form_data.roles) if form_data.roles else 'None' }}</p>
             </div>
         </div>
     </div>
