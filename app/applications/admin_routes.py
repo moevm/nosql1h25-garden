@@ -77,7 +77,7 @@ def admin_view_users():
     return render_template(
         'admin_view_users.html', 
         users=users_list, 
-        title="Manage Users",
+        title="Управление пользователями",
         search_query=search_query,
         admin_filter=admin_filter
     )
@@ -133,7 +133,7 @@ def admin_view_gardens():
     return render_template(
         'admin_view_gardens.html', 
         gardens=gardens_list, 
-        title="Manage Gardens",
+        title="Управление участками",
         search_garden_name=search_garden_name,
         search_user_email=search_user_email
     )
@@ -196,7 +196,7 @@ def admin_view_beds():
         
         beds_list.append(bed)
 
-    return render_template('admin_view_beds.html', beds=beds_list, title="Manage Beds",
+    return render_template('admin_view_beds.html', beds=beds_list, title="Управление грядками",
                          search_bed_name=search_bed_name, search_garden_name=search_garden_name,
                          search_user_email=search_user_email)
 
@@ -270,7 +270,7 @@ def admin_view_care_logs():
             
         care_logs_list.append(log)
 
-    return render_template('admin_view_care_logs.html', care_logs=care_logs_list, title="Manage Care Logs",
+    return render_template('admin_view_care_logs.html', care_logs=care_logs_list, title="Управление записями об уходе",
                          search_action_type=search_action_type, search_garden_name=search_garden_name,
                          search_bed_name=search_bed_name, search_user_email=search_user_email,
                          date_from=date_from, date_to=date_to)
@@ -350,7 +350,7 @@ def admin_view_recommendations():
         recommendations_list.append(rec)
 
     return render_template('admin_view_recommendations.html', recommendations=recommendations_list,
-                         title="Manage Recommendations", search_action_type=search_action_type,
+                         title="Управление рекомендациями", search_action_type=search_action_type,
                          search_garden_name=search_garden_name, search_bed_name=search_bed_name,
                          search_user_email=search_user_email, is_completed=is_completed,
                          due_date_from=due_date_from, due_date_to=due_date_to)
@@ -412,7 +412,7 @@ def admin_view_diary():
             
         entries_list.append(entry)
 
-    return render_template('admin_view_diary.html', entries=entries_list, title="Manage Diary Entries",
+    return render_template('admin_view_diary.html', entries=entries_list, title="Управление записями в дневнике",
                          search_title=search_title, search_user_email=search_user_email,
                          date_from=date_from, date_to=date_to)
 
