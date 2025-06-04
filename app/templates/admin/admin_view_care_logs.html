@@ -6,25 +6,25 @@
         <div class="col-md-2">
             <div class="input-group">
                 <span class="input-group-text"><i class="bi bi-activity"></i></span>
-                <input type="text" class="form-control" name="search_action_type" value="{{ search_action_type }}" placeholder="Action type">
+                <input type="text" class="form-control" name="search_action_type" value="{{ search_action_type }}" placeholder="Тип действия">
             </div>
         </div>
         <div class="col-md-2">
             <div class="input-group">
                 <span class="input-group-text"><i class="bi bi-tree"></i></span>
-                <input type="text" class="form-control" name="search_garden_name" value="{{ search_garden_name }}" placeholder="Garden name">
+                <input type="text" class="form-control" name="search_garden_name" value="{{ search_garden_name }}" placeholder="Название участка">
             </div>
         </div>
         <div class="col-md-2">
             <div class="input-group">
                 <span class="input-group-text"><i class="bi bi-grid"></i></span>
-                <input type="text" class="form-control" name="search_bed_name" value="{{ search_bed_name }}" placeholder="Bed name">
+                <input type="text" class="form-control" name="search_bed_name" value="{{ search_bed_name }}" placeholder="Название грядки">
             </div>
         </div>
         <div class="col-md-2">
             <div class="input-group">
                 <span class="input-group-text"><i class="bi bi-person"></i></span>
-                <input type="text" class="form-control" name="search_user_email" value="{{ search_user_email }}" placeholder="User email">
+                <input type="text" class="form-control" name="search_user_email" value="{{ search_user_email }}" placeholder="email пользователя">
             </div>
         </div>
         <div class="col-md-2">
@@ -41,12 +41,12 @@
         </div>
         <div class="col-md-2">
             <button type="submit" class="btn btn-primary w-100">
-                <i class="bi bi-funnel me-2"></i>Apply Filters
+                <i class="bi bi-funnel me-2"></i>Применить фильтры
             </button>
         </div>
         <div class="col-md-2">
             <a href="{{ url_for('admin_bp.admin_view_care_logs') }}" class="btn btn-outline-secondary w-100" data-action="clear-filters">
-                <i class="bi bi-x-circle me-2"></i>Clear Filters
+                <i class="bi bi-x-circle me-2"></i>Очистить фильтры
             </a>
         </div>
     </form>
@@ -56,19 +56,19 @@
     <table class="table table-hover" data-item-type="care_logs">
         <thead>
             <tr>
-                <th>Date</th>
-                <th>Action Type</th>
-                <th>Garden</th>
-                <th>Bed</th>
-                <th>User</th>
-                <th>Description</th>
-                <th>Actions</th>
+                <th>Дата</th>
+                <th>Тип действия</th>
+                <th>Участок</th>
+                <th>Грядка</th>
+                <th>Пользователь</th>
+                <th>Описание</th>
+                <th>Действие</th>
             </tr>
         </thead>
         <tbody>
             {% for log in care_logs %}
             <tr data-item-id="{{ log._id }}">
-                <td>{{ log.log_date.strftime('%Y-%m-%d %H:%M') if log.log_date else 'N/A' }}</td>
+                <td>{{ log.log_date.strftime('%d-%m-%Y %H:%M') if log.log_date else 'N/A' }}</td>
                 <td>
                     <span class="badge bg-info">{{ log.action_type }}</span>
                 </td>
@@ -96,13 +96,16 @@
                 <td>{{ log.description }}</td>
                 <td>
                     <div class="btn-group">
-                        <button type="button" class="btn btn-sm btn-outline-primary" title="Edit Log" data-action="edit">
+                        <a href="{{ url_for('admin_bp.admin_edit_care_log', care_log_id=log._id) }}" 
+                           class="btn btn-sm btn-outline-primary" title="Edit Log">
                             <i class="bi bi-pencil"></i>
-                        </button>
-                        <button type="button" class="btn btn-sm btn-outline-danger" title="Delete Log" data-action="delete">
+                        </a>
+                        <button type="button" class="btn btn-sm btn-outline-danger care-log-delete-btn" 
+                                title="Delete Log" data-care-log-id="{{ log._id }}">
                             <i class="bi bi-trash"></i>
                         </button>
-                        <button type="button" class="btn btn-sm btn-outline-success" title="View Details" data-action="view">
+                        <button type="button" class="btn btn-sm btn-outline-success care-log-view-btn" 
+                                title="View Details" data-care-log-id="{{ log._id }}">
                             <i class="bi bi-eye"></i>
                         </button>
                     </div>
@@ -110,10 +113,113 @@
             </tr>
             {% else %}
             <tr>
-                <td colspan="7" class="text-center">No care logs found matching the criteria.</td>
+                <td colspan="7" class="text-center">Журналы ухода, соответствующие критериям, не найдены.</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
-{% endblock %} 
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Вы уверены, что хотите удалить этот журнал ухода? Это действие не может быть отменено
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteForm" method="POST" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- View Details Modal -->
+<div class="modal fade" id="viewModal" tabindex="-1" aria-labelledby="viewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewModalLabel">Подробности журнала ухода</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="viewModalBody">
+                <!-- Content will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle delete buttons - using specific class to avoid conflicts with admin.js
+    const deleteButtons = document.querySelectorAll('.care-log-delete-btn');
+    const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    const deleteForm = document.getElementById('deleteForm');
+    
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const careLogId = this.getAttribute('data-care-log-id');
+            const deleteUrl = `{{ url_for('admin_bp.admin_delete_care_log', care_log_id='PLACEHOLDER') }}`.replace('PLACEHOLDER', careLogId);
+            deleteForm.action = deleteUrl;
+            deleteModal.show();
+        });
+    });
+    
+    const viewButtons = document.querySelectorAll('.care-log-view-btn');
+    const viewModal = new bootstrap.Modal(document.getElementById('viewModal'));
+    const viewModalBody = document.getElementById('viewModalBody');
+    
+    viewButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const careLogId = this.getAttribute('data-care-log-id');
+            const row = this.closest('tr');
+            
+            // Extract data from the row
+            const cells = row.querySelectorAll('td');
+            const date = cells[0].textContent.trim();
+            const actionType = cells[1].querySelector('.badge').textContent.trim();
+            const garden = cells[2].querySelector('div:last-child').textContent.trim();
+            const bed = cells[3].querySelector('div:last-child').textContent.trim();
+            const userName = cells[4].querySelector('div:first-child').textContent.trim();
+            const userEmail = cells[4].querySelector('small').textContent.trim();
+            const description = cells[5].textContent.trim();
+            
+            // Populate modal with care log details
+            viewModalBody.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Date:</strong> ${date}</p>
+                        <p><strong>Action Type:</strong> <span class="badge bg-info">${actionType}</span></p>
+                        <p><strong>Garden:</strong> ${garden}</p>
+                        <p><strong>Bed:</strong> ${bed}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>User:</strong> ${userName}</p>
+                        <p><strong>Email:</strong> ${userEmail}</p>
+                    </div>
+                    <div class="col-12">
+                        <p><strong>Description:</strong></p>
+                        <div class="border p-3 bg-light rounded">
+                            ${description || 'No description provided'}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            viewModal.show();
+        });
+    });
+});
+</script>
+
+{% endblock %}
