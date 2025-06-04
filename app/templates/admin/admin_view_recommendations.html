@@ -6,54 +6,54 @@
         <div class="col-md-2">
             <div class="input-group">
                 <span class="input-group-text"><i class="bi bi-activity"></i></span>
-                <input type="text" class="form-control" name="search_action_type" value="{{ search_action_type }}" placeholder="Action type">
+                <input type="text" class="form-control" name="search_action_type" value="{{ search_action_type }}" placeholder="Тип действия">
             </div>
         </div>
         <div class="col-md-2">
             <div class="input-group">
                 <span class="input-group-text"><i class="bi bi-tree"></i></span>
-                <input type="text" class="form-control" name="search_garden_name" value="{{ search_garden_name }}" placeholder="Garden name">
+                <input type="text" class="form-control" name="search_garden_name" value="{{ search_garden_name }}" placeholder="Название участка">
             </div>
         </div>
         <div class="col-md-2">
             <div class="input-group">
                 <span class="input-group-text"><i class="bi bi-grid"></i></span>
-                <input type="text" class="form-control" name="search_bed_name" value="{{ search_bed_name }}" placeholder="Bed name">
+                <input type="text" class="form-control" name="search_bed_name" value="{{ search_bed_name }}" placeholder="Название грядки">
             </div>
         </div>
         <div class="col-md-2">
             <div class="input-group">
                 <span class="input-group-text"><i class="bi bi-person"></i></span>
-                <input type="text" class="form-control" name="search_user_email" value="{{ search_user_email }}" placeholder="User email">
+                <input type="text" class="form-control" name="search_user_email" value="{{ search_user_email }}" placeholder="Email пользователя">
             </div>
         </div>
         <div class="col-md-2">
             <select class="form-select" name="is_completed">
-                <option value="">All Status</option>
-                <option value="yes" {% if is_completed == 'yes' %}selected{% endif %}>Completed</option>
-                <option value="no" {% if is_completed == 'no' %}selected{% endif %}>Pending</option>
+                <option value="">Все статусы</option>
+                <option value="yes" {% if is_completed == 'yes' %}selected{% endif %}>Выполнено</option>
+                <option value="no" {% if is_completed == 'no' %}selected{% endif %}>Ожидает</option>
             </select>
         </div>
         <div class="col-md-2">
             <div class="input-group">
                 <span class="input-group-text"><i class="bi bi-calendar"></i></span>
-                <input type="date" class="form-control" name="due_date_from" value="{{ due_date_from }}" placeholder="Due from">
+                <input type="date" class="form-control" name="due_date_from" value="{{ due_date_from }}" placeholder="Срок с">
             </div>
         </div>
         <div class="col-md-2">
             <div class="input-group">
                 <span class="input-group-text"><i class="bi bi-calendar"></i></span>
-                <input type="date" class="form-control" name="due_date_to" value="{{ due_date_to }}" placeholder="Due to">
+                <input type="date" class="form-control" name="due_date_to" value="{{ due_date_to }}" placeholder="Срок по">
             </div>
         </div>
         <div class="col-md-2">
             <button type="submit" class="btn btn-primary w-100">
-                <i class="bi bi-funnel me-2"></i>Apply Filters
+                <i class="bi bi-funnel me-2"></i>Применить фильтры
             </button>
         </div>
         <div class="col-md-2">
             <a href="{{ url_for('admin_bp.admin_view_recommendations') }}" class="btn btn-outline-secondary w-100" data-action="clear-filters">
-                <i class="bi bi-x-circle me-2"></i>Clear Filters
+                <i class="bi bi-x-circle me-2"></i>Сбросить фильтры
             </a>
         </div>
     </form>
@@ -63,20 +63,20 @@
     <table class="table table-hover" data-item-type="recommendations">
         <thead>
             <tr>
-                <th>Due Date</th>
-                <th>Action Type</th>
-                <th>Garden</th>
-                <th>Bed</th>
-                <th>User</th>
-                <th>Description</th>
-                <th>Status</th>
-                <th>Actions</th>
+                <th>Срок</th>
+                <th>Тип действия</th>
+                <th>Участок</th>
+                <th>Грядка</th>
+                <th>Пользователь</th>
+                <th>Описание</th>
+                <th>Статус</th>
+                <th>Действия</th>
             </tr>
         </thead>
         <tbody>
             {% for rec in recommendations %}
             <tr data-item-id="{{ rec._id }}">
-                <td>{{ rec.due_date.strftime('%Y-%m-%d') if rec.due_date else 'N/A' }}</td>
+                <td>{{ rec.due_date.strftime('%d-%m-%Y %H:%M') if rec.due_date else '—' }}</td>
                 <td>
                     <span class="badge bg-info">{{ rec.action_type }}</span>
                 </td>
@@ -104,20 +104,23 @@
                 <td>{{ rec.description }}</td>
                 <td>
                     {% if rec.is_completed %}
-                    <span class="badge bg-success">Completed</span>
+                    <span class="badge bg-success">Выполнено</span>
                     {% else %}
-                    <span class="badge bg-warning">Pending</span>
+                    <span class="badge bg-warning">Ожидает</span>
                     {% endif %}
                 </td>
                 <td>
                     <div class="btn-group">
-                        <button type="button" class="btn btn-sm btn-outline-primary" title="Edit Recommendation" data-action="edit">
+                        <a href="{{ url_for('admin_bp.admin_edit_recommendation', recommendation_id=rec._id) }}" 
+                           class="btn btn-sm btn-outline-primary" title="Редактировать рекомендацию">
                             <i class="bi bi-pencil"></i>
-                        </button>
-                        <button type="button" class="btn btn-sm btn-outline-danger" title="Delete Recommendation" data-action="delete">
+                        </a>
+                        <button type="button" class="btn btn-sm btn-outline-danger recommendation-delete-btn" 
+                                title="Удалить рекомендацию" data-recommendation-id="{{ rec._id }}">
                             <i class="bi bi-trash"></i>
                         </button>
-                        <button type="button" class="btn btn-sm btn-outline-success" title="View Details" data-action="view">
+                        <button type="button" class="btn btn-sm btn-outline-success recommendation-view-btn" 
+                                title="Просмотреть детали" data-recommendation-id="{{ rec._id }}">
                             <i class="bi bi-eye"></i>
                         </button>
                     </div>
@@ -125,10 +128,117 @@
             </tr>
             {% else %}
             <tr>
-                <td colspan="8" class="text-center">No recommendations found matching the criteria.</td>
+                <td colspan="8" class="text-center">Рекомендаций, соответствующих критериям, не найдено.</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
-{% endblock %} 
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Подтверждение удаления</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                Вы уверены, что хотите удалить эту рекомендацию? Это действие не может быть отменено.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <form id="deleteForm" method="POST" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">Удалить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- View Details Modal -->
+<div class="modal fade" id="viewModal" tabindex="-1" aria-labelledby="viewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewModalLabel">Подробности рекомендации</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body" id="viewModalBody">
+                <!-- Content will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle delete buttons
+    const deleteButtons = document.querySelectorAll('.recommendation-delete-btn');
+    const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    const deleteForm = document.getElementById('deleteForm');
+    
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const recommendationId = this.getAttribute('data-recommendation-id');
+            const deleteUrl = `{{ url_for('admin_bp.admin_delete_recommendation', recommendation_id='PLACEHOLDER') }}`.replace('PLACEHOLDER', recommendationId);
+            deleteForm.action = deleteUrl;
+            deleteModal.show();
+        });
+    });
+    
+    // Handle view buttons
+    const viewButtons = document.querySelectorAll('.recommendation-view-btn');
+    const viewModal = new bootstrap.Modal(document.getElementById('viewModal'));
+    const viewModalBody = document.getElementById('viewModalBody');
+    
+    viewButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const recommendationId = this.getAttribute('data-recommendation-id');
+            const row = this.closest('tr');
+            
+            // Extract data from the row
+            const cells = row.querySelectorAll('td');
+            const dueDate = cells[0].textContent.trim();
+            const actionType = cells[1].querySelector('.badge').textContent.trim();
+            const garden = cells[2].querySelector('div:last-child').textContent.trim();
+            const bed = cells[3].querySelector('div:last-child').textContent.trim();
+            const userName = cells[4].querySelector('div:first-child').textContent.trim();
+            const userEmail = cells[4].querySelector('small').textContent.trim();
+            const description = cells[5].textContent.trim();
+            const status = cells[6].querySelector('.badge').textContent.trim();
+            const statusClass = cells[6].querySelector('.badge').classList.contains('bg-success') ? 'bg-success' : 'bg-warning';
+            
+            // Populate modal with recommendation details
+            viewModalBody.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Срок выполнения:</strong> ${dueDate}</p>
+                        <p><strong>Тип действия:</strong> <span class="badge bg-info">${actionType}</span></p>
+                        <p><strong>Участок:</strong> ${garden}</p>
+                        <p><strong>Грядка:</strong> ${bed}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Пользователь:</strong> ${userName}</p>
+                        <p><strong>Email:</strong> ${userEmail}</p>
+                        <p><strong>Статус:</strong> <span class="badge ${statusClass}">${status}</span></p>
+                    </div>
+                    <div class="col-12">
+                        <p><strong>Описание рекомендации:</strong></p>
+                        <div class="border p-3 bg-light rounded">
+                            ${description || 'Описание не предоставлено'}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            viewModal.show();
+        });
+    });
+});
+</script>
+
+{% endblock %}
