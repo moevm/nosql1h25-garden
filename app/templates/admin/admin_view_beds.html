@@ -6,29 +6,29 @@
         <div class="col-md-3">
             <div class="input-group">
                 <span class="input-group-text"><i class="bi bi-search"></i></span>
-                <input type="text" class="form-control" name="search_bed_name" value="{{ search_bed_name }}" placeholder="Search by bed name">
+                <input type="text" class="form-control" name="search_bed_name" value="{{ search_bed_name }}" placeholder="Искать по названию грядки">
             </div>
         </div>
         <div class="col-md-3">
             <div class="input-group">
                 <span class="input-group-text"><i class="bi bi-tree"></i></span>
-                <input type="text" class="form-control" name="search_garden_name" value="{{ search_garden_name }}" placeholder="Search by garden name">
+                <input type="text" class="form-control" name="search_garden_name" value="{{ search_garden_name }}" placeholder="Искать по названию участка">
             </div>
         </div>
         <div class="col-md-3">
             <div class="input-group">
                 <span class="input-group-text"><i class="bi bi-person"></i></span>
-                <input type="text" class="form-control" name="search_user_email" value="{{ search_user_email }}" placeholder="Search by user email">
+                <input type="text" class="form-control" name="search_user_email" value="{{ search_user_email }}" placeholder="Искать по email">
             </div>
         </div>
         <div class="col-md-1">
             <button type="submit" class="btn btn-primary w-100">
-                <i class="bi bi-funnel me-2"></i>Filter
+                <i class="bi bi-funnel me-2"></i>Фильтр
             </button>
         </div>
         <div class="col-md-2">
             <a href="{{ url_for('admin_bp.admin_view_beds') }}" class="btn btn-outline-secondary w-100" data-action="clear-filters">
-                <i class="bi bi-x-circle me-2"></i>Clear Filters
+                <i class="bi bi-x-circle me-2"></i>Очистить фильтры
             </a>
         </div>
     </form>
@@ -38,14 +38,14 @@
     <table class="table table-hover" data-item-type="beds">
         <thead>
             <tr>
-                <th>Bed Name</th>
-                <th>Garden</th>
-                <th>Owner</th>
-                <th>Crop name</th>
-                <th>Rows</th>
-                <th>Care Logs</th>
-                <th>Created At</th>
-                <th>Actions</th>
+                <th>Название грядки</th>
+                <th>Участок</th>
+                <th>Создатель</th>
+                <th>Название культуры</th>
+                <th>Рядов</th>
+                <th>Записи об уходе</th>
+                <th>Создан</th>
+                <th>Действие</th>
             </tr>
         </thead>
         <tbody>
@@ -70,16 +70,16 @@
                 <td>{{ bed.crop_name }}</td>
                 <td>{{ bed.count_row if bed.count_row is defined else 'N/A' }}</td>
                 <td>{{ bed.care_logs_count if bed.care_logs_count is defined else 'N/A' }}</td>
-                <td>{{ bed.created_at.strftime('%Y-%m-%d') if bed.created_at else 'N/A' }}</td>
+                <td>{{ bed.created_at.strftime('%d-%m-%Y %H:%M') if bed.created_at else 'N/A' }}</td>
                 <td>
                     <div class="btn-group">
-                        <button type="button" class="btn btn-sm btn-outline-primary" title="Edit Bed" data-action="edit">
+                        <button type="button" class="btn btn-sm btn-outline-primary" title="Редактировать грядку" data-action="edit">
                             <i class="bi bi-pencil"></i>
                         </button>
-                        <button type="button" class="btn btn-sm btn-outline-danger" title="Delete Bed" data-action="delete">
+                        <button type="button" class="btn btn-sm btn-outline-danger" title="Удалить грядку" data-action="delete">
                             <i class="bi bi-trash"></i>
                         </button>
-                        <button type="button" class="btn btn-sm btn-outline-success" title="View Details" data-action="view">
+                        <button type="button" class="btn btn-sm btn-outline-success bed-view-btn" title="Просмотреть детали" data-bed-id="{{ bed._id }}">
                             <i class="bi bi-eye"></i>
                         </button>
                     </div>
@@ -87,10 +87,110 @@
             </tr>
             {% else %}
             <tr>
-                <td colspan="8" class="text-center">No beds found matching the criteria.</td>
+                <td colspan="8" class="text-center">Грядки соответствующие критериям, не найдены.</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
-{% endblock %} 
+
+<!-- View Details Modal -->
+<div class="modal fade" id="viewModal" tabindex="-1" aria-labelledby="viewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewModalLabel">Подробности грядки</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="viewModalBody">
+                <!-- Content will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle view buttons
+    const viewButtons = document.querySelectorAll('.bed-view-btn');
+    const viewModal = new bootstrap.Modal(document.getElementById('viewModal'));
+    const viewModalBody = document.getElementById('viewModalBody');
+    
+    viewButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const bedId = this.getAttribute('data-bed-id');
+            const row = this.closest('tr');
+            
+            // Extract data from the row
+            const cells = row.querySelectorAll('td');
+            const bedName = cells[0].textContent.trim();
+            const gardenName = cells[1].querySelector('div:last-child').textContent.trim();
+            const userName = cells[2].querySelector('div:first-child').textContent.trim();
+            const userEmail = cells[2].querySelector('small').textContent.trim();
+            const cropName = cells[3].textContent.trim();
+            const countRow = cells[4].textContent.trim();
+            const careLogsCount = cells[5].textContent.trim();
+            const createdAt = cells[6].textContent.trim();
+            
+            // Populate modal with bed details
+            viewModalBody.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-primary">Основная информация</h6>
+                        <p><strong>Название грядки:</strong> ${bedName}</p>
+                        <p><strong>Участок:</strong> <i class="bi bi-tree me-2"></i>${gardenName}</p>
+                        <p><strong>Культура:</strong> ${cropName}</p>
+                        <p><strong>Количество рядов:</strong> ${countRow}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-primary">Информация о создателе</h6>
+                        <p><strong>Имя:</strong> <i class="bi bi-person-circle me-2"></i>${userName}</p>
+                        <p><strong>Email:</strong> ${userEmail}</p>
+                        <p><strong>Дата создания:</strong> ${createdAt}</p>
+                        <p><strong>Записей об уходе:</strong> <span class="badge bg-info">${careLogsCount}</span></p>
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-12">
+                        <h6 class="text-primary">Статистика</h6>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="card text-center">
+                                    <div class="card-body">
+                                        <h5 class="card-title text-info">${careLogsCount}</h5>
+                                        <p class="card-text">Записей об уходе</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card text-center">
+                                    <div class="card-body">
+                                        <h5 class="card-title text-success">${countRow}</h5>
+                                        <p class="card-text">Рядов</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card text-center">
+                                    <div class="card-body">
+                                        <h5 class="card-title text-warning">1</h5>
+                                        <p class="card-text">Участок</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            viewModal.show();
+        });
+    });
+});
+</script>
+
+{% endblock %}
