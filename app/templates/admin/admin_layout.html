@@ -17,37 +17,42 @@
             <ul class="nav flex-column">
                 <li class="nav-item">
                     <a class="nav-link {{ 'active' if request.endpoint == 'admin_bp.admin_dashboard' }}" href="{{ url_for('admin_bp.admin_dashboard') }}">
-                        <i class="bi bi-speedometer2 me-2"></i>Dashboard
+                        <i class="bi bi-speedometer2 me-2"></i>Панель управления
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {{ 'active' if request.endpoint == 'admin_bp.admin_view_users' }}" href="{{ url_for('admin_bp.admin_view_users') }}">
-                        <i class="bi bi-people me-2"></i>Users
+                        <i class="bi bi-people me-2"></i>Пользователи
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {{ 'active' if request.endpoint == 'admin_bp.admin_view_gardens' }}" href="{{ url_for('admin_bp.admin_view_gardens') }}">
-                        <i class="bi bi-tree me-2"></i>Gardens
+                        <i class="bi bi-tree me-2"></i>Участки
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {{ 'active' if request.endpoint == 'admin_bp.admin_view_beds' }}" href="{{ url_for('admin_bp.admin_view_beds') }}">
-                        <i class="bi bi-grid me-2"></i>Beds
+                        <i class="bi bi-grid me-2"></i>Грядки
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {{ 'active' if request.endpoint == 'admin_bp.admin_view_care_logs' }}" href="{{ url_for('admin_bp.admin_view_care_logs') }}">
-                        <i class="bi bi-journal-check me-2"></i>Care Logs
+                        <i class="bi bi-journal-check me-2"></i>Записи об уходе
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {{ 'active' if request.endpoint == 'admin_bp.admin_view_recommendations' }}" href="{{ url_for('admin_bp.admin_view_recommendations') }}">
-                        <i class="bi bi-lightbulb me-2"></i>Recommendations
+                        <i class="bi bi-lightbulb me-2"></i>Рекомендации
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {{ 'active' if request.endpoint == 'admin_bp.admin_view_diary' }}" href="{{ url_for('admin_bp.admin_view_diary') }}">
-                        <i class="bi bi-book me-2"></i>Diary Entries
+                        <i class="bi bi-book me-2"></i>Записи в дневнике
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ 'active' if request.endpoint == 'admin_bp.admin_view_diary' }}" href="{{ url_for('main_bp.home') }}">
+                        <i class="bi me-2"></i>Вернуться на главную страницу
                     </a>
                 </li>
             </ul>
