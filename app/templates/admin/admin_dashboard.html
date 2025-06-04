@@ -7,7 +7,7 @@
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Users</div>
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Пользователи</div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.users }}</div>
                     </div>
                     <div class="col-auto">
@@ -23,7 +23,7 @@
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Gardens</div>
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Участки</div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.gardens }}</div>
                     </div>
                     <div class="col-auto">
@@ -39,7 +39,7 @@
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Beds</div>
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Грядки</div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.beds }}</div>
                     </div>
                     <div class="col-auto">
@@ -55,7 +55,7 @@
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Care Logs</div>
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Записи об уходе</div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.care_logs }}</div>
                     </div>
                     <div class="col-auto">
@@ -71,7 +71,7 @@
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Recommendations</div>
+                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Рекомендации</div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.recommendations }}</div>
                     </div>
                     <div class="col-auto">
@@ -87,7 +87,7 @@
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">Diary Entries</div>
+                        <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">Записи в дневнике</div>
                         <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.diary_entries }}</div>
                     </div>
                     <div class="col-auto">
@@ -109,31 +109,31 @@
                 <div class="row">
                     <div class="col-md-2 mb-3">
                         <a href="{{ url_for('admin_bp.admin_view_users') }}" class="btn btn-primary w-100">
-                            <i class="bi bi-people me-2"></i>Manage Users
+                            <i class="bi bi-people me-2"></i>Управление пользователями
                         </a>
                     </div>
                     <div class="col-md-2 mb-3">
                         <a href="{{ url_for('admin_bp.admin_view_gardens') }}" class="btn btn-success w-100">
-                            <i class="bi bi-tree me-2"></i>Manage Gardens
+                            <i class="bi bi-tree me-2"></i>Управление участками
                         </a>
                     </div>
                     <div class="col-md-2 mb-3">
                         <a href="{{ url_for('admin_bp.admin_view_beds') }}" class="btn btn-info w-100">
-                            <i class="bi bi-grid me-2"></i>Manage Beds
+                            <i class="bi bi-grid me-2"></i>Управление грядками
                         </a>
                     </div>
                     <div class="col-md-2 mb-3">
                         <a href="{{ url_for('admin_bp.admin_view_care_logs') }}" class="btn btn-warning w-100">
-                            <i class="bi bi-journal-check me-2"></i>View Care Logs
+                            <i class="bi bi-journal-check me-2"></i>Посмотреть журнал ухода
                         </a>
                     </div>
                     <div class="col-md-2 mb-3">
                         <a href="{{ url_for('admin_bp.admin_view_recommendations') }}" class="btn btn-danger w-100">
-                            <i class="bi bi-lightbulb me-2"></i>Recommendations
+                            <i class="bi bi-lightbulb me-2"></i>Рекомендации
                         </a>
                     </div>                    <div class="col-md-2 mb-3">
                         <a href="{{ url_for('admin_bp.admin_view_diary') }}" class="btn btn-secondary w-100">
-                            <i class="bi bi-book me-2"></i>Diary Entries
+                            <i class="bi bi-book me-2"></i>Записи в дневнике
                         </a>
                     </div>
                 </div>
@@ -146,33 +146,33 @@
     <div class="col-12">
         <div class="card">
             <div class="card-header">
-                <h5 class="card-title mb-0">Data Management</h5>
+                <h5 class="card-title mb-0">Управление данными</h5>
             </div>
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-6">
-                        <h6>Export Data</h6>
-                        <p class="text-muted small">Export all application data to JSON format</p>
+                        <h6>Экспортирование данных</h6>
+                        <p class="text-muted small">Экспорт всех данных в формат JSON</p>
                         <form method="POST" action="{{ url_for('import_export_bp.export_data') }}" class="d-inline">
                             <button type="submit" class="btn btn-success">
-                                <i class="bi bi-download me-2"></i>Export All Data
+                                <i class="bi bi-download me-2"></i>Экспорт всех данных
                             </button>
                         </form>
                     </div>
                     <div class="col-md-6">
-                        <h6>Import Data</h6>
-                        <p class="text-muted small">Import application data from JSON format</p>
+                        <h6>Импортировать данные</h6>
+                        <p class="text-muted small">Импорт данных из формата JSON</p>
                         <form method="POST" action="{{ url_for('import_export_bp.import_data') }}" enctype="multipart/form-data">
                             <div class="input-group mb-2">
                                 <input type="file" class="form-control" id="import_file" name="import_file" accept=".json" required>
                                 <button type="submit" class="btn btn-warning">
-                                    <i class="bi bi-upload me-2"></i>Import Data
+                                    <i class="bi bi-upload me-2"></i>Импортировать данные
                                 </button>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="replace_existing" name="replace_existing" value="true">
                                 <label class="form-check-label small text-muted" for="replace_existing">
-                                    Replace existing data (WARNING: This will delete all current data)
+                                    Заменить существующие данные (ВНИМАНИЕ: это приведет к удалению всех текущих данных)
                                 </label>
                             </div>
                         </form>
