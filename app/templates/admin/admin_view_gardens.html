@@ -6,23 +6,23 @@
         <div class="col-md-4">
             <div class="input-group">
                 <span class="input-group-text"><i class="bi bi-search"></i></span>
-                <input type="text" class="form-control" name="search_garden_name" value="{{ search_garden_name }}" placeholder="Search by garden name">
+                <input type="text" class="form-control" name="search_garden_name" value="{{ search_garden_name }}" placeholder="Поиск по названию участка">
             </div>
         </div>
         <div class="col-md-4">
             <div class="input-group">
                 <span class="input-group-text"><i class="bi bi-person"></i></span>
-                <input type="text" class="form-control" name="search_user_email" value="{{ search_user_email }}" placeholder="Search by user email">
+                <input type="text" class="form-control" name="search_user_email" value="{{ search_user_email }}" placeholder="Поиск по email пользователя">
             </div>
         </div>
         <div class="col-md-2">
             <button type="submit" class="btn btn-primary w-100">
-                <i class="bi bi-funnel me-2"></i>Apply Filters
+                <i class="bi bi-funnel me-2"></i>Применить фильтры
             </button>
         </div>
         <div class="col-md-2">
             <a href="{{ url_for('admin_bp.admin_view_gardens') }}" class="btn btn-outline-secondary w-100" data-action="clear-filters">
-                <i class="bi bi-x-circle me-2"></i>Clear Filters
+                <i class="bi bi-x-circle me-2"></i>Очистить фильтры
             </a>
         </div>
     </form>
@@ -32,14 +32,14 @@
     <table class="table table-hover" data-item-type="gardens">
         <thead>
             <tr>
-                <th>Garden Name</th>
-                <th>Owner</th>
-                <th>Location</th>
-                <th>Area (m²)</th>
-                <th>Beds Count</th>
-                <th>Care Logs</th>
-                <th>Created At</th>
-                <th>Actions</th>
+                <th>Название участка</th>
+                <th>Владелец</th>
+                <th>Расположение</th>
+                <th>Площадь (м²)</th>
+                <th>Количество грядок</th>
+                <th>Записей по уходу</th>
+                <th>Дата создания</th>
+                <th>Действия</th>
             </tr>
         </thead>
         <tbody>
@@ -57,18 +57,18 @@
                 </td>
                 <td>{{ garden.location }}</td>
                 <td>{{ garden.area }}</td>
-                <td>{{ garden.beds_count if garden.beds_count is defined else 'N/A' }}</td>
-                <td>{{ garden.care_logs_count if garden.care_logs_count is defined else 'N/A' }}</td>
-                <td>{{ garden.created_at.strftime('%Y-%m-%d') if garden.created_at else 'N/A' }}</td>
+                <td>{{ garden.beds_count if garden.beds_count is defined else '—' }}</td>
+                <td>{{ garden.care_logs_count if garden.care_logs_count is defined else '—' }}</td>
+                <td>{{ garden.created_at.strftime('%d-%m-%Y %H:%M') if garden.created_at else '—' }}</td>
                 <td>
                     <div class="btn-group">
-                        <button type="button" class="btn btn-sm btn-outline-primary" title="Edit Garden" data-action="edit">
+                        <button type="button" class="btn btn-sm btn-outline-primary" title="Редактировать участок" data-action="edit">
                             <i class="bi bi-pencil"></i>
                         </button>
-                        <button type="button" class="btn btn-sm btn-outline-danger" title="Delete Garden" data-action="delete">
+                        <button type="button" class="btn btn-sm btn-outline-danger" title="Удалить участок" data-action="delete">
                             <i class="bi bi-trash"></i>
                         </button>
-                        <button type="button" class="btn btn-sm btn-outline-success" title="View Details" data-action="view">
+                        <button type="button" class="btn btn-sm btn-outline-success garden-view-btn" title="Просмотреть детали" data-garden-id="{{ garden._id }}">
                             <i class="bi bi-eye"></i>
                         </button>
                     </div>
@@ -76,10 +76,123 @@
             </tr>
             {% else %}
             <tr>
-                <td colspan="8" class="text-center">No gardens found matching the criteria.</td>
+                <td colspan="8" class="text-center">Участков, соответствующих критериям, не найдено.</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
-{% endblock %} 
+
+<!-- View Details Modal -->
+<div class="modal fade" id="viewModal" tabindex="-1" aria-labelledby="viewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewModalLabel">Подробности участка</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="viewModalBody">
+                <!-- Content will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle view buttons
+    const viewButtons = document.querySelectorAll('.garden-view-btn');
+    const viewModal = new bootstrap.Modal(document.getElementById('viewModal'));
+    const viewModalBody = document.getElementById('viewModalBody');
+    
+    viewButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const gardenId = this.getAttribute('data-garden-id');
+            const row = this.closest('tr');
+            
+            // Extract data from the row
+            const cells = row.querySelectorAll('td');
+            const gardenName = cells[0].textContent.trim();
+            const userName = cells[1].querySelector('div:first-child').textContent.trim();
+            const userEmail = cells[1].querySelector('small').textContent.trim();
+            const location = cells[2].textContent.trim();
+            const area = cells[3].textContent.trim();
+            const bedsCount = cells[4].textContent.trim();
+            const careLogsCount = cells[5].textContent.trim();
+            const createdAt = cells[6].textContent.trim();
+            
+            // Populate modal with garden details
+            viewModalBody.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-primary">Основная информация</h6>
+                        <p><strong>Название участка:</strong> ${gardenName}</p>
+                        <p><strong>Расположение:</strong> <i class="bi bi-geo-alt me-2"></i>${location}</p>
+                        <p><strong>Площадь:</strong> ${area} м²</p>
+                        <p><strong>Дата создания:</strong> ${createdAt}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-primary">Владелец</h6>
+                        <p><strong>Имя:</strong> <i class="bi bi-person-circle me-2"></i>${userName}</p>
+                        <p><strong>Email:</strong> ${userEmail}</p>
+                        <p><strong>ID участка:</strong> <code>${gardenId}</code></p>
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-12">
+                        <h6 class="text-primary">Статистика участка</h6>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="card text-center">
+                                    <div class="card-body">
+                                        <i class="bi bi-grid display-4 text-success"></i>
+                                        <h5 class="card-title mt-2">${bedsCount}</h5>
+                                        <p class="card-text">Грядок</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card text-center">
+                                    <div class="card-body">
+                                        <i class="bi bi-journal-check display-4 text-info"></i>
+                                        <h5 class="card-title mt-2">${careLogsCount}</h5>
+                                        <p class="card-text">Записей по уходу</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card text-center">
+                                    <div class="card-body">
+                                        <i class="bi bi-rulers display-4 text-warning"></i>
+                                        <h5 class="card-title mt-2">${area}</h5>
+                                        <p class="card-text">м² площади</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-12">
+                        <h6 class="text-primary">Дополнительная информация</h6>
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>Участок "${gardenName}"</strong> был создан ${createdAt} и содержит ${bedsCount} грядок. 
+                            Общая площадь участка составляет ${area} м². За время существования участка было создано ${careLogsCount} записей по уходу за растениями.
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            viewModal.show();
+        });
+    });
+});
+</script>
+
+{% endblock %}
