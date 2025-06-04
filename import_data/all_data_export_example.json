@@ -1,0 +1,517 @@
+{
+  "export_metadata": {
+    "exported_at": "2025-06-04T10:13:07.622199",
+    "exported_by": "admin@garden.com",
+    "version": "1.0"
+  },
+  "data": {
+    "users": [
+      {
+        "_id": "68401c1fbdb7f6fff30d5ec9",
+        "email": "admin@garden.com",
+        "password_hash": "scrypt:32768:8:1$rieLlxeEVKyG2v7B$31f8253215c2f9f5182b3879d75e39a9fbb7ace30261005d660cf6ed706b3df1c7eaf618aa1a783fd6b025f8deb10fffa6c78512d34535c258e8aa374e1b0ad8",
+        "name": "Admin User",
+        "photo_path": "",
+        "email_verified": true,
+        "created_at": "2024-03-15T09:00:00",
+        "updated_at": "2024-03-15T09:00:00",
+        "roles": [
+          "admin"
+        ],
+        "is_admin": true
+      },
+      {
+        "_id": "68401c1fbdb7f6fff30d5eca",
+        "email": "user1@garden.com",
+        "password_hash": "scrypt:32768:8:1$bRwhasZQT0aNJjLb$d6495873b02dc712a0736fc5dead87d8d512f0b250c08b94d2d3de676d935a78b7845cc80df84e7779753f2a3431a83af1850128aa56159b4487e94be546f70c",
+        "name": "Regular User",
+        "photo_path": "",
+        "email_verified": true,
+        "created_at": "2024-03-15T11:00:00",
+        "updated_at": "2024-03-15T11:00:00",
+        "roles": [
+          "user"
+        ],
+        "is_admin": false
+      },
+      {
+        "_id": "68401c1fbdb7f6fff30d5ecb",
+        "email": "user2@garden.com",
+        "password_hash": "scrypt:32768:8:1$wJcH2ujIPe1MfKKv$68556a3f649a10a66ea2ec3518292e9ffc499792f2f1755b290a17de02b694a78fa53c5ae6f182f4be46c8e3c258f249b37ff030d394fcd520668306fa10c600",
+        "name": "Second User",
+        "photo_path": "",
+        "email_verified": true,
+        "created_at": "2024-03-15T12:00:00",
+        "updated_at": "2024-03-15T12:00:00",
+        "roles": [
+          "user"
+        ],
+        "is_admin": false
+      }
+    ],
+    "gardens": [
+      {
+        "_id": "68401c1fbdb7f6fff30d5ecc",
+        "name": "Дачный участок",
+        "location": "Пригород",
+        "area": 500.0,
+        "soil_type": "Чернозем",
+        "terrain_type": "Равнина",
+        "lighting": "Солнечное (весь день)",
+        "photo_file_paths": [],
+        "stats": {
+          "total_beds": 1,
+          "active_beds": 1,
+          "total_crops": 1
+        },
+        "user_id": "68401c1fbdb7f6fff30d5eca",
+        "registration_time": "2025-06-04T10:12:47.575000",
+        "last_modified_time": "2025-06-04T10:12:47.575000"
+      },
+      {
+        "_id": "68401c1fbdb7f6fff30d5ecd",
+        "name": "Городской огород",
+        "location": "Городская черта",
+        "area": 100.0,
+        "soil_type": "Суглинистая",
+        "terrain_type": "Террасированный",
+        "lighting": "Полутень (рассеянный свет)",
+        "photo_file_paths": [],
+        "stats": {
+          "total_beds": 1,
+          "active_beds": 1,
+          "total_crops": 1
+        },
+        "user_id": "68401c1fbdb7f6fff30d5eca",
+        "registration_time": "2025-06-04T10:12:47.595000",
+        "last_modified_time": "2025-06-04T10:12:47.595000"
+      },
+      {
+        "_id": "68401c1fbdb7f6fff30d5ece",
+        "name": "Теплица",
+        "location": "Задний двор",
+        "area": 50.0,
+        "soil_type": "Торфяная",
+        "terrain_type": "Равнина",
+        "lighting": "Солнечное (весь день)",
+        "photo_file_paths": [],
+        "stats": {
+          "total_beds": 1,
+          "active_beds": 1,
+          "total_crops": 1
+        },
+        "user_id": "68401c1fbdb7f6fff30d5eca",
+        "registration_time": "2025-06-04T10:12:47.596000",
+        "last_modified_time": "2025-06-04T10:12:47.596000"
+      },
+      {
+        "_id": "68401c1fbdb7f6fff30d5ecf",
+        "name": "Загородный участок",
+        "location": "За городом",
+        "area": 800.0,
+        "soil_type": "Песчаная",
+        "terrain_type": "Холмистая",
+        "lighting": "Утреннее солнце, дневная тень",
+        "photo_file_paths": [],
+        "stats": {
+          "total_beds": 5,
+          "active_beds": 5,
+          "total_crops": 5
+        },
+        "user_id": "68401c1fbdb7f6fff30d5ecb",
+        "registration_time": "2025-06-04T10:12:47.598000",
+        "last_modified_time": "2025-06-04T10:12:47.598000"
+      },
+      {
+        "_id": "68401c1fbdb7f6fff30d5ed0",
+        "name": "Дворовый огород",
+        "location": "Во дворе",
+        "area": 75.0,
+        "soil_type": "Глинистая",
+        "terrain_type": "Склон (южный)",
+        "lighting": "Дневное солнце, вечерняя тень",
+        "photo_file_paths": [],
+        "stats": {
+          "total_beds": 4,
+          "active_beds": 4,
+          "total_crops": 4
+        },
+        "user_id": "68401c1fbdb7f6fff30d5ecb",
+        "registration_time": "2025-06-04T10:12:47.599000",
+        "last_modified_time": "2025-06-04T10:12:47.599000"
+      }
+    ],
+    "beds": [
+      {
+        "_id": "68401c1fbdb7f6fff30d5ed1",
+        "name": "Томатная грядка",
+        "crop_name": "Помидоры",
+        "planting_date": "2024-03-01T00:00:00",
+        "count_row": 2,
+        "length": 3.0,
+        "width": 1.0,
+        "bed_type": "Поднятая грядка",
+        "is_hothouse": true,
+        "notes": "Сорт 'Черри'",
+        "photo_file_paths": [],
+        "recommendations": [],
+        "care_actions": [],
+        "stats": {
+          "total_care_actions": 2,
+          "last_care_date": "2024-03-20T08:30:00",
+          "pending_recommendations": 0,
+          "completed_recommendations": 0
+        },
+        "garden_id": "68401c1fbdb7f6fff30d5ecc",
+        "user_id": "68401c1fbdb7f6fff30d5eca",
+        "creation_time": "2025-06-04T10:12:47.600000",
+        "last_modified_time": "2025-06-04T10:12:47.685000"
+      },
+      {
+        "_id": "68401c1fbdb7f6fff30d5ed2",
+        "name": "Огуречная грядка",
+        "crop_name": "Огурцы",
+        "planting_date": "2024-03-05T00:00:00",
+        "count_row": 1,
+        "length": 2.5,
+        "width": 1.0,
+        "bed_type": "Традиционная (в грунте)",
+        "is_hothouse": false,
+        "notes": "Сорт 'Засолочный'",
+        "photo_file_paths": [],
+        "recommendations": [],
+        "care_actions": [],
+        "stats": {
+          "total_care_actions": 1,
+          "last_care_date": "2024-03-16T10:00:00",
+          "pending_recommendations": 0,
+          "completed_recommendations": 0
+        },
+        "garden_id": "68401c1fbdb7f6fff30d5ecd",
+        "user_id": "68401c1fbdb7f6fff30d5eca",
+        "creation_time": "2025-06-04T10:12:47.623000",
+        "last_modified_time": "2025-06-04T10:12:47.679000"
+      },
+      {
+        "_id": "68401c1fbdb7f6fff30d5ed3",
+        "name": "Морковная грядка",
+        "crop_name": "Морковь",
+        "planting_date": "2024-03-10T00:00:00",
+        "count_row": 3,
+        "length": 4.0,
+        "width": 1.0,
+        "bed_type": "Традиционная (в грунте)",
+        "is_hothouse": false,
+        "notes": "Сорт 'Нантская'",
+        "photo_file_paths": [],
+        "recommendations": [],
+        "care_actions": [],
+        "stats": {
+          "total_care_actions": 1,
+          "last_care_date": "2024-03-17T09:00:00",
+          "pending_recommendations": 0,
+          "completed_recommendations": 0
+        },
+        "garden_id": "68401c1fbdb7f6fff30d5ece",
+        "user_id": "68401c1fbdb7f6fff30d5eca",
+        "creation_time": "2025-06-04T10:12:47.626000",
+        "last_modified_time": "2025-06-04T10:12:47.682000"
+      },
+      {
+        "_id": "68401c1fbdb7f6fff30d5ed4",
+        "name": "Клубничная грядка",
+        "crop_name": "Клубника",
+        "planting_date": "2024-03-20T00:00:00",
+        "count_row": 4,
+        "length": 5.0,
+        "width": 1.2,
+        "bed_type": "Поднятая грядка",
+        "is_hothouse": false,
+        "notes": "Сорт 'Виктория'",
+        "photo_file_paths": [],
+        "recommendations": [],
+        "care_actions": [],
+        "stats": {
+          "total_care_actions": 1,
+          "last_care_date": "2024-03-21T09:00:00",
+          "pending_recommendations": 0,
+          "completed_recommendations": 0
+        },
+        "garden_id": "68401c1fbdb7f6fff30d5ecf",
+        "user_id": "68401c1fbdb7f6fff30d5ecb",
+        "creation_time": "2025-06-04T10:12:47.628000",
+        "last_modified_time": "2025-06-04T10:12:47.688000"
+      },
+      {
+        "_id": "68401c1fbdb7f6fff30d5ed5",
+        "name": "Картофельная грядка",
+        "crop_name": "Картофель",
+        "planting_date": "2024-03-25T00:00:00",
+        "count_row": 3,
+        "length": 6.0,
+        "width": 1.5,
+        "bed_type": "Традиционная (в грунте)",
+        "is_hothouse": false,
+        "notes": "Сорт 'Ранний'",
+        "photo_file_paths": [],
+        "recommendations": [],
+        "care_actions": [],
+        "stats": {
+          "total_care_actions": 1,
+          "last_care_date": "2024-03-22T16:00:00",
+          "pending_recommendations": 0,
+          "completed_recommendations": 0
+        },
+        "garden_id": "68401c1fbdb7f6fff30d5ed0",
+        "user_id": "68401c1fbdb7f6fff30d5ecb",
+        "creation_time": "2025-06-04T10:12:47.631000",
+        "last_modified_time": "2025-06-04T10:12:47.692000"
+      },
+      {
+        "_id": "68401c1fbdb7f6fff30d5ed6",
+        "name": "Баклажанная грядка",
+        "crop_name": "Баклажаны",
+        "planting_date": "2024-03-28T00:00:00",
+        "count_row": 2,
+        "length": 3.0,
+        "width": 1.0,
+        "bed_type": "Поднятая грядка",
+        "is_hothouse": true,
+        "notes": "Сорт 'Черный принц'",
+        "photo_file_paths": [],
+        "recommendations": [],
+        "care_actions": [],
+        "stats": {
+          "total_care_actions": 0,
+          "last_care_date": null,
+          "pending_recommendations": 0,
+          "completed_recommendations": 0
+        },
+        "garden_id": "68401c1fbdb7f6fff30d5ecf",
+        "user_id": "68401c1fbdb7f6fff30d5ecb",
+        "creation_time": "2025-06-04T10:12:47.633000",
+        "last_modified_time": "2025-06-04T10:12:47.633000"
+      },
+      {
+        "_id": "68401c1fbdb7f6fff30d5ed7",
+        "name": "Капустная грядка",
+        "crop_name": "Капуста",
+        "planting_date": "2024-04-01T00:00:00",
+        "count_row": 2,
+        "length": 4.0,
+        "width": 1.2,
+        "bed_type": "Традиционная (в грунте)",
+        "is_hothouse": false,
+        "notes": "Сорт 'Белокочанная'",
+        "photo_file_paths": [],
+        "recommendations": [],
+        "care_actions": [],
+        "stats": {
+          "total_care_actions": 0,
+          "last_care_date": null,
+          "pending_recommendations": 0,
+          "completed_recommendations": 0
+        },
+        "garden_id": "68401c1fbdb7f6fff30d5ed0",
+        "user_id": "68401c1fbdb7f6fff30d5ecb",
+        "creation_time": "2025-06-04T10:12:47.635000",
+        "last_modified_time": "2025-06-04T10:12:47.635000"
+      },
+      {
+        "_id": "68401c1fbdb7f6fff30d5ed8",
+        "name": "Свекольная грядка",
+        "crop_name": "Свекла",
+        "planting_date": "2024-04-05T00:00:00",
+        "count_row": 3,
+        "length": 3.5,
+        "width": 1.0,
+        "bed_type": "Традиционная (в грунте)",
+        "is_hothouse": false,
+        "notes": "Сорт 'Бордо'",
+        "photo_file_paths": [],
+        "recommendations": [],
+        "care_actions": [],
+        "stats": {
+          "total_care_actions": 0,
+          "last_care_date": null,
+          "pending_recommendations": 0,
+          "completed_recommendations": 0
+        },
+        "garden_id": "68401c1fbdb7f6fff30d5ecf",
+        "user_id": "68401c1fbdb7f6fff30d5ecb",
+        "creation_time": "2025-06-04T10:12:47.637000",
+        "last_modified_time": "2025-06-04T10:12:47.637000"
+      },
+      {
+        "_id": "68401c1fbdb7f6fff30d5ed9",
+        "name": "Луковая грядка",
+        "crop_name": "Лук",
+        "planting_date": "2024-04-10T00:00:00",
+        "count_row": 4,
+        "length": 3.0,
+        "width": 0.8,
+        "bed_type": "Поднятая грядка",
+        "is_hothouse": false,
+        "notes": "Сорт 'Штутгартер Ризен'",
+        "photo_file_paths": [],
+        "recommendations": [],
+        "care_actions": [],
+        "stats": {
+          "total_care_actions": 0,
+          "last_care_date": null,
+          "pending_recommendations": 0,
+          "completed_recommendations": 0
+        },
+        "garden_id": "68401c1fbdb7f6fff30d5ed0",
+        "user_id": "68401c1fbdb7f6fff30d5ecb",
+        "creation_time": "2025-06-04T10:12:47.640000",
+        "last_modified_time": "2025-06-04T10:12:47.640000"
+      },
+      {
+        "_id": "68401c1fbdb7f6fff30d5eda",
+        "name": "Чесночная грядка",
+        "crop_name": "Чеснок",
+        "planting_date": "2024-04-15T00:00:00",
+        "count_row": 3,
+        "length": 2.5,
+        "width": 0.6,
+        "bed_type": "Традиционная (в грунте)",
+        "is_hothouse": false,
+        "notes": "Озимый сорт",
+        "photo_file_paths": [],
+        "recommendations": [],
+        "care_actions": [],
+        "stats": {
+          "total_care_actions": 0,
+          "last_care_date": null,
+          "pending_recommendations": 0,
+          "completed_recommendations": 0
+        },
+        "garden_id": "68401c1fbdb7f6fff30d5ecf",
+        "user_id": "68401c1fbdb7f6fff30d5ecb",
+        "creation_time": "2025-06-04T10:12:47.643000",
+        "last_modified_time": "2025-06-04T10:12:47.643000"
+      },
+      {
+        "_id": "68401c1fbdb7f6fff30d5edb",
+        "name": "Зеленая грядка",
+        "crop_name": "Петрушка",
+        "planting_date": "2024-04-20T00:00:00",
+        "count_row": 2,
+        "length": 2.0,
+        "width": 0.5,
+        "bed_type": "Контейнер",
+        "is_hothouse": false,
+        "notes": "Кудрявая петрушка",
+        "photo_file_paths": [],
+        "recommendations": [],
+        "care_actions": [],
+        "stats": {
+          "total_care_actions": 0,
+          "last_care_date": null,
+          "pending_recommendations": 0,
+          "completed_recommendations": 0
+        },
+        "garden_id": "68401c1fbdb7f6fff30d5ed0",
+        "user_id": "68401c1fbdb7f6fff30d5ecb",
+        "creation_time": "2025-06-04T10:12:47.645000",
+        "last_modified_time": "2025-06-04T10:12:47.645000"
+      },
+      {
+        "_id": "68401c1fbdb7f6fff30d5edc",
+        "name": "Тыквенная грядка",
+        "crop_name": "Тыква",
+        "planting_date": "2024-04-25T00:00:00",
+        "count_row": 1,
+        "length": 8.0,
+        "width": 2.0,
+        "bed_type": "Традиционная (в грунте)",
+        "is_hothouse": false,
+        "notes": "Сорт 'Мускатная'",
+        "photo_file_paths": [],
+        "recommendations": [],
+        "care_actions": [],
+        "stats": {
+          "total_care_actions": 0,
+          "last_care_date": null,
+          "pending_recommendations": 0,
+          "completed_recommendations": 0
+        },
+        "garden_id": "68401c1fbdb7f6fff30d5ecf",
+        "user_id": "68401c1fbdb7f6fff30d5ecb",
+        "creation_time": "2025-06-04T10:12:47.647000",
+        "last_modified_time": "2025-06-04T10:12:47.647000"
+      }
+    ],
+    "care_logs": [
+      {
+        "_id": "68401c1fbdb7f6fff30d5edd",
+        "action_type": "Полив",
+        "log_date": "2024-03-15T08:00:00",
+        "notes": "Обильный полив после посадки",
+        "created_at": "2024-03-15T08:00:00",
+        "updated_at": "2024-03-15T08:00:00",
+        "bed_id": "68401c1fbdb7f6fff30d5ed1",
+        "garden_id": "68401c1fbdb7f6fff30d5ecc",
+        "user_id": "68401c1fbdb7f6fff30d5eca"
+      },
+      {
+        "_id": "68401c1fbdb7f6fff30d5ede",
+        "action_type": "Прополка",
+        "log_date": "2024-03-16T10:00:00",
+        "notes": "Удаление сорняков",
+        "created_at": "2024-03-16T10:00:00",
+        "updated_at": "2024-03-16T10:00:00",
+        "bed_id": "68401c1fbdb7f6fff30d5ed2",
+        "garden_id": "68401c1fbdb7f6fff30d5ecd",
+        "user_id": "68401c1fbdb7f6fff30d5eca"
+      },
+      {
+        "_id": "68401c1fbdb7f6fff30d5edf",
+        "action_type": "Подкормка (Удобрение)",
+        "log_date": "2024-03-17T09:00:00",
+        "notes": "Внесение органических удобрений",
+        "created_at": "2024-03-17T09:00:00",
+        "updated_at": "2024-03-17T09:00:00",
+        "bed_id": "68401c1fbdb7f6fff30d5ed3",
+        "garden_id": "68401c1fbdb7f6fff30d5ece",
+        "user_id": "68401c1fbdb7f6fff30d5eca"
+      },
+      {
+        "_id": "68401c1fbdb7f6fff30d5ee0",
+        "action_type": "Полив",
+        "log_date": "2024-03-20T08:30:00",
+        "notes": "Утренний полив клубники",
+        "created_at": "2024-03-20T08:30:00",
+        "updated_at": "2024-03-20T08:30:00",
+        "bed_id": "68401c1fbdb7f6fff30d5ed1",
+        "garden_id": "68401c1fbdb7f6fff30d5ecc",
+        "user_id": "68401c1fbdb7f6fff30d5eca"
+      },
+      {
+        "_id": "68401c1fbdb7f6fff30d5ee1",
+        "action_type": "Рыхление",
+        "log_date": "2024-03-21T09:00:00",
+        "notes": "Рыхление почвы вокруг картофеля",
+        "created_at": "2024-03-21T09:00:00",
+        "updated_at": "2024-03-21T09:00:00",
+        "bed_id": "68401c1fbdb7f6fff30d5ed4",
+        "garden_id": "68401c1fbdb7f6fff30d5ecf",
+        "user_id": "68401c1fbdb7f6fff30d5ecb"
+      },
+      {
+        "_id": "68401c1fbdb7f6fff30d5ee2",
+        "action_type": "Визуальный осмотр",
+        "log_date": "2024-03-22T16:00:00",
+        "notes": "Проверка на наличие вредителей",
+        "created_at": "2024-03-22T16:00:00",
+        "updated_at": "2024-03-22T16:00:00",
+        "bed_id": "68401c1fbdb7f6fff30d5ed5",
+        "garden_id": "68401c1fbdb7f6fff30d5ed0",
+        "user_id": "68401c1fbdb7f6fff30d5ecb"
+      }
+    ],
+    "recommendations": [],
+    "diary": []
+  }
+}
