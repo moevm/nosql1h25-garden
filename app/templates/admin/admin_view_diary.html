@@ -6,13 +6,13 @@
         <div class="col-md-4">
             <div class="input-group">
                 <span class="input-group-text"><i class="bi bi-search"></i></span>
-                <input type="text" class="form-control" name="search_title" value="{{ search_title }}" placeholder="Search by title">
+                <input type="text" class="form-control" name="search_title" value="{{ search_title }}" placeholder="Искать по Заголовоку">
             </div>
         </div>
         <div class="col-md-3">
             <div class="input-group">
                 <span class="input-group-text"><i class="bi bi-person"></i></span>
-                <input type="text" class="form-control" name="search_user_email" value="{{ search_user_email }}" placeholder="Search by user email">
+                <input type="text" class="form-control" name="search_user_email" value="{{ search_user_email }}" placeholder="Искать по email">
             </div>
         </div>
         <div class="col-md-2">
@@ -29,12 +29,12 @@
         </div>
         <div class="col-md-2">
             <button type="submit" class="btn btn-primary w-100">
-                <i class="bi bi-funnel me-2"></i>Apply Filters
+                <i class="bi bi-funnel me-2"></i>Применить фильтры
             </button>
         </div>
         <div class="col-md-2">
             <a href="{{ url_for('admin_bp.admin_view_diary') }}" class="btn btn-outline-secondary w-100" data-action="clear-filters">
-                <i class="bi bi-x-circle me-2"></i>Clear Filters
+                <i class="bi bi-x-circle me-2"></i>Очистить фильтры
             </a>
         </div>
     </form>
@@ -44,12 +44,12 @@
     <table class="table table-hover" data-item-type="diary_entries">
         <thead>
             <tr>
-                <th>Date</th>
-                <th>Title</th>
-                <th>User</th>
-                <th>Content Preview</th>
-                <th>Images</th>
-                <th>Actions</th>
+                <th>Дата</th>
+                <th>Заголовок</th>
+                <th>Пользователь</th>
+                <th>Предварительный просмотр контента</th>
+                <th>Изображения</th>
+                <th>Действия</th>
             </tr>
         </thead>
         <tbody>
@@ -73,20 +73,20 @@
                 </td>
                 <td>
                     {% if entry.images %}
-                    <span class="badge bg-info">{{ entry.images|length }} images</span>
+                    <span class="badge bg-info">{{ entry.images|length }} изображений</span>
                     {% else %}
-                    <span class="badge bg-secondary">No images</span>
+                    <span class="badge bg-secondary">Нет изображений</span>
                     {% endif %}
                 </td>
                 <td>
                     <div class="btn-group">
-                        <button type="button" class="btn btn-sm btn-outline-primary" title="Edit Entry" data-action="edit">
+                        <button type="button" class="btn btn-sm btn-outline-primary" title="Редактировать запись" data-action="edit">
                             <i class="bi bi-pencil"></i>
                         </button>
-                        <button type="button" class="btn btn-sm btn-outline-danger" title="Delete Entry" data-action="delete">
+                        <button type="button" class="btn btn-sm btn-outline-danger" title="Удалить запись" data-action="delete">
                             <i class="bi bi-trash"></i>
                         </button>
-                        <button type="button" class="btn btn-sm btn-outline-success" title="View Details" data-action="view">
+                        <button type="button" class="btn btn-sm btn-outline-success diary-view-btn" title="Просмотреть детали" data-entry-id="{{ entry._id }}">
                             <i class="bi bi-eye"></i>
                         </button>
                     </div>
@@ -94,10 +94,117 @@
             </tr>
             {% else %}
             <tr>
-                <td colspan="6" class="text-center">No diary entries found matching the criteria.</td>
+                <td colspan="6" class="text-center">Не найдено ни одной записи в дневнике, соответствующей критериям.</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
-{% endblock %} 
+
+<!-- View Details Modal -->
+<div class="modal fade" id="viewModal" tabindex="-1" aria-labelledby="viewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewModalLabel">Подробности записи дневника</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="viewModalBody">
+                <!-- Content will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle view buttons
+    const viewButtons = document.querySelectorAll('.diary-view-btn');
+    const viewModal = new bootstrap.Modal(document.getElementById('viewModal'));
+    const viewModalBody = document.getElementById('viewModalBody');
+    
+    viewButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const entryId = this.getAttribute('data-entry-id');
+            const row = this.closest('tr');
+            
+            // Extract data from the row
+            const cells = row.querySelectorAll('td');
+            const date = cells[0].textContent.trim();
+            const title = cells[1].textContent.trim();
+            const userName = cells[2].querySelector('div:first-child').textContent.trim();
+            const userEmail = cells[2].querySelector('small').textContent.trim();
+            const content = cells[3].querySelector('div').textContent.trim();
+            const imagesInfo = cells[4].querySelector('.badge').textContent.trim();
+            
+            // Populate modal with diary entry details
+            viewModalBody.innerHTML = `
+                <div class="row">
+                    <div class="col-md-8">
+                        <h6 class="text-primary">Основная информация</h6>
+                        <p><strong>Заголовок:</strong> ${title}</p>
+                        <p><strong>Дата создания:</strong> <i class="bi bi-calendar me-2"></i>${date}</p>
+                        <p><strong>Изображения:</strong> <span class="badge bg-info">${imagesInfo}</span></p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-primary">Автор</h6>
+                        <p><strong>Имя:</strong> <i class="bi bi-person-circle me-2"></i>${userName}</p>
+                        <p><strong>Email:</strong> ${userEmail}</p>
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-12">
+                        <h6 class="text-primary">Содержание записи</h6>
+                        <div class="border p-3 bg-light rounded" style="max-height: 400px; overflow-y: auto;">
+                            <div style="white-space: pre-wrap;">${content || 'Содержание не указано'}</div>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-12">
+                        <h6 class="text-primary">Дополнительная информация</h6>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="card text-center">
+                                    <div class="card-body">
+                                        <i class="bi bi-journal-text display-4 text-info"></i>
+                                        <h6 class="card-title mt-2">Запись дневника</h6>
+                                        <p class="card-text text-muted">ID: ${entryId}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card text-center">
+                                    <div class="card-body">
+                                        <i class="bi bi-images display-4 text-success"></i>
+                                        <h6 class="card-title mt-2">Медиа</h6>
+                                        <p class="card-text">${imagesInfo}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card text-center">
+                                    <div class="card-body">
+                                        <i class="bi bi-clock display-4 text-warning"></i>
+                                        <h6 class="card-title mt-2">Создано</h6>
+                                        <p class="card-text">${date}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            viewModal.show();
+        });
+    });
+});
+</script>
+
+{% endblock %}
