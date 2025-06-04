@@ -6,24 +6,24 @@
         <div class="col-md-4">
             <div class="input-group">
                 <span class="input-group-text"><i class="bi bi-search"></i></span>
-                <input type="text" class="form-control" name="search_query" value="{{ search_query }}" placeholder="Search by name or email">
+                <input type="text" class="form-control" name="search_query" value="{{ search_query }}" placeholder="Поиск по имени или email">
             </div>
         </div>
         <div class="col-md-3">
             <select class="form-select" name="admin_filter">
-                <option value="">All Users</option>
-                <option value="yes" {% if admin_filter == 'yes' %}selected{% endif %}>Admin Users</option>
-                <option value="no" {% if admin_filter == 'no' %}selected{% endif %}>Regular Users</option>
+                <option value="">Все пользователи</option>
+                <option value="yes" {% if admin_filter == 'yes' %}selected{% endif %}>Администраторы</option>
+                <option value="no" {% if admin_filter == 'no' %}selected{% endif %}>Обычные пользователи</option>
             </select>
         </div>
         <div class="col-md-2">
             <button type="submit" class="btn btn-primary w-100">
-                <i class="bi bi-funnel me-2"></i>Apply Filters
+                <i class="bi bi-funnel me-2"></i>Применить фильтры
             </button>
         </div>
         <div class="col-md-2">
             <a href="{{ url_for('admin_bp.admin_view_users') }}" class="btn btn-outline-secondary w-100" data-action="clear-filters">
-                <i class="bi bi-x-circle me-2"></i>Clear Filters
+                <i class="bi bi-x-circle me-2"></i>Сбросить фильтры
             </a>
         </div>
     </form>
@@ -33,13 +33,14 @@
     <table class="table table-hover" data-item-type="users">
         <thead>
             <tr>
-                <th>Name</th>
+                <th>Имя</th>
                 <th>Email</th>
-                <th>Role</th>
-                <th>Gardens</th>
-                <th>Beds</th>
-                <th>Care Logs</th>
-                <th>Actions</th>
+                <th>Роль</th>
+                <th>Дата создания</th>
+                <th>Участки</th>
+                <th>Грядки</th>
+                <th>Записи по уходу</th>
+                <th>Действия</th>
             </tr>
         </thead>
         <tbody>
@@ -49,23 +50,35 @@
                 <td>{{ user.email }}</td>
                 <td>
                     {% if user.is_admin %}
-                    <span class="badge bg-primary">Admin</span>
+                    <span class="badge bg-primary">Админ</span>
                     {% else %}
-                    <span class="badge bg-secondary">User</span>
+                    <span class="badge bg-secondary">Пользователь</span>
                     {% endif %}
                 </td>
-                <td>{{ user.gardens_count if user.gardens_count is defined else 'N/A' }}</td>
-                <td>{{ user.beds_count if user.beds_count is defined else 'N/A' }}</td>
-                <td>{{ user.care_logs_count if user.care_logs_count is defined else 'N/A' }}</td>
+                <td>
+                    {% if user.created_at %}
+                    <small class="text-muted">
+                        {{ user.created_at.strftime('%d.%m.%Y %H:%M') }}
+                    </small>
+                    {% else %}
+                    <small class="text-muted">—</small>
+                    {% endif %}
+                </td>
+                <td>{{ user.gardens_count if user.gardens_count is defined else '—' }}</td>
+                <td>{{ user.beds_count if user.beds_count is defined else '—' }}</td>
+                <td>{{ user.care_logs_count if user.care_logs_count is defined else '—' }}</td>
                 <td>
                     <div class="btn-group">
-                        <button type="button" class="btn btn-sm btn-outline-primary" title="Edit User" data-action="edit">
+                        <a href="{{ url_for('admin_bp.admin_edit_user', user_id=user._id) }}" 
+                           class="btn btn-sm btn-outline-primary" title="Редактировать пользователя">
                             <i class="bi bi-pencil"></i>
-                        </button>
-                        <button type="button" class="btn btn-sm btn-outline-danger" title="Delete User" data-action="delete">
+                        </a>
+                        <button type="button" class="btn btn-sm btn-outline-danger user-delete-btn" 
+                                title="Удалить пользователя" data-user-id="{{ user._id }}">
                             <i class="bi bi-trash"></i>
                         </button>
-                        <button type="button" class="btn btn-sm btn-outline-success" title="View Details" data-action="view">
+                        <button type="button" class="btn btn-sm btn-outline-success user-view-btn" 
+                                title="Просмотреть детали" data-user-id="{{ user._id }}">
                             <i class="bi bi-eye"></i>
                         </button>
                     </div>
@@ -73,10 +86,152 @@
             </tr>
             {% else %}
             <tr>
-                <td colspan="7" class="text-center">No users found matching the criteria.</td>
+                <td colspan="8" class="text-center">Пользователи, соответствующие критериям, не найдены.</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
-{% endblock %} 
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Подтверждение удаления</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                Вы уверены, что хотите удалить этого пользователя? Это действие не может быть отменено. Все связанные данные (участки, грядки, записи по уходу) также будут удалены.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <form id="deleteForm" method="POST" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">Удалить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- View Details Modal -->
+<div class="modal fade" id="viewModal" tabindex="-1" aria-labelledby="viewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewModalLabel">Подробности пользователя</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body" id="viewModalBody">
+                <!-- Content will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle delete buttons
+    const deleteButtons = document.querySelectorAll('.user-delete-btn');
+    const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    const deleteForm = document.getElementById('deleteForm');
+    
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const userId = this.getAttribute('data-user-id');
+            const deleteUrl = `{{ url_for('admin_bp.admin_delete_user', user_id='PLACEHOLDER') }}`.replace('PLACEHOLDER', userId);
+            deleteForm.action = deleteUrl;
+            deleteModal.show();
+        });
+    });
+    
+    // Handle view buttons
+    const viewButtons = document.querySelectorAll('.user-view-btn');
+    const viewModal = new bootstrap.Modal(document.getElementById('viewModal'));
+    const viewModalBody = document.getElementById('viewModalBody');
+    
+    viewButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const userId = this.getAttribute('data-user-id');
+            const row = this.closest('tr');
+            
+            // Extract data from the row
+            const cells = row.querySelectorAll('td');
+            const name = cells[0].textContent.trim();
+            const email = cells[1].textContent.trim();
+            const role = cells[2].querySelector('.badge').textContent.trim();
+            const roleClass = cells[2].querySelector('.badge').classList.contains('bg-primary') ? 'bg-primary' : 'bg-secondary';
+            const createdAt = cells[3].textContent.trim();
+            const gardensCount = cells[4].textContent.trim();
+            const bedsCount = cells[5].textContent.trim();
+            const careLogsCount = cells[6].textContent.trim();
+            
+            // Populate modal with user details
+            viewModalBody.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0"><i class="bi bi-person-circle me-2"></i>Основная информация</h6>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Имя:</strong> ${name}</p>
+                                <p><strong>Email:</strong> ${email}</p>
+                                <p><strong>Роль:</strong> <span class="badge ${roleClass}">${role}</span></p>
+                                <p><strong>Дата создания:</strong> ${createdAt}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0"><i class="bi bi-bar-chart me-2"></i>Статистика активности</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row text-center">
+                                    <div class="col-4">
+                                        <div class="d-flex flex-column align-items-center">
+                                            <i class="bi bi-tree text-success fs-3"></i>
+                                            <strong class="fs-4">${gardensCount}</strong>
+                                            <small class="text-muted">Участки</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="d-flex flex-column align-items-center">
+                                            <i class="bi bi-grid text-info fs-3"></i>
+                                            <strong class="fs-4">${bedsCount}</strong>
+                                            <small class="text-muted">Грядки</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="d-flex flex-column align-items-center">
+                                            <i class="bi bi-clipboard-data text-warning fs-3"></i>
+                                            <strong class="fs-4">${careLogsCount}</strong>
+                                            <small class="text-muted">Записи по уходу</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>Информация:</strong> Для просмотра детальной информации об участках, грядках и записях по уходу этого пользователя, используйте соответствующие разделы администрирования с фильтрацией по email пользователя.
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            viewModal.show();
+        });
+    });
+});
+</script>
+
+{% endblock %}
